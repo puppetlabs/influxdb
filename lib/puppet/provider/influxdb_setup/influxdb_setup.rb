@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
+require_relative '../influxdb/influxdb'
 require 'puppet/resource_api/simple_provider'
-require_relative '../influxdb_provider'
 
 # Implementation for performing initial setup of InfluxDB using the Resource API.
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
-class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxdb
+class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxdb::Influxdb
   def get(context)
     response = influx_get('setup')
     [

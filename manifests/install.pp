@@ -41,7 +41,13 @@ class influxdb::install(
     require => Package['influxdb2'],
   }
 
+  # We have to instantiate the base type first to avoid autoloading issues
+  influxdb {$influxdb_host:
+    ensure => 'present',
+  }
+
   influxdb_setup {$influxdb_host:
     ensure        => 'present',
+    require => Influxdb[$influxdb_host],
   }
 }

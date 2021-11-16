@@ -7,7 +7,7 @@ require 'pry'
 require 'uri'
 
 # Implementation for the influxdb type using the Resource API.
-class Puppet::Provider::Influxdb < Puppet::ResourceApi::SimpleProvider
+class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
   #TODO: is this a terrible idea
   @@client ||= Puppet.runtime[:http]
 
