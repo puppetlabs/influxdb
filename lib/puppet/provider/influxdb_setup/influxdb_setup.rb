@@ -8,10 +8,10 @@ require 'puppet/resource_api/simple_provider'
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxdb::Influxdb
   def get(context)
-    response = influx_get('setup')
+    response = influx_get('setup', params: {})
     [
       {
-        influxdb_host: 'localhost',
+        influxdb_host: @@influxdb_host,
         ensure: response['allowed'] == true ? 'absent' : 'present',
       },
     ]
@@ -19,8 +19,8 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxd
 
   def create(context, name, should)
     context.notice("Creating '#{name}' with #{should.inspect}")
-    #TODO: make configurable
-    influx_put('setup', '{"bucket": "puppet", "org": "puppetlabs", "username": "admin"}')
+    response = influx_put('setup', '{"bucket": "puppet", "org": "puppetlabs", "username": "admin", "password": "puppetlabs"}')
+    File.write("#{Dir.home}/.influxdb_token", response['auth']['token'])
 
   end
 
@@ -31,5 +31,4 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxd
   def delete(context, name)
     context.notice("Deleting '#{name}'")
   end
-
 end

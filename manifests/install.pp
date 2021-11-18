@@ -2,6 +2,10 @@ class influxdb::install(
   Boolean $manage_influxdb_repo = $influxdb::manage_influxdb_repo,
   String  $influxdb_host = $influxdb::influxdb_host,
   String  $repo_name = 'influxdb2',
+  String  $initial_org = 'puppetlabs',
+  String  $initial_bucket = 'puppet',
+  String  $admin_user = 'admin',
+  String  $admin_pass = 'puppetlabs',
 ){
   # If we are managing the repository, set it up and install the package with a require on the repo
   if $manage_influxdb_repo {
@@ -41,13 +45,7 @@ class influxdb::install(
     require => Package['influxdb2'],
   }
 
-  # We have to instantiate the base type first to avoid autoloading issues
-  influxdb {$influxdb_host:
-    ensure => 'present',
-  }
-
   influxdb_setup {$influxdb_host:
     ensure        => 'present',
-    require => Influxdb[$influxdb_host],
   }
 }
