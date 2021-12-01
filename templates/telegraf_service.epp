@@ -1,0 +1,17 @@
+<%- | String $sysconfig_dir, $config_file, String $config_dir | -%>
+[Unit]
+Description=The plugin-driven server agent for reporting metrics into InfluxDB
+Documentation=https://github.com/influxdata/telegraf
+After=network.target
+
+[Service]
+EnvironmentFile=-<%= $sysconfig_dir %>/telegraf
+User=telegraf
+ExecStart=/usr/bin/telegraf -config <%= $config_file %> -config-directory <%= $config_dir %> $TELEGRAF_OPTS
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartForceExitStatus=SIGPIPE
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target

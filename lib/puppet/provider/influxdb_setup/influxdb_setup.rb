@@ -8,7 +8,7 @@ require 'puppet/resource_api/simple_provider'
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxdb::Influxdb
   def get(context)
-    response = influx_get('setup', params: {})
+    response = influx_get('/api/v2/setup', params: {})
     [
       {
         influxdb_host: @@influxdb_host,
@@ -19,7 +19,7 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxd
 
   def create(context, name, should)
     context.notice("Creating '#{name}' with #{should.inspect}")
-    response = influx_put('setup', '{"bucket": "puppet", "org": "puppetlabs", "username": "admin", "password": "puppetlabs"}')
+    response = influx_post('/api/v2/setup', '{"bucket": "puppet", "org": "puppetlabs", "username": "admin", "password": "puppetlabs"}')
     File.write("#{Dir.home}/.influxdb_token", response['auth']['token'])
 
   end

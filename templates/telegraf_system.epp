@@ -1,0 +1,19 @@
+<%- | String $bucket, $organization, String $token, Array $urls | -%>
+[[inputs.cpu]]
+collect_cpu_time = false
+percpu = true
+report_active = false
+totalcpu = true
+[[inputs.disk]]
+ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
+[[inputs.diskio]]
+[[inputs.mem]]
+[[inputs.net]]
+[[inputs.processes]]
+[[inputs.swap]]
+[[inputs.system]]
+[[outputs.influxdb_v2]]
+bucket = "<%= $bucket %>"
+organization = "<%= $organization %>"
+token = "<%= $token %>"
+urls = <%= $urls %>

@@ -1,7 +1,8 @@
 class influxdb::install(
   Boolean $manage_influxdb_repo = $influxdb::manage_influxdb_repo,
+  Boolean $manage_telegraf_service = $influxdb::manage_telegraf_service,
   String  $influxdb_host = $influxdb::influxdb_host,
-  String  $repo_name = 'influxdb2',
+  String  $influxdb_repo_name = $influxdb::influxdb_repo_name,
   String  $initial_org = 'puppetlabs',
   String  $initial_bucket = 'puppet',
   String  $admin_user = 'admin',
@@ -16,9 +17,9 @@ class influxdb::install(
           'CentOS' => 'centos',
           default  => 'rhel',
         }
-        yumrepo {$repo_name:
+        yumrepo {$influxdb_repo_name:
           ensure   => 'present',
-          name     => $repo_name,
+          name     => $influxdb_repo_name,
           baseurl  => "https://repos.influxdata.com/$dist/\$releasever/\$basearch/stable",
           gpgkey   => 'https://repos.influxdata.com/influxdb2.key https://repos.influxdata.com/influxdb.key',
           enabled  => '1',
@@ -29,12 +30,21 @@ class influxdb::install(
     }
     package {'influxdb2':
       ensure  => installed,
-      require => Yumrepo[$repo_name],
+      require => Yumrepo[$influxdb_repo_name],
+    }
+    if $manage_telegraf_service {
+      package {'telegraf':
+        ensure  => installed,
+        require => Yumrepo[$influxdb_repo_name],
+      }
     }
   }
   # Otherwise, just install the package
   else {
     package {'influxdb2':
+      ensure  => installed,
+    }
+    package {'telegraf':
       ensure  => installed,
     }
   }

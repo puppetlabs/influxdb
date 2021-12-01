@@ -8,13 +8,22 @@ require 'puppet/resource_api/simple_provider'
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::Influxdb
   def get(context)
-    response = influx_get('orgs', params: {})
+    response = influx_get('/api/v2/orgs', params: {})
     if response['orgs']
-      response['orgs'].reduce([]) {|memo, value| memo + [{influxdb_host: 'localhost', org: value['name'], ensure: 'present', desc: value['description']}]}
+      response['orgs'].reduce([]) { |memo, value|
+        memo + [
+          {
+            influxdb_host: @@influxdb_host,
+            org: value['name'],
+            ensure: 'present',
+            desc: value['description']
+          }
+        ]
+      }
     else
       [
         {
-          influxdb_host: 'localhost',
+          influxdb_host: @@influxdb_host,
           org: nil,
           ensure: 'absent',
           desc: nil,
@@ -26,7 +35,7 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
   def create(context, name, should)
     context.notice("Creating '#{name}' with #{should.inspect}")
     body = {name: should[:org], description: should[:desc]}
-    influx_put('orgs', body.to_s)
+    influx_post('/api/v2/orgs', body.to_s)
   end
 
   #TODO: utility method to create an instance variable with org information.  /orgs should make this easy, as it has links to
