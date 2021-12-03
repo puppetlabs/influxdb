@@ -86,8 +86,8 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
 
   # Our HTTP class doesn't have a patch method, so we create the connection and use Net::HTTP manually
   def influx_patch(name, body)
-    @@client.connect(URI(@@influxdb_uri + name)) { |conn|
-      request = Net::HTTP::Patch.new(@@influxdb_uri)
+    @@client.connect(URI(@@influxdb_uri)) { |conn|
+      request = Net::HTTP::Patch.new(@@influxdb_uri + name)
       request['Content-Type'] = 'application/json'
 
       if File.file?("#{Dir.home}/.influxdb_token")

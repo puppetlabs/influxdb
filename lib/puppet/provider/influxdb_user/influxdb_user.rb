@@ -7,9 +7,17 @@ require 'puppet/resource_api/simple_provider'
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb::Influxdb
-  @user_map
+  # User attributes including those from the { 'links' => [...] } entry
+  attr_accessor :user_map
+  # Users belonging to an organization, per /orgs
+  attr_accessor :org_user_map
 
-  def member_map()
+  def initialize()
+    @org_user_map = update_org_user_map
+    @user_map = update_user_map
+  end
+
+  def update_org_user_map()
     @@org_hash.map { |org|
       members = org.dig('members', 'users')
       {
@@ -19,17 +27,28 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
     }
   end
 
+  def update_user_map()
+    response = influx_get('/api/v2/users', params: {})
+    if response['users']
+      response['users'].map { |user|
+        process_links(user, user['links'])
+        user
+      }
+    else
+      []
+    end
+  end
+
   def get(context)
     response = influx_get('/api/v2/users', params: {})
     if response['users']
       @user_map = response['users']
-      org_members = member_map()
 
       response['users'].reduce([]) { |memo, value|
         name = value['name']
         id = value['id']
 
-        user_orgs = org_members.map { |org|
+        user_orgs = @org_user_map.map { |org|
           org['name'] if org['members'].map { |m| m['id'] }.include? id
         }
 
