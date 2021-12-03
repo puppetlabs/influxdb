@@ -101,6 +101,16 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
     }
   end
 
+  def influx_delete(name)
+    if File.file?("#{Dir.home}/.influxdb_token")
+      token = File.read("#{Dir.home}/.influxdb_token").chomp
+      response = @@client.delete(URI(@@influxdb_uri + name), headers: {'Content-Type' => 'application/json', 'Authorization' => "Token #{token}"})
+    else
+      response = @@client.delete(URI(@@influxdb_uri + name), headers: {'Content-Type' => 'application/json'})
+    end
+    #JSON.parse(response.body)
+  end
+
   def ping()
     begin
       response = influx_get('/api/v2/ping', params: {})
@@ -146,7 +156,7 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
     #   add the results of the "buckets" api call to a "buckets" key
     links.each { |k,v|
       next if k == "self"
-      org[k] = influx_get(v, params: {})[k]
+      org[k] = influx_get(v, params: {})
     }
 
   end

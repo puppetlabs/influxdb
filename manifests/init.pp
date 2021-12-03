@@ -14,14 +14,15 @@ class influxdb(
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
   if $manage_influxdb_setup {
     unless $influxdb_host == $facts['fqdn'] or $influxdb_host == 'localhost' {
-      fail("Unable to manage InfluxDB on host ${influxdb_host}")
+      fail("Unable to manage InfluxDB installation on host ${influxdb_host}")
     }
     include influxdb::install
   }
 
-  include influxdb::telegraf::configs
 
   if $manage_telegraf_service {
+    include influxdb::telegraf::configs
+
     influxdb::telegraf::agent {'puppet_telegraf':
       config_file => $telegraf_config_file,
       config_dir  => $telegraf_config_dir,
