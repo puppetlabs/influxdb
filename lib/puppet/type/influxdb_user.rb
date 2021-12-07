@@ -40,9 +40,9 @@ EOS
       desc: 'Status of the user',
       default: 'active',
     },
-    orgs: {
-      type: 'Array',
-      desc: 'Organizations to add the user to',
-    },
+    #orgs: {
+    #  type: 'Array',
+    #  desc: 'Organizations to add the user to',
+    #},
   },
 )

@@ -4,6 +4,7 @@ class influxdb::install(
   String  $influxdb_host = $influxdb::influxdb_host,
   String  $influxdb_repo_name = $influxdb::influxdb_repo_name,
   String  $initial_org = 'puppetlabs',
+  Hash    $output_defaults = {'bucket' => 'puppet', 'organization' => 'puppetlabs', 'token' => '$INFLUX_TOKEN'},
   String  $initial_bucket = 'puppet',
   String  $admin_user = 'admin',
   String  $admin_pass = 'puppetlabs',

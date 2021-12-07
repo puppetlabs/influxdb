@@ -7,14 +7,11 @@ require 'puppet/resource_api/simple_provider'
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb::Influxdb
-  # User attributes including those from the { 'links' => [...] } entry
-  attr_accessor :user_map
   # Users belonging to an organization, per /orgs
   attr_accessor :org_user_map
 
   def initialize()
     @org_user_map = update_org_user_map
-    @user_map = update_user_map
   end
 
   def update_org_user_map()
@@ -27,30 +24,12 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
     }
   end
 
-  def update_user_map()
-    response = influx_get('/api/v2/users', params: {})
-    if response['users']
-      response['users'].map { |user|
-        process_links(user, user['links'])
-        user
-      }
-    else
-      []
-    end
-  end
-
   def get(context)
     response = influx_get('/api/v2/users', params: {})
     if response['users']
-      @user_map = response['users']
-
       response['users'].reduce([]) { |memo, value|
         name = value['name']
         id = value['id']
-
-        user_orgs = @org_user_map.map { |org|
-          org['name'] if org['members'].map { |m| m['id'] }.include? id
-        }
 
         memo + [
           {
@@ -58,7 +37,6 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
             name: name,
             ensure: 'present',
             status: value['status'],
-            orgs: user_orgs ? user_orgs : [],
           }
         ]
       }
@@ -69,7 +47,6 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
           name: nil,
           ensure: 'absent',
           status: nil,
-          orgs: nil,
         }
       ]
     end
@@ -79,35 +56,41 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
     context.notice("Creating '#{name}' with #{should.inspect}")
 
     body = { name: should[:name] }
-    influx_post('/api/v2/users', JSON.dump(body))
+    response = influx_post('/api/v2/users', JSON.dump(body))
+    puts 'create body'
+    puts JSON.pretty_generate(response)
+    if should[:password] and response['id']
+      body = { password: should[:password].unwrap }
+      influx_post("/api/v2/users/#{response['id']}/password", JSON.dump(body))
+    end
+
 
     # Org membership is determined by /orgs, so we need to first create the user and then update it
-    update(context, name, should)
+    #TODO: only allow influxdb_org type to set membership?
+    #update(context, name, should)
   end
 
   def update(context, name, should)
-    @user_map = influx_get('/api/v2/users', params: {})['users']
+    #@@user_map = update_user_info
     context.notice("Updating '#{name}' with #{should.inspect}")
-
-    # Submit a POST request to /orgs/<org>/members for each <org>
-    should[:orgs].each { |org|
-      org_id = org_id_from_name(org)
-      body = { id: user_id_from_name(name) }
-      influx_post("/api/v2/orgs/#{org_id}/members", body.to_json)
+    user_id = id_from_name(@@user_map, name)
+    body = {
+      name: name,
+      status: should[:status],
     }
+    # Submit a POST request to /orgs/<org>/members for each <org>
+    #should[:orgs].each { |org|
+    #  org_id = id_from_name(@@org_hash, org)
+    #  body = { id: id_from_name(@@user_map, name) }
+    #  influx_post("/api/v2/orgs/#{org_id}/members", body.to_json)
+    #}
+    influx_patch("/api/v2/users/#{user_id}", JSON.dump(body))
   end
 
   def delete(context, name)
     context.notice("Deleting '#{name}'")
-    id = user_id_from_name(name)
+    id = id_from_name(@@user_map, name)
     influx_delete("/api/v2/users/#{id}")
-  end
-
-  def user_id_from_name(name)
-    @user_map.select {|user| user['name'] == name}.map { |user| user['id'] }.first
-  end
-  def user_name_from_id(id)
-    @user_map.select {|user| user['id'] == id}.map { |user| user['name'] }.first
   end
 
 end

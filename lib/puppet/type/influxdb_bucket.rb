@@ -31,9 +31,8 @@ EOS
       desc: 'The name of the resource you want to manage.',
     },
     labels: {
-      type: 'Array',
+      type: 'Optional[Array[String]]',
       desc: 'Labels applied to the bucket',
-      default: [],
     },
     org: {
       type: 'String',
@@ -48,6 +47,11 @@ EOS
         'shardGroupDurationSeconds' => 604800,
       }]
     },
+    members: {
+      type: 'Array[String]',
+      desc: 'List of users to add as members of the bucket',
+      default: [],
+    }
     #TODO: fields present in newer version?
     #description: {
     #  type: 'Optional[String]',

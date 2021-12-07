@@ -11,6 +11,9 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
   @@client ||= Puppet.runtime[:http]
   @@org_hash = []
   @@telegraf_hash = []
+  # User attributes including those from the { 'links' => [...] } entry
+  @@user_map = []
+  @@label_hash = []
 
   # Hack to set a global URI.  Maybe there's a better way to do this using some kind of prefetch, shared library, etc
   def canonicalize(context, resources)
@@ -21,6 +24,8 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
     if ping
       get_org_info
       get_telegraf_info
+      get_user_info
+      get_label_info
     end
 
     resources
@@ -67,11 +72,11 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
   def influx_post(name, body)
     if File.file?("#{Dir.home}/.influxdb_token")
       token = File.read("#{Dir.home}/.influxdb_token").chomp
-      response = @@client.post(URI(@@influxdb_uri + name), body , headers: {'Content-Type' => 'application/json', 'Authorization' => "Token #{token}"}).body
+      response = @@client.post(URI(@@influxdb_uri + name), body , headers: {'Content-Type' => 'application/json', 'Authorization' => "Token #{token}"})
     else
-      response = @@client.post(URI(@@influxdb_uri + name), body , headers: {'Content-Type' => 'application/json'}).body
+      response = @@client.post(URI(@@influxdb_uri + name), body , headers: {'Content-Type' => 'application/json'})
     end
-    JSON.parse(response)
+    JSON.parse(response.body ? response.body : '{}')
   end
 
   def influx_put(name, body)
@@ -81,6 +86,7 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
     else
       response = @@client.put(URI(@@influxdb_uri + name), body , headers: {'Content-Type' => 'application/json'}).body
     end
+    puts response.inspect
     JSON.parse(response)
   end
 
@@ -94,9 +100,10 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
         token = File.read("#{Dir.home}/.influxdb_token").chomp
         request['Authorization'] = "Token #{token}"
       end
-      request.body = body
 
+      request.body = body
       response = conn.request(request)
+      puts response.inspect
       JSON.parse(response.body)
     }
   end
@@ -146,8 +153,24 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
           @@telegraf_hash << telegraf
         }
       end
-
     end
+  end
+
+  def get_user_info()
+    response = influx_get('/api/v2/users', params: {})
+    @@user_map = if response['users']
+      response['users'].map { |user|
+        process_links(user, user['links'])
+        user
+      }
+    else
+      []
+    end
+  end
+
+  def get_label_info()
+    response = influx_get('/api/v2/labels', params: {})
+    @@label_hash = response['labels'] ? response['labels'] : []
   end
 
   def process_links(org, links)
@@ -161,18 +184,13 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
 
   end
 
-  def org_id_from_name(name)
-    @@org_hash.map { |org| org['id'] }.first
+  #TODO: refactor into one method
+  def id_from_name(hashes, name)
+    hashes.select {|user| user['name'] == name}.map { |user| user['id'] }.first
   end
-  def org_name_from_id(id)
-    @@org_hash.map { |org| org['name'] }.first
+  def name_from_id(hashes, id)
+    hashes.select {|user| user['id'] == id}.map { |user| user['name'] }.first
   end
 
-  def telegraf_id_from_name(name)
-    @@telegraf_hash.map { |telegraf| telegraf['id'] }.first
-  end
-  def telegraf_name_from_id(id)
-    @@telegraf_hash.map { |telegraf| telegraf['name'] }.first
-  end
 
 end

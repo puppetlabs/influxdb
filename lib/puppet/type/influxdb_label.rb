@@ -3,7 +3,7 @@
 require 'puppet/resource_api'
 
 Puppet::ResourceApi.register_type(
-  name: 'influxdb_org',
+  name: 'influxdb_label',
   docs: <<-EOS,
 @summary a influxdb type
 @example
@@ -21,27 +21,22 @@ EOS
       desc: 'Whether this resource should be present or absent on the target system.',
       default: 'present',
     },
-    #TODO: does this type need to know about this?
+    name: {
+      type: 'String',
+      desc: 'Name of the label',
+      behavior: :namevar,
+    },
     influxdb_host: {
       type: 'String',
       desc: 'The name of the resource you want to manage.',
     },
     org: {
       type: 'String',
-      desc: 'Organization to manage in InfluxDB',
-      behavior: :namevar,
+      desc: 'Organization the label belongs to',
     },
-    members: {
-      type: 'Optional[Array[String]]',
-      desc: 'A list of users to add as members of the organization',
-    },
-    description: {
-      type: 'Optional[String]',
-      desc: 'Optional description for a given org',
+    properties: {
+      type: 'Optional[Hash]',
+      desc: 'Key/value pairs associated with the label',
     },
   },
-  #TODO: does this do anything?
-  autorequire: {
-    influxdb: '$influxdb_host',
-  }
 )

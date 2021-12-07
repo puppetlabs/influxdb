@@ -11,12 +11,14 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
     response = influx_get('/api/v2/orgs', params: {})
     if response['orgs']
       response['orgs'].reduce([]) { |memo, value|
+      org_members = @@org_hash.find{ |org| org['name'] == value['name']}.dig('members', 'users')
         memo + [
           {
+            ensure: 'present',
             influxdb_host: @@influxdb_host,
             org: value['name'],
-            ensure: 'present',
-            desc: value['description']
+            members: org_members ? org_members.map {|member| member['name']} : [],
+            description: value['description']
           }
         ]
       }
@@ -26,7 +28,7 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
           influxdb_host: @@influxdb_host,
           org: nil,
           ensure: 'absent',
-          desc: nil,
+          description: nil,
         }
       ]
     end
@@ -34,7 +36,10 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
 
   def create(context, name, should)
     context.notice("Creating '#{name}' with #{should.inspect}")
-    body = {name: should[:org], description: should[:desc]}
+    body = {
+      name: should[:org],
+      description: should[:description],
+    }
     influx_post('/api/v2/orgs', body.to_s)
   end
 
@@ -42,8 +47,27 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
   # all the apis needed to get this info
   def update(context, name, should)
     context.notice("Updating '#{name}' with #{should.inspect}")
-    body = {name: should[:org], description: should[:desc]}
-    #influx_patch("orgs/#{should['id']}", body.to_json)
+    org_id = id_from_name(@@org_hash, name)
+    org_members = @@org_hash.find{ |org| org['name'] == name}.dig('members', 'users')
+
+    to_remove = org_members.map{ |user| user['name']} - should[:members]
+    to_add = should[:members] - org_members.map{ |user| user['name']}
+
+    to_remove.each { |user|
+      next if user == 'admin'
+      user_id = id_from_name(@@user_map, user)
+      url = "/api/v2/orgs/#{org_id}/members/#{user_id}"
+      influx_delete(url)
+    }
+    to_add.each { |user|
+      user_id = id_from_name(@@user_map, user)
+      body = { name: user, id: user_id }
+      url = "/api/v2/orgs/#{org_id}/members"
+      influx_post(url, JSON.dump(body))
+    }
+
+    body = { description: should[:description], }
+    influx_patch("/api/v2/orgs/#{org_id}", JSON.dump(body))
   end
 
   def delete(context, name)
