@@ -10,12 +10,12 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
   # Users belonging to an organization, per /orgs
   attr_accessor :org_user_map
 
-  def initialize()
-    @org_user_map = update_org_user_map
-  end
+  #def initialize()
+  #  @org_user_map = update_org_user_map
+  #end
 
   def update_org_user_map()
-    @@org_hash.map { |org|
+    @org_hash.map { |org|
       members = org.dig('members', 'users')
       {
         'name' => org['name'],
@@ -25,6 +25,9 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
   end
 
   def get(context)
+    init_attrs()
+    init_auth()
+    init_data()
     response = influx_get('/api/v2/users', params: {})
     if response['users']
       response['users'].reduce([]) { |memo, value|
@@ -33,7 +36,6 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
 
         memo + [
           {
-            influxdb_host: @@influxdb_host,
             name: name,
             ensure: 'present',
             status: value['status'],
@@ -43,7 +45,6 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
     else
       [
         {
-          influxdb_host: @@influxdb_host,
           name: nil,
           ensure: 'absent',
           status: nil,
@@ -57,8 +58,6 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
 
     body = { name: should[:name] }
     response = influx_post('/api/v2/users', JSON.dump(body))
-    puts 'create body'
-    puts JSON.pretty_generate(response)
     if should[:password] and response['id']
       body = { password: should[:password].unwrap }
       influx_post("/api/v2/users/#{response['id']}/password", JSON.dump(body))
@@ -71,17 +70,17 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
   end
 
   def update(context, name, should)
-    #@@user_map = update_user_info
+    #@user_map = update_user_info
     context.notice("Updating '#{name}' with #{should.inspect}")
-    user_id = id_from_name(@@user_map, name)
+    user_id = id_from_name(@user_map, name)
     body = {
       name: name,
       status: should[:status],
     }
     # Submit a POST request to /orgs/<org>/members for each <org>
     #should[:orgs].each { |org|
-    #  org_id = id_from_name(@@org_hash, org)
-    #  body = { id: id_from_name(@@user_map, name) }
+    #  org_id = id_from_name(@org_hash, org)
+    #  body = { id: id_from_name(@user_map, name) }
     #  influx_post("/api/v2/orgs/#{org_id}/members", body.to_json)
     #}
     influx_patch("/api/v2/users/#{user_id}", JSON.dump(body))
@@ -89,7 +88,7 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::Provider::Influxdb:
 
   def delete(context, name)
     context.notice("Deleting '#{name}'")
-    id = id_from_name(@@user_map, name)
+    id = id_from_name(@user_map, name)
     influx_delete("/api/v2/users/#{id}")
   end
 

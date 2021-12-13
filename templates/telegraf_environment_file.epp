@@ -1,0 +1,3 @@
+<%- | Sensitive[String] $token | -%>
+[Service]
+Environment="INFLUX_TOKEN=<%= $token %>"

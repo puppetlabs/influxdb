@@ -8,15 +8,18 @@ require 'puppet/resource_api/simple_provider'
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::Influxdb
   def get(context)
+    init_attrs()
+    init_auth()
+    init_data()
+
     response = influx_get('/api/v2/orgs', params: {})
     if response['orgs']
       response['orgs'].reduce([]) { |memo, value|
-      org_members = @@org_hash.find{ |org| org['name'] == value['name']}.dig('members', 'users')
+      org_members = @org_hash.find{ |org| org['name'] == value['name']}.dig('members', 'users')
         memo + [
           {
+            name: value['name'],
             ensure: 'present',
-            influxdb_host: @@influxdb_host,
-            org: value['name'],
             members: org_members ? org_members.map {|member| member['name']} : [],
             description: value['description']
           }
@@ -25,7 +28,7 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
     else
       [
         {
-          influxdb_host: @@influxdb_host,
+          influxdb_host: @influxdb_host,
           org: nil,
           ensure: 'absent',
           description: nil,
@@ -43,24 +46,25 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
     influx_post('/api/v2/orgs', body.to_s)
   end
 
-  #TODO: utility method to create an instance variable with org information.  /orgs should make this easy, as it has links to
-  # all the apis needed to get this info
+  #TODO: make this less ugly
   def update(context, name, should)
     context.notice("Updating '#{name}' with #{should.inspect}")
-    org_id = id_from_name(@@org_hash, name)
-    org_members = @@org_hash.find{ |org| org['name'] == name}.dig('members', 'users')
+    org_id = id_from_name(@org_hash, name)
+    org_members = @org_hash.find{ |org| org['name'] == name}.dig('members', 'users')
+    _members = org_members ? org_members : []
+    should_members = should[:members] ? should[:members] : []
 
-    to_remove = org_members.map{ |user| user['name']} - should[:members]
-    to_add = should[:members] - org_members.map{ |user| user['name']}
+    to_remove = _members.map {|member| member['name']} - should_members
+    to_add = should_members - _members.map {|member| member['name']}
 
     to_remove.each { |user|
       next if user == 'admin'
-      user_id = id_from_name(@@user_map, user)
+      user_id = id_from_name(@user_map, user)
       url = "/api/v2/orgs/#{org_id}/members/#{user_id}"
       influx_delete(url)
     }
     to_add.each { |user|
-      user_id = id_from_name(@@user_map, user)
+      user_id = id_from_name(@user_map, user)
       body = { name: user, id: user_id }
       url = "/api/v2/orgs/#{org_id}/members"
       influx_post(url, JSON.dump(body))

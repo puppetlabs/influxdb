@@ -26,10 +26,6 @@ EOS
       desc: 'Name of the user',
       behavior: :namevar,
     },
-    influxdb_host: {
-      type: 'String',
-      desc: 'The name of the resource you want to manage.',
-    },
     password: {
       type: 'Optional[Sensitive[String]]',
       desc: 'User password',

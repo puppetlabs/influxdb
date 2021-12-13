@@ -4,40 +4,22 @@ require_relative '../influxdb/influxdb'
 require 'puppet/resource_api/simple_provider'
 
 class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::Provider::Influxdb::Influxdb
-  attr_accessor :label_hash
-  def initialize()
-    @label_hash = update_label_hash()
-  end
-
-  def update_label_hash()
-    response = influx_get('/api/v2/labels', params: {})
-    # No 'links' entries for individual labels as of now
-    response['labels'] ? response['labels']: []
-  end
-
   def get(context)
+    init_attrs()
+    init_auth()
+    init_data()
     response = influx_get('/api/v2/labels', params: {})
     if response['labels']
-      puts JSON.pretty_generate(response['labels'])
       response['labels'].map{ |label|
         {
-          influxdb_host: @@influxdb_host,
           name: label['name'],
           ensure: 'present',
-          org: name_from_id(@@org_hash, label['orgID']),
+          org: name_from_id(@org_hash, label['orgID']),
           properties: label['properties'],
         }
       }
     else
-      [
-        {
-          influxdb_host: @@influxdb_host,
-          name: nil,
-          ensure: 'absent',
-          org: nil,
-          properties: nil,
-        }
-      ]
+      []
     end
   end
 
@@ -46,7 +28,7 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::Provider::Influxd
 
     body = {
       name: name,
-      orgID: id_from_name(@@org_hash, should[:org]),
+      orgID: id_from_name(@org_hash, should[:org]),
       properties: should[:properties],
     }
 

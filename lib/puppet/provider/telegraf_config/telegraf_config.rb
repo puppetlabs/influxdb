@@ -9,15 +9,20 @@ require 'toml-rb'
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
 class Puppet::Provider::TelegrafConfig::TelegrafConfig < Puppet::Provider::Influxdb::Influxdb
+  def init_attrs()
+    super
+  end
+
   def get(context)
+    init_attrs()
     response = influx_get('/api/v2/telegrafs', params: {})
     if response['configurations']
       response['configurations'].reduce([]) { |memo, value|
         memo + [
           {
             name: value['name'],
-            influxdb_host: @@influxdb_host,
-            org: name_from_id(@@org_hash, value['orgID']),
+            influxdb_host: @influxdb_host,
+            org: name_from_id(@org_hash, value['orgID']),
             ensure: 'present',
             description: value['description'],
             config: TomlRB.parse(value['config']),
@@ -43,20 +48,20 @@ class Puppet::Provider::TelegrafConfig::TelegrafConfig < Puppet::Provider::Influ
       description: should[:description],
       config: TomlRB.dump(should[:config]),
       metadata: should[:metadata],
-      orgID: id_from_name(@@org_hash, should[:org])
+      orgID: id_from_name(@org_hash, should[:org])
     }
     response = influx_post('/api/v2/telegrafs', JSON.dump(body))
   end
 
   def update(context, name, should)
     context.info("Updating '#{name}' with #{should.inspect}")
-    telegraf_id = id_from_name(@@telegraf_hash, should[:name])
+    telegraf_id = id_from_name(@telegraf_hash, should[:name])
     body = {
       name: should[:name],
       description: should[:description],
       config: TomlRB.dump(should[:config]),
       metadata: should[:metadata],
-      orgID: id_from_name(@@org_hash, should[:org])
+      orgID: id_from_name(@org_hash, should[:org])
     }
     influx_put("/api/v2/telegrafs/#{telegraf_id}", JSON.dump(body))
   end

@@ -21,12 +21,7 @@ EOS
       desc: 'Whether this resource should be present or absent on the target system.',
       default: 'present',
     },
-    #TODO: does this type need to know about this?
-    influxdb_host: {
-      type: 'String',
-      desc: 'The name of the resource you want to manage.',
-    },
-    org: {
+    name: {
       type: 'String',
       desc: 'Organization to manage in InfluxDB',
       behavior: :namevar,
@@ -40,8 +35,4 @@ EOS
       desc: 'Optional description for a given org',
     },
   },
-  #TODO: does this do anything?
-  autorequire: {
-    influxdb: '$influxdb_host',
-  }
 )

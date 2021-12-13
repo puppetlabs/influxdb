@@ -7,31 +7,12 @@ require 'puppet/resource_api/simple_provider'
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influxdb::Influxdb
-  attr_accessor :bucket_hash
-  def initialize()
-    @bucket_hash = update_bucket_hash()
-  end
-
-  def update_bucket_hash()
-    response = influx_get('/api/v2/buckets', params: {})
-    if response['buckets']
-      response['buckets'].select{ |bucket| bucket['type'] == 'user'}.map { |bucket|
-        process_links(bucket, bucket['links'])
-        bucket
-      }
-    else
-      []
-    end
-  end
-
-  def bucket_id_from_name(name)
-    @bucket_hash.select {|bucket| bucket['name'] == name}.map { |bucket| bucket['id'] }.first
-  end
-  def bucket_name_from_id(id)
-    @bucket_hash.select {|bucket| bucket['id'] == id}.map { |bucket| bucket['name'] }.first
-  end
-
   def get(context)
+    init_attrs()
+    init_auth()
+    init_data()
+
+    #TODO: refactor this one to be like other hashes
     response = influx_get('/api/v2/buckets', params: {})
     if response['buckets']
       response['buckets'].select{ |bucket| bucket['type'] == 'user'}.reduce([]) { |memo, value|
@@ -41,10 +22,9 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
 
         memo + [
           {
-            influxdb_host: @@influxdb_host,
             name: value['name'],
             ensure: 'present',
-            org: name_from_id(@@org_hash, value['orgID']),
+            org: name_from_id(@org_hash, value['orgID']),
             retention_rules: value['retentionRules'],
             members: bucket_members ? bucket_members.map {|member| member['name']} : [],
             labels: bucket_labels ? bucket_labels.map {|label| label['name']} : [],
@@ -52,16 +32,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
         ]
       }
     else
-      [
-        {
-          influxdb_host: nil,
-          name: nil,
-          ensure: nil,
-          org: nil,
-          retention_rules: nil,
-          labels: nil,
-        }
-      ]
+      []
     end
   end
 
@@ -70,7 +41,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
 
     body = {
       name: should[:name],
-      orgId: id_from_name(@@org_hash, should[:org]),
+      orgId: id_from_name(@org_hash, should[:org]),
       retentionRules: should[:retention_rules],
     }
     response = influx_post('/api/v2/buckets', JSON.dump(body))
@@ -95,21 +66,19 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
       influx_delete("/api/v2/buckets/#{bucket_id}/members/#{user_id}")
     }
     users_to_add.each{ |user|
-      body = { 'id' => id_from_name(@@user_hash, user) }
+      body = { 'id' => id_from_name(@user_hash, user) }
       influx_post("/api/v2/buckets/#{bucket_id}/members", body.to_json)
     }
 
     labels_to_remove = bucket_labels.map{ |label| label['name']} - should[:labels]
     labels_to_add = should[:labels] - bucket_labels.map{ |label| label['name']}
-    puts labels_to_remove.inspect
-    puts labels_to_add.inspect
 
     labels_to_remove.each{ |label|
-      label_id = id_from_name(@@label_hash, label)
+      label_id = id_from_name(@label_hash, label)
       influx_delete("/api/v2/buckets/#{bucket_id}/labels/#{label_id}")
     }
     labels_to_add.each{ |label|
-      label_id = id_from_name(@@label_hash, label)
+      label_id = id_from_name(@label_hash, label)
       body = { 'labelID' => label_id }
       influx_post("/api/v2/buckets/#{bucket_id}/labels", JSON.dump(body))
     }

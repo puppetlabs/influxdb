@@ -16,20 +16,30 @@ This type is an abstraction to represent the entirety of the InfluxDB stack as i
 EOS
   features: ['canonicalize'],
   attributes: {
-    #ensure: {
-    #  type: 'Enum[present, absent]',
-    #  desc: 'Whether this resource should be present or absent on the target system.',
-    #  default: 'present',
-    #},
-    influxdb_host: {
+    ensure: {
+      type: 'Enum[present, absent]',
+      desc: 'Whether this resource should be present or absent on the target system.',
+      default: 'present',
+    },
+    name: {
       type: 'String',
       desc: 'The host running InfluxDB',
       behaviour: :namevar,
     },
     influxdb_port: {
-      type: 'Optional[Integer]',
+      type: 'Integer',
       desc: 'Port used by the InfluxDB service',
       default: 8086,
-    }
+    },
+    token: {
+      type: 'Optional[Sensitive[String]]',
+      desc: 'Token used for authentication',
+      behavior: :parameter,
+    },
+    token_file: {
+      type: 'Optional[String]',
+      desc: 'File on disk containing a token',
+      behavior: :parameter,
+    },
   },
 )

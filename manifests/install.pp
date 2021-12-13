@@ -4,10 +4,10 @@ class influxdb::install(
   String  $influxdb_host = $influxdb::influxdb_host,
   String  $influxdb_repo_name = $influxdb::influxdb_repo_name,
   String  $initial_org = 'puppetlabs',
-  Hash    $output_defaults = {'bucket' => 'puppet', 'organization' => 'puppetlabs', 'token' => '$INFLUX_TOKEN'},
   String  $initial_bucket = 'puppet',
   String  $admin_user = 'admin',
-  String  $admin_pass = 'puppetlabs',
+  Sensitive[String[1]] $admin_pass = Sensitive('puppetlabs'),
+  String  $token_file = $influxdb::token_file,
 ){
   # If we are managing the repository, set it up and install the package with a require on the repo
   if $manage_influxdb_repo {
@@ -57,6 +57,11 @@ class influxdb::install(
   }
 
   influxdb_setup {$influxdb_host:
-    ensure        => 'present',
+    ensure     => 'present',
+    token_file => $token_file,
+    bucket   => $initial_bucket,
+    org      => $initial_org,
+    username => $admin_user,
+    password => $admin_pass,
   }
 }

@@ -21,13 +21,35 @@ EOS
       desc: 'Whether this resource should be present or absent on the target system.',
       default: 'present',
     },
-    influxdb_host: {
+    name: {
       type: 'String',
       desc: 'The name of the resource you want to manage.',
       behaviour: :namevar,
     },
+    token_file: {
+      type: 'String',
+      desc: 'Absolute path to save the initial admin token',
+      behavior: :parameter
+    },
+    bucket: {
+      type: 'String',
+      desc: 'Name of the initial bucket to create',
+      behavior: :parameter
+    },
+    org: {
+      type: 'String',
+      desc: 'Name of the initial bucket to create',
+      behavior: :parameter
+    },
+    username: {
+      type: 'String',
+      desc: 'Name of the initial bucket to create',
+      behavior: :parameter
+    },
+    password: {
+      type: 'Sensitive[String]',
+      desc: 'Name of the initial admin password',
+      behavior: :parameter
+    },
   },
-  autorequire: {
-    influxdb: '$influxdb_host',
-  }
 )

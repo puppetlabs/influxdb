@@ -26,10 +26,6 @@ EOS
       desc: 'Name of the bucket',
       behavior: :namevar,
     },
-    influxdb_host: {
-      type: 'String',
-      desc: 'The name of the resource you want to manage.',
-    },
     labels: {
       type: 'Optional[Array[String]]',
       desc: 'Labels applied to the bucket',
