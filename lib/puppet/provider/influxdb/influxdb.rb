@@ -4,7 +4,6 @@ require 'puppet/resource_api/simple_provider'
 require 'puppet/http'
 require 'json'
 require 'uri'
-require 'pry'
 
 # Implementation for the influxdb type using the Resource API.
 class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
