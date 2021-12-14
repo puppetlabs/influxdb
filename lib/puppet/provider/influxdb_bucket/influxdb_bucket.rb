@@ -12,7 +12,6 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
     init_auth()
     init_data()
 
-    #TODO: refactor this one to be like other hashes
     response = influx_get('/api/v2/buckets', params: {})
     if response['buckets']
       response['buckets'].select{ |bucket| bucket['type'] == 'user'}.reduce([]) { |memo, value|
@@ -45,15 +44,16 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
       retentionRules: should[:retention_rules],
     }
     response = influx_post('/api/v2/buckets', JSON.dump(body))
+    @bucket_hash = []
+    get_bucket_info()
 
-    #update(context, name, should) if should[:labels]
+    update(context, name, should) if should[:labels] or should[:members]
   end
 
   def update(context, name, should)
     context.notice("Updating '#{name}' with #{should.inspect}")
-    bucket_id = bucket_id_from_name(name)
+    bucket_id = id_from_name(@bucket_hash, name)
 
-    #TODO: move the "user map" code to the base class so this code is less ugly
     bucket_members = @bucket_hash.find{ |bucket| bucket['name'] == name}.dig('members', 'users')
     bucket_labels = @bucket_hash.find{ |bucket| bucket['name'] == name}.dig('labels', 'labels')
     bucket_users = bucket_members ? bucket_members.map{ |user| {'name' => user['name'], 'id' => user['id'] } } : []
@@ -66,7 +66,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
       influx_delete("/api/v2/buckets/#{bucket_id}/members/#{user_id}")
     }
     users_to_add.each{ |user|
-      body = { 'id' => id_from_name(@user_hash, user) }
+      body = { 'id' => id_from_name(@user_map, user) }
       influx_post("/api/v2/buckets/#{bucket_id}/members", body.to_json)
     }
 
@@ -92,7 +92,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
 
   def delete(context, name)
     context.notice("Deleting '#{name}'")
-    id = bucket_id_from_name(name)
+    id = id_from_name(@bucket_hash, name)
     influx_delete("/api/v2/buckets/#{id}")
   end
 end

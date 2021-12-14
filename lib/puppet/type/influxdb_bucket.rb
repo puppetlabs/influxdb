@@ -44,9 +44,8 @@ EOS
       }]
     },
     members: {
-      type: 'Array[String]',
+      type: 'Optional[Array[String]]',
       desc: 'List of users to add as members of the bucket',
-      default: [],
     }
     #TODO: fields present in newer version?
     #description: {
