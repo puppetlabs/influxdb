@@ -1,0 +1,4 @@
+<%- | String $cert, String $key | -%>
+[Service]
+Environment="INFLUXD_TLS_CERT=<%= $cert %>"
+Environment="INFLUXD_TLS_KEY=<%= $key %>"

@@ -10,7 +10,9 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
   def get(context)
     init_attrs()
     init_auth()
-    init_data()
+
+    get_org_info()
+    get_user_info()
 
     response = influx_get('/api/v2/orgs', params: {})
     if response['orgs']

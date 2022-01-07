@@ -7,7 +7,10 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::Provider::Influxd
   def get(context)
     init_attrs()
     init_auth()
-    init_data()
+
+    get_org_info()
+    get_label_info()
+
     response = influx_get('/api/v2/labels', params: {})
     if response['labels']
       response['labels'].map{ |label|

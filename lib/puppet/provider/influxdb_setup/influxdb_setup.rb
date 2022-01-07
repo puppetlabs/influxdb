@@ -7,22 +7,9 @@ require 'puppet/resource_api/simple_provider'
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxdb::Influxdb
-  #def init_attrs()
-  #  super
-  #end
-
-  #def init_data()
-  #  super
-  #end
-  #def init_auth()
-  #  super
-  #end
-
-
   def get(context)
     init_attrs()
-    init_auth()
-    init_data()
+
     response = influx_get('/api/v2/setup', params: {})
     [
       {

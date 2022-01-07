@@ -4,6 +4,7 @@ require 'puppet/resource_api/simple_provider'
 require 'puppet/http'
 require 'json'
 require 'uri'
+require 'pry'
 
 # Implementation for the influxdb type using the Resource API.
 class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
@@ -11,14 +12,14 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
   # Ideally we'd set these in initialize() as regular instance variables, but we don't know what
   #   the resources will be during initialization
   class << self
-    attr_accessor :influxdb_host, :influxdb_port, :token, :token_file
+    attr_accessor :influxdb_host, :influxdb_port, :token, :token_file, :use_ssl
   end
-  attr_accessor :telegraf_hash, :user_map, :label_hash, :auth, :bucket_hash
+  attr_accessor :telegraf_hash, :user_map, :label_hash, :auth, :bucket_hash, :dbrp_hash
 
   def initialize()
     @client = Puppet.runtime[:http]
-    @org_hash, @telegraf_hash, @label_hash, @user_map, @bucket_hash = [], [], [], [], []
-    @auth = {}
+    @org_hash, @telegraf_hash, @label_hash, @user_map, @bucket_hash, @dbrp_hash = [], [], [], [], [], []
+    @auth, @self_hash = {}, []
   end
 
   # Make class instance variables available as instance variables to whichever object calls this method
@@ -26,18 +27,9 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
   def init_attrs()
     @influxdb_host = Puppet::Provider::Influxdb::Influxdb.influxdb_host
     @influxdb_port = Puppet::Provider::Influxdb::Influxdb.influxdb_port
-    @influxdb_uri = "http://#{@influxdb_host}:#{@influxdb_port}"
-  end
 
-  #TODO: don't run this for every type if data already there
-  def init_data()
-    if influx_setup
-      get_org_info
-      get_user_info
-      get_telegraf_info
-      get_label_info
-      get_bucket_info
-    end
+    protocol = Puppet::Provider::Influxdb::Influxdb.use_ssl ? 'https' : 'http'
+    @influxdb_uri = "#{protocol}://#{@influxdb_host}:#{@influxdb_port}"
   end
 
   def init_auth()
@@ -55,7 +47,6 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
   def id_from_name(hashes, name)
     hashes.select {|user| user['name'] == name}.map { |user| user['id'] }.first
   end
-  #JSON.parse(response.body)
   def name_from_id(hashes, id)
     hashes.select {|user| user['id'] == id}.map { |user| user['name'] }.first
   end
@@ -66,6 +57,7 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
   def canonicalize(context, resources)
     self.class.influxdb_host = resources[0][:name]
     self.class.influxdb_port = resources[0][:influxdb_port]
+    self.class.use_ssl = resources[0][:use_ssl]
 
     if resources[0][:token]
       self.class.token = resources[0][:token]
@@ -79,13 +71,11 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
 
   def get(context)
     init_auth()
-    # Cache gobal data if InfluxDB is up
-    init_data()
-
     [
       {
         name: @influxdb_host,
         influxdb_port: @influxdb_port,
+        use_ssl: self.class.use_ssl,
         ensure: 'present',
       },
     ]
@@ -119,6 +109,7 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
 
   def influx_post(name, body)
     response = @client.post(URI(@influxdb_uri + name), body , headers: @auth.merge({'Content-Type' => 'application/json'}))
+    puts response.inspect
     if response.success?
       JSON.parse(response.body ? response.body : '{}')
     else
@@ -127,7 +118,7 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
   end
 
   def influx_put(name, body)
-    response = @client.put(URI(@influxdb_uri + name), body , headers: @auth)
+    response = @client.put(URI(@influxdb_uri + name), body , headers: @auth.merge({'Content-Type' => 'application/json'}))
     if response.success?
       JSON.parse(response.body ? response.body : '{}')
     else
@@ -155,6 +146,7 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
 
   def influx_delete(name)
     response = @client.delete(URI(@influxdb_uri + name), headers: @auth)
+    puts response.inspect
     if response.success?
       JSON.parse(response.body ? response.body : '{}')
     else
@@ -191,6 +183,16 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
     end
   end
 
+  def get_dbrp_info()
+    # org is a mandatory parameter, so we have to look over each org to get all dbrps
+    # get_org_info must be called before this
+    orgs = @org_hash.map{ |org| org['name'] }
+    orgs.each{ |org|
+      dbrp = influx_get("/api/v2/dbrps?org=#{org}", params: {})
+      @dbrp_hash << dbrp
+    }
+end
+
   def get_telegraf_info()
     response = influx_get('/api/v2/telegrafs', params: {})
 
@@ -212,19 +214,19 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
     end
   end
 
+  # No links entries for labels other than self
   def get_label_info()
     response = influx_get('/api/v2/labels', params: {})
     @label_hash = response['labels'] ? response['labels'] : []
   end
 
-  def process_links(org, links)
+  def process_links(hash, links)
     # For each org hash returned by the api, traverse the 'links' entries and add an element to the hash
     # For example, given an org 'puppetlabs' with {"links" => ["buckets": "/api/v2/buckets?org=puppetlabs"]}
     #   add the results of the "buckets" api call to a "buckets" key
     links.each { |k,v|
       next if k == "self" or k == 'write'
-      response = influx_get(v, params: {})
-      org[k] = response
+      hash[k] = influx_get(v, params: {})
     }
   end
 end

@@ -6,8 +6,13 @@ class influxdb(
   String  $telegraf_config_dir = '/etc/telegraf/telegraf.d',
   Boolean $manage_influxdb_setup = true,
   Boolean $manage_influxdb_repo = true,
-  Boolean $manage_telegraf_token = true,
-  Boolean $manage_telegraf_service = false,
+  Boolean $manage_telegraf = true,
+  Boolean $use_ssl = true,
+  String  $initial_org = 'puppetlabs',
+  String  $initial_bucket = 'puppet_data',
+  String  $ssl_cert_file = $settings::hostcert,
+  String  $ssl_key_file = $settings::hostprivkey,
+  String  $ssl_ca_file = $settings::localcacert,
   Optional[Sensitive[String[1]]] $token = undef,
   String  $token_file = $facts['identity']['user'] ? {
                                       'root'  => '/root/.influxdb_token',
@@ -23,7 +28,14 @@ class influxdb(
     influxdb_port => $influxdb_port,
     token         => $token,
     token_file    => $token_file,
+    use_ssl       => $use_ssl,
   }
+
+  $protocol = $use_ssl ? {
+    true  => 'https',
+    false => 'http',
+  }
+
 
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
   if $manage_influxdb_setup {
@@ -33,31 +45,34 @@ class influxdb(
     include influxdb::install
   }
 
-  influxdb_user {'Adrian':
-    ensure   => present,
-    password => Sensitive('puppetlabs'),
-  }
+  if $manage_telegraf {
+    if $use_ssl {
+      file {'/etc/telegraf/cert.pem':
+        ensure => present,
+        source => "file:///${ssl_cert_file}",
+        mode   => '0400',
+        owner  => 'telegraf',
+      }
+      file {'/etc/telegraf/key.pem':
+        ensure => present,
+        source => "file:///${ssl_key_file}",
+        mode   => '0400',
+        owner  => 'telegraf',
+      }
+      file {'/etc/telegraf/ca.pem':
+        ensure => present,
+        source => "file:///${ssl_ca_file}",
+        mode   => '0400',
+        owner  => 'telegraf',
+      }
+    }
 
-  influxdb_org {'puppetlabs':
-    ensure      => present,
-    description => 'Hi',
-    members     => ['Adrian'],
-  }
-
-  influxdb_bucket {'foo':
-    ensure => present,
-    org    => 'puppetlabs',
-  }
-
-  influxdb_label {'foo':
-    ensure => present,
-    org    => 'puppetlabs',
-  }
-
-  if $manage_telegraf_token {
+    # Create a token with permissions to read and write timeseries data
+    # The retrieve_token() function cannot find a token during the catalog compilation which creates it
+    #   i.e. it takes two agent runs to become available
     influxdb_auth {"puppet telegraf token":
       ensure        => present,
-      org           => 'puppetlabs',
+      org           => $initial_org,
       permissions   => [
         {
           "action"   => "read",
@@ -71,16 +86,19 @@ class influxdb(
             "type"   => "telegrafs"
           }
         },
+        {
+          "action"   => "read",
+          "resource" => {
+            "type"   => "buckets"
+          }
+        },
+        {
+          "action"   => "write",
+          "resource" => {
+            "type"   => "buckets"
+          }
+        },
       ]
-    }
-  }
-  if $manage_telegraf_service {
-    include influxdb::telegraf::configs
-
-    influxdb::telegraf::agent {'puppet_telegraf':
-      config_file => $telegraf_config_file,
-      config_dir  => $telegraf_config_dir,
-      notify      => Exec['puppet_telegraf_daemon_reload'],
     }
   }
 }

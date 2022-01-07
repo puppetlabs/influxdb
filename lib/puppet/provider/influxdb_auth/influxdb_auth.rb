@@ -7,16 +7,15 @@ require 'puppet/resource_api/simple_provider'
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::Provider::Influxdb::Influxdb
-  attr_accessor :auth_hash
 
   def get(context)
     init_attrs()
     init_auth()
-    init_data()
+    get_org_info()
 
     response = influx_get('/api/v2/authorizations', params: {})
     if response['authorizations']
-      @auth_hash = response['authorizations']
+      @self_hash = response['authorizations']
 
       response['authorizations'].reduce([]) { |memo, value|
         #puts value.inspect
@@ -53,12 +52,15 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::Provider::Influxdb:
 
   def update(context, name, should)
     context.notice("Updating '#{name}' with #{should.inspect}")
+    # A token cannot be updated, so we delete and create a new one
+    delete(context, name)
+    create(context, name, should)
   end
 
   def delete(context, name)
     context.notice("Deleting '#{name}'")
 
-    token_id = @auth_hash.find {|auth| auth['description'] == name}.dig('id')
+    token_id = @self_hash.find {|auth| auth['description'] == name}.dig('id')
     influx_delete("/api/v2/authorizations/#{token_id}")
   end
 

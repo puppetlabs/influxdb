@@ -41,5 +41,10 @@ EOS
       desc: 'File on disk containing a token',
       behavior: :parameter,
     },
+    use_ssl: {
+      type: 'Boolean',
+      desc: 'Whether to enable SSL for the InfluxDB service',
+      default: true,
+    }
   },
 )

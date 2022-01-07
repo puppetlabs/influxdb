@@ -1,10 +1,16 @@
 define influxdb::telegraf::agent (
   String $service_name = $title,
-  String $config_file = '/etc/telegraf/telegraf.conf',
-  String $config_dir = '/etc/telegraf/telegraf.d',
-  #TODO
-  Sensitive[String[1]] $token = $influxdb::token,
+  Sensitive[String[1]] $token,
+  # Set of default options for /etc/telegraf/telegraf.conf
+  Hash   $agent_defaults = influxdb::from_toml(file('influxdb/telegraf_agent.conf')),
+  String $config_file = $influxdb::telegraf_config_file,
+  String $config_dir = $influxdb::telegraf_config_dir,
 ){
+  file {$config_file:
+    ensure  => present,
+    content => influxdb::to_toml($agent_defaults),
+    notify  => Service[$service_name],
+  }
   file {"/etc/systemd/system/${service_name}.service.d":
     ensure => directory,
     owner  => 'telegraf',

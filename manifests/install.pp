@@ -1,10 +1,14 @@
 class influxdb::install(
   Boolean $manage_influxdb_repo = $influxdb::manage_influxdb_repo,
-  Boolean $manage_telegraf_service = $influxdb::manage_telegraf_service,
+  Boolean $manage_telegraf = $influxdb::manage_telegraf,
+  Boolean $use_ssl = $influxdb::use_ssl,
+  String $ssl_cert_file = $influxdb::ssl_cert_file,
+  String $ssl_key_file = $influxdb::ssl_key_file,
+  String $ssl_ca_file = $influxdb::ssl_ca_file,
   String  $influxdb_host = $influxdb::influxdb_host,
   String  $influxdb_repo_name = $influxdb::influxdb_repo_name,
-  String  $initial_org = 'puppetlabs',
-  String  $initial_bucket = 'puppet',
+  String  $initial_org = $influxdb::initial_org,
+  String  $initial_bucket = $influxdb::initial_bucket,
   String  $admin_user = 'admin',
   Sensitive[String[1]] $admin_pass = Sensitive('puppetlabs'),
   String  $token_file = $influxdb::token_file,
@@ -33,7 +37,7 @@ class influxdb::install(
       ensure  => installed,
       require => Yumrepo[$influxdb_repo_name],
     }
-    if $manage_telegraf_service {
+    if $manage_telegraf {
       package {'telegraf':
         ensure  => installed,
         require => Yumrepo[$influxdb_repo_name],
@@ -50,6 +54,42 @@ class influxdb::install(
     }
   }
 
+  if $use_ssl {
+    File {
+      mode    => '0400',
+      owner   => 'influxdb',
+      require => Package['influxdb2'],
+    }
+
+    file {'/etc/influxdb/cert.pem':
+      ensure => present,
+      source => "file:///${ssl_cert_file}",
+    }
+    file {'/etc/influxdb/key.pem':
+      ensure => present,
+      source => "file:///${ssl_key_file}",
+    }
+    file {'/etc/influxdb/ca.pem':
+      ensure => present,
+      source => "file:///${ssl_ca_file}",
+    }
+    file {"/etc/systemd/system/influxdb.service.d":
+      ensure => directory,
+      owner  => 'influxdb',
+    }
+    file {"/etc/systemd/system/influxdb.service.d/override.conf":
+      ensure  => file,
+      #TODO: epp necessary?
+      content => epp(
+        'influxdb/influxdb_dropin.epp',
+        {
+          cert => '/etc/influxdb/cert.pem',
+          key  => '/etc/influxdb/key.pem',
+        }
+      ),
+    }
+  }
+
   service {'influxdb':
     ensure  => running,
     enable  => true,
@@ -63,5 +103,18 @@ class influxdb::install(
     org      => $initial_org,
     username => $admin_user,
     password => $admin_pass,
+  }
+
+  influxdb_label {'puppetlabs/influxdb':
+    ensure  => present,
+    org     => $initial_org,
+    require => Influxdb_setup[$influxdb_host],
+  }
+
+  influxdb_bucket {$initial_bucket:
+    ensure  => present,
+    org     => $initial_org,
+    labels => ['puppetlabs/influxdb'],
+    require => Influxdb_setup[$influxdb_host],
   }
 }

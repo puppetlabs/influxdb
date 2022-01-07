@@ -4,40 +4,54 @@ class influxdb::telegraf::configs (
   String  $telegraf_config_file = $influxdb::telegraf_config_file,
   String  $telegraf_config_dir = $influxdb::telegraf_config_file,
   # Set of default options for /etc/telegraf/telegraf.conf
-  Hash   $agent_config = influxdb::from_toml(file('influxdb/telegraf_agent.conf')),
-  # Default options for [[outputs.influxdb_v2]]
-  Hash   $output_defaults = $influxdb::output_defaults,
-  String $config_file = '/etc/telegraf/telegraf.conf',
-  String $config_dir = '/etc/telegraf/telegraf.d',
+  Hash   $agent_defaults = influxdb::from_toml(file('influxdb/telegraf_agent.conf')),
+  String $config_file = $influxdb::telegraf_config_file,
+  String $config_dir = $influxdb::telegraf_config_dir,
+  String $default_org = $influxdb::install::initial_org,
+  String $default_bucket = $influxdb::install::initial_bucket,
+  Boolean $use_ssl = $influxdb::use_ssl,
+  String $ssl_cert_file = $influxdb::ssl_cert_file,
+  String $ssl_key_file = $influxdb::ssl_key_file,
+  String $ssl_ca_file = $influxdb::ssl_ca_file,
   Boolean $include_system_metrics = true,
   # Whether to store Telegraf configs locally.
   Boolean $store_config = true,
-  Boolean $manage_token = true,
   Optional[Array[Hash]] $configs = [],
-  Sensitive[String[1]] $token,
 ){
-  if $token {
-    notify {"$token": }
-  }
   exec { 'puppet_telegraf_daemon_reload':
     command     => 'systemctl daemon-reload',
     path        => ['/bin', '/usr/bin'],
     refreshonly => true,
   }
 
+  $protocol = $use_ssl ? {
+    true  => 'https',
+    false => 'http',
+  }
+
+
+  file {$influxdb::telegraf_config_file:
+    ensure  => present,
+    content => influxdb::to_toml($agent_defaults),
+  }
 
   if $include_system_metrics {
-    $system_config = epp('influxdb/telegraf_system.epp',
-      $output_defaults + {'urls' => ["'http://${influxdb_host}:8086'"]}
-    ).influxdb::from_toml()
-    $outputs = $system_config.dig('outputs', 'influxdb_v2', 0)
+    $defaults = {
+      'bucket'       => $default_bucket,
+      'organization' => $default_org,
+      'token'        => '$INFLUX_TOKEN',
+      #FIXME
+      'urls'         => ["'${protocol}://${influxdb_host}:8086'"],
+    }
+
+    $system_config = epp('influxdb/telegraf_system.epp', $defaults).influxdb::from_toml()
 
     telegraf_config {'puppet_system':
       ensure        => present,
       config        => $system_config,
       influxdb_host => $influxdb_host,
-      org           => $outputs['organization'],
-      metadata      => { 'buckets' => [$outputs['bucket']] },
+      org           => $defaults['organization'],
+      metadata      => { 'buckets' => [$defaults['bucket']] },
       description   => 'System metrics from influxdb::telegraf::configs',
     }
     if $store_config {

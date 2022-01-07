@@ -46,7 +46,12 @@ EOS
     members: {
       type: 'Optional[Array[String]]',
       desc: 'List of users to add as members of the bucket',
-    }
+    },
+    create_dbrp: {
+      type: 'Boolean',
+      desc: 'Whether to create a "database retention policy" mapping to allow for legacy access',
+      default: true,
+    },
     #TODO: fields present in newer version?
     #description: {
     #  type: 'Optional[String]',
