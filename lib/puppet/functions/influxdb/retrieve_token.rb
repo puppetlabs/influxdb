@@ -1,6 +1,5 @@
 require 'uri'
 require 'json'
-require 'pry'
 
 Puppet::Functions.create_function(:'influxdb::retrieve_token') do
   dispatch :retrieve_token do
@@ -10,7 +9,6 @@ Puppet::Functions.create_function(:'influxdb::retrieve_token') do
   end
 
   def retrieve_token(uri, admin_token, token_name)
-    binding.pry
     begin
       client = Puppet.runtime[:http]
       response = client.get(URI(uri + '/api/v2/authorizations'),

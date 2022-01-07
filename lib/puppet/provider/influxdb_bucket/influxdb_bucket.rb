@@ -2,7 +2,6 @@
 
 require_relative '../influxdb/influxdb'
 require 'puppet/resource_api/simple_provider'
-require 'pry'
 
 # Implementation for performing initial setup of InfluxDB using the Resource API.
 # Inheriting from the base provider gives us the get() and put() methods, as
@@ -84,7 +83,6 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
       user_id = id_from_name(@user_map, user)
       if user_id
         body = { 'id' => user_id }
-        binding.pry
         influx_post("/api/v2/buckets/#{bucket_id}/members", JSON.dump(body))
       else
         context.warning("Could not find user #{user}")

@@ -3,7 +3,6 @@
 require_relative '../influxdb/influxdb'
 require 'puppet/resource_api/simple_provider'
 require 'toml-rb'
-require 'pry'
 
 # Implementation for performing initial setup of InfluxDB using the Resource API.
 # Inheriting from the base provider gives us the get() and put() methods, as
