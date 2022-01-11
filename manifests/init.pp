@@ -4,15 +4,15 @@ class influxdb(
   String  $influxdb_repo_name = 'influxdb2',
   String  $telegraf_config_file = '/etc/telegraf/telegraf.conf',
   String  $telegraf_config_dir = '/etc/telegraf/telegraf.d',
-  Boolean $manage_influxdb_setup = true,
+  Boolean $manage_influxdb_setup = false,
   Boolean $manage_influxdb_repo = true,
   Boolean $manage_telegraf = true,
   Boolean $use_ssl = true,
   String  $initial_org = 'puppetlabs',
   String  $initial_bucket = 'puppet_data',
-  String  $ssl_cert_file = $settings::hostcert,
-  String  $ssl_key_file = $settings::hostprivkey,
-  String  $ssl_ca_file = $settings::localcacert,
+  String  $ssl_cert_file = "${facts['puppet_ssldir']}/certs/${trusted['certname']}.pem",
+  String  $ssl_key_file ="${facts['puppet_ssldir']}/private_keys/${trusted['certname']}.pem",
+  String  $ssl_ca_file ="${facts['puppet_ssldir']}/certs/ca.pem",
   Optional[Sensitive[String[1]]] $token = undef,
   String  $token_file = $facts['identity']['user'] ? {
                                       'root'  => '/root/.influxdb_token',
@@ -35,7 +35,6 @@ class influxdb(
     true  => 'https',
     false => 'http',
   }
-
 
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
   if $manage_influxdb_setup {

@@ -37,19 +37,10 @@ class influxdb::install(
       ensure  => installed,
       require => Yumrepo[$influxdb_repo_name],
     }
-    if $manage_telegraf {
-      package {'telegraf':
-        ensure  => installed,
-        require => Yumrepo[$influxdb_repo_name],
-      }
-    }
   }
   # Otherwise, just install the package
   else {
     package {'influxdb2':
-      ensure  => installed,
-    }
-    package {'telegraf':
       ensure  => installed,
     }
   }
