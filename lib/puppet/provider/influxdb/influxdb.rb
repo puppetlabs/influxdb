@@ -82,15 +82,15 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
 
   # This base provider doesn't have any resources to manage at the moment.  Setup is done via the influxdb_setup type
   def create(context, name, should)
-    context.notice("Creating '#{name}' with #{should.inspect}")
+    context.debug("Creating '#{name}' with #{should.inspect}")
   end
 
   def update(context, name, should)
-    context.notice("Updating '#{name}' with #{should.inspect}")
+    context.debug("Updating '#{name}' with #{should.inspect}")
   end
 
   def delete(context, name)
-    context.notice("Deleting '#{name}'")
+    context.debug("Deleting '#{name}'")
   end
 
   def influx_get(name, params:)
@@ -108,7 +108,6 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
 
   def influx_post(name, body)
     response = @client.post(URI(@influxdb_uri + name), body , headers: @auth.merge({'Content-Type' => 'application/json'}))
-    puts response.inspect
     if response.success?
       JSON.parse(response.body ? response.body : '{}')
     else
@@ -145,7 +144,6 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
 
   def influx_delete(name)
     response = @client.delete(URI(@influxdb_uri + name), headers: @auth)
-    puts response.inspect
     if response.success?
       JSON.parse(response.body ? response.body : '{}')
     else

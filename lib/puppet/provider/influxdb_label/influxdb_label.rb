@@ -27,7 +27,7 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::Provider::Influxd
   end
 
   def create(context, name, should)
-    context.notice("Creating '#{name}' with #{should.inspect}")
+    context.debug("Creating '#{name}' with #{should.inspect}")
 
     body = {
       name: name,
@@ -49,7 +49,7 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::Provider::Influxd
   end
 
   def delete(context, name)
-    context.notice("Deleting '#{name}'")
+    context.debug("Deleting '#{name}'")
     label_id = id_from_name(@label_hash, name)
     influx_delete("/api/v2/labels/#{label_id}")
   end

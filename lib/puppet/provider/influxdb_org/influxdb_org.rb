@@ -40,7 +40,7 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
   end
 
   def create(context, name, should)
-    context.notice("Creating '#{name}' with #{should.inspect}")
+    context.debug("Creating '#{name}' with #{should.inspect}")
     body = {
       name: should[:org],
       description: should[:description],
@@ -50,7 +50,7 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
 
   #TODO: make this less ugly
   def update(context, name, should)
-    context.notice("Updating '#{name}' with #{should.inspect}")
+    context.debug("Updating '#{name}' with #{should.inspect}")
     org_id = id_from_name(@org_hash, name)
     org_members = @org_hash.find{ |org| org['name'] == name}.dig('members', 'users')
     _members = org_members ? org_members : []
@@ -77,7 +77,7 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::Provider::Influxdb::I
   end
 
   def delete(context, name)
-    context.notice("Deleting '#{name}'")
+    context.debug("Deleting '#{name}'")
   end
 
 end

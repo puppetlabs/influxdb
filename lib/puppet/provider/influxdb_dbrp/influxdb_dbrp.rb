@@ -30,7 +30,7 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::Provider::Influxdb:
   end
 
   def create(context, name, should)
-    context.notice("Creating '#{name}' with #{should.inspect}")
+    context.debug("Creating '#{name}' with #{should.inspect}")
 
     body = {
       bucketID: id_from_name(@bucket_hash, should[:bucket]),
@@ -43,15 +43,12 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::Provider::Influxdb:
   end
 
   def update(context, name, should)
-    context.notice("Updating '#{name}' with #{should.inspect}")
-    #dbrp = @dbrp_hash.map{ |dbrp| dbrp['content'] }.flatten.find{ |dbrp| dbrp['database'] == name }
-    #if should[:dbrp] and !dbrp
-    #  puts 'yay'
-    #end
+    context.debug("Updating '#{name}' with #{should.inspect}")
+    #TODO
   end
 
   def delete(context, name)
-    context.notice("Deleting '#{name}'")
+    context.debug("Deleting '#{name}'")
 
     self_entry = @dbrp_hash.map{ |dbrp| dbrp['content'] }.flatten.find{ |dbrp| dbrp['database'] == name }
     id, org = self_entry['id'], name_from_id(@org_hash, self_entry['orgID'])

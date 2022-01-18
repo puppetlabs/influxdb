@@ -1,0 +1,22 @@
+<%- | String $env_file | -%>
+# Managed by Puppet!
+[Unit]
+Description=InfluxDB is an open-source, distributed, time series database
+Documentation=https://docs.influxdata.com/influxdb/
+After=network-online.target
+
+[Service]
+Environment="INFLUXD_CONFIG_PATH=/etc/influxdb"
+User=influxdb
+Group=influxdb
+LimitNOFILE=65536
+EnvironmentFile=-<%= $env_file %>
+ExecStart=/etc/influxdb/scripts/influxd-systemd-start.sh
+KillMode=control-group
+Restart=on-failure
+Type=forking
+PIDFile=/var/lib/influxdb/influxd.pid
+
+[Install]
+WantedBy=multi-user.target
+Alias=influxd.service
