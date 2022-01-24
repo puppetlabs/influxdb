@@ -9,9 +9,10 @@ class influxdb::install(
   String  $archive_source = 'https://dl.influxdata.com/influxdb/releases/influxdb2-2.1.1-linux-amd64.tar.gz',
 
   Boolean $use_ssl = $influxdb::use_ssl,
-  String  $ssl_cert_file = "${facts['puppet_ssldir']}/certs/${trusted['certname']}.pem",
-  String  $ssl_key_file ="${facts['puppet_ssldir']}/private_keys/${trusted['certname']}.pem",
-  String  $ssl_ca_file ="${facts['puppet_ssldir']}/certs/ca.pem",
+  String  $ssl_cert_file = "/etc/puppetlabs/puppet/ssl/certs/${trusted['certname']}.pem",
+  String  $ssl_key_file ="/etc/puppetlabs/puppet/ssl/private_keys/${trusted['certname']}.pem",
+  String  $ssl_ca_file ="/etc/puppetlabs/puppet/ssl/certs/ca.pem",
+
 
   String  $influxdb_host = $influxdb::influxdb_host,
   String  $initial_org = 'puppetlabs',
