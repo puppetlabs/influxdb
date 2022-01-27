@@ -4,11 +4,12 @@ class influxdb::install(
   Boolean $manage_initial_resources = true,
   Boolean $manage_telegraf_token = true,
 
-  String  $influxdb_repo_name = 'influxdb2',
-  String  $influxdb_version = '2.1.1',
+  String  $repo_name = 'influxdb2',
+  String  $version = '2.1.1',
   String  $archive_source = 'https://dl.influxdata.com/influxdb/releases/influxdb2-2.1.1-linux-amd64.tar.gz',
 
   Boolean $use_ssl = $influxdb::use_ssl,
+  Boolean $manage_ssl = true,
   String  $ssl_cert_file = "/etc/puppetlabs/puppet/ssl/certs/${trusted['certname']}.pem",
   String  $ssl_key_file ="/etc/puppetlabs/puppet/ssl/private_keys/${trusted['certname']}.pem",
   String  $ssl_ca_file ="/etc/puppetlabs/puppet/ssl/certs/ca.pem",
@@ -26,10 +27,8 @@ class influxdb::install(
   require influxdb
 
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
-  if $manage_setup {
-    unless $influxdb_host == $facts['fqdn'] or $influxdb_host == 'localhost' {
-      fail("Unable to manage InfluxDB installation on host ${influxdb_host}")
-    }
+  unless $influxdb_host == $facts['fqdn'] or $influxdb_host == 'localhost' {
+    fail("Unable to manage InfluxDB installation on host ${influxdb_host}")
   }
 
   # If we are managing the repository, set it up and install the package with a require on the repo
@@ -41,9 +40,9 @@ class influxdb::install(
           'CentOS' => 'centos',
           default  => 'rhel',
         }
-        yumrepo {$influxdb_repo_name:
+        yumrepo {$repo_name:
           ensure   => 'present',
-          name     => $influxdb_repo_name,
+          name     => $repo_name,
           baseurl  => "https://repos.influxdata.com/$dist/\$releasever/\$basearch/stable",
           gpgkey   => 'https://repos.influxdata.com/influxdb2.key https://repos.influxdata.com/influxdb.key',
           enabled  => '1',
@@ -53,8 +52,8 @@ class influxdb::install(
       }
     }
     package {'influxdb2':
-      ensure  => installed,
-      require => Yumrepo[$influxdb_repo_name],
+      ensure  => $version,
+      require => Yumrepo[$repo_name],
     }
   }
   # If not managing the repo, install the package from archive source
@@ -115,21 +114,24 @@ class influxdb::install(
   }
 
   if $use_ssl {
-    file {'/etc/influxdb/cert.pem':
-      ensure => present,
-      source => "file:///${ssl_cert_file}",
-      notify => Service['influxdb'],
+    if $manage_ssl {
+      file {'/etc/influxdb/cert.pem':
+        ensure => present,
+        source => "file:///${ssl_cert_file}",
+        notify => Service['influxdb'],
+      }
+      file {'/etc/influxdb/key.pem':
+        ensure => present,
+        source => "file:///${ssl_key_file}",
+        notify => Service['influxdb'],
+      }
+      file {'/etc/influxdb/ca.pem':
+        ensure => present,
+        source => "file:///${ssl_ca_file}",
+        notify => Service['influxdb'],
+      }
     }
-    file {'/etc/influxdb/key.pem':
-      ensure => present,
-      source => "file:///${ssl_key_file}",
-      notify => Service['influxdb'],
-    }
-    file {'/etc/influxdb/ca.pem':
-      ensure => present,
-      source => "file:///${ssl_ca_file}",
-      notify => Service['influxdb'],
-    }
+
     file {"/etc/systemd/system/influxdb.service.d":
       ensure => directory,
       owner  => 'influxdb',
