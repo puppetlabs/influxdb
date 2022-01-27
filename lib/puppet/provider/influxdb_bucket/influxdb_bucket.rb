@@ -58,7 +58,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
     @bucket_hash = []
     get_bucket_info()
 
-    update(context, name, should) if should[:labels] or should[:members] or should[:dbrp]
+    update(context, name, should) if should[:labels] or should[:members] or should[:create_dbrp]
   end
 
   def update(context, name, should)
