@@ -5,25 +5,22 @@ require 'puppet/resource_api'
 Puppet::ResourceApi.register_type(
   name: 'influxdb_org',
   docs: <<-EOS,
-@summary a influxdb type
+@summary Manages organizations in InfluxDB
 @example
-influxdb {
-  ensure => 'present',
-}
-
-This type provides the ability to manage InfluxDB organizations
-
+  influxdb_org {'puppetlabs':
+    ensure  => present,
+  }
 EOS
   features: [],
   attributes: {
     ensure: {
       type: 'Enum[present, absent]',
-      desc: 'Whether this resource should be present or absent on the target system.',
+      desc: 'Whether the organization should be present or absent on the target system.',
       default: 'present',
     },
     name: {
       type: 'String',
-      desc: 'Organization to manage in InfluxDB',
+      desc: 'Name of the organization to manage in InfluxDB',
       behavior: :namevar,
     },
     members: {

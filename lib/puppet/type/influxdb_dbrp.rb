@@ -5,11 +5,14 @@ require 'puppet/resource_api'
 Puppet::ResourceApi.register_type(
   name: 'influxdb_dbrp',
   docs: <<-EOS,
-@summary a influxdb type
+@summary Manages dbrps, or database and retention policy mappings.  These provide backwards compatibilty for 1.x queries.  Note that these are automatically created by the influxdb_bucket resource, so it isn't necessary to use this resource unless you need to customize them.
 @example
-influxdb {
-  ensure => 'present',
-}
+  influxdb_dbrp {'my_bucket':
+    ensure => present,
+    org    => 'my_org',
+    bucket => 'my_bucket',
+    rp     => 'Forever',
+  }
 
 This type provides the ability to manage InfluxDB dbrps
 
@@ -18,32 +21,27 @@ EOS
   attributes: {
     ensure: {
       type: 'Enum[present, absent]',
-      desc: 'Whether this resource should be present or absent on the target system.',
+      desc: 'Whether the dbrp should be present or absent on the target system.',
       default: 'present',
     },
     name: {
       type: 'String',
-      desc: 'DBRP manage in InfluxDB',
+      desc: 'Name of the dbrp to manage in InfluxDB',
       behavior: :namevar,
     },
     bucket: {
       type: 'String',
-      desc: 'The bucket to map to',
+      desc: 'The bucket to map to the retention policy to',
     },
     org: {
       type: 'String',
       desc: 'Name of the organization that owns the mapping',
     },
-    #TODO: what do these last fields actually do
     is_default: {
       type: 'Optional[Boolean]',
-      desc: 'What does this do',
+      desc: 'Whether this should be the default policy',
       default: true,
     },
-    #database: {
-    #  type: 'String',
-    #  desc: 'Name of the InfluxDB 1.x database',
-    #},
     rp: {
       type: 'String',
       desc: 'Name of the InfluxDB 1.x retention policy',

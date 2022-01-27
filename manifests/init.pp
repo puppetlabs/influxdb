@@ -1,3 +1,17 @@
+# @summary Base dependency for all influxdb_* types and providers
+# @example Basic usage
+#   require influxdb
+# @param influxdb_host
+#   fqdn of the host running InfluxDB.  Defaults to the fqdn of the local machine
+# @param influxdb_port
+#   Port used by the influxdb service.  Defaults to 8086
+# @param use_ssl
+#   Whether to use http or https connections.  Defaults to true (https).
+#   Configuration and management of the ssl bundle is provided by the influxdb::install class
+# @param token
+#   Administrative token in Sensitive format. This parameter takes precedence over $token_file if both are provided
+# @param token_file
+#   File on disk containing an administrative token.  The influxdb::install class will write the token generated as part of initial setup to this file.  Note that functions or anything run in Puppet server will not be able to use this file, so $token is preferred.
 class influxdb(
   String  $influxdb_host = $facts['fqdn'],
   Integer $influxdb_port = 8086,

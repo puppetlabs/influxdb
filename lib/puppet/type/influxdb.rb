@@ -5,20 +5,14 @@ require 'puppet/resource_api'
 Puppet::ResourceApi.register_type(
   name: 'influxdb',
   docs: <<-EOS,
-@summary a influxdb type
-@example
-influxdb {
-  ensure => 'present',
-}
-
-This type is an abstraction to represent the entirety of the InfluxDB stack as installed on a given system.  ensure => present is determined by whether initial setup has been performed, e.g. if the /setup api returns allowed: false.
-
+@summary Base resource dependency for all other influxdb_* types and providers.  This resource should not be used directly, but rather by requiring the influxdb class.
+@example require influxdb
 EOS
   features: ['canonicalize'],
   attributes: {
     ensure: {
-      type: 'Enum[present, absent]',
-      desc: 'Whether this resource should be present or absent on the target system.',
+      type: 'Enum[present]',
+      desc: 'Because this resource is an abstraction, its ensure property is always "present".  It is used to provide the ensurable property so that it functions as a type/provider',
       default: 'present',
     },
     name: {
@@ -33,12 +27,12 @@ EOS
     },
     token: {
       type: 'Optional[Sensitive[String]]',
-      desc: 'Token used for authentication',
+      desc: 'Administrative token used for authenticating API calls',
       behavior: :parameter,
     },
     token_file: {
       type: 'Optional[String]',
-      desc: 'File on disk containing a token',
+      desc: 'File on disk containing an administrative token',
       behavior: :parameter,
     },
     use_ssl: {

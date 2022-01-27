@@ -1,3 +1,47 @@
+# @summary Installs, configures, and performs initial setup of InfluxDB 2.x
+# @example Basic usage
+#   include influxdb::install
+#
+#   class {'influxdb::install':
+#     initial_org => 'my_org',
+#     initial_bucket => 'my_bucket',
+#   }
+# @param manage_repo
+#   Whether to manage a repository to provide InfluxDB packages.  Defaults to true
+# @param manage_setup
+#   Whether to perform initial setup of InfluxDB.  This will create an initial organization, bucket, and admin token.  Defaults to true.
+# @param manage_initial_resources
+#   Whether to manage the initial organization and bucket resources.  Defaults to true.
+# @param manage_telegraf_token
+#   Whether to create and manage a Telegraf token.  The token will have permissions to read and write all buckets and telegrafs in the initial organization
+# @param repo_name
+#   Name of the InfluxDB repository if using $manage_repo.  Defaults to influxdb2
+# @param version
+#   Version of InfluxDB to install.  Changing this is not recommended.
+# @param archive_source
+#   URL containing an InfluxDB archive if not installing from a repository.  Defaults to version 2-2.1.1 on amd64 architechture.
+# @param use_ssl
+#   Whether to use http or https connections.  Defaults to true (https).
+# @param manage_ssl
+#   Whether to manage the SSL bundle for https connections.  Defaults to true.
+# @param ssl_cert_file
+#   SSL certificate to be used by the influxdb service.  Defaults to the agent certificate issued by the Puppet CA for the local machine.
+# @param ssl_key_file
+#   Private key used in the CSR for the certificate specified by $ssl_cert_file.  Defaults to the private key of the local machine for generating a CSR for the Puppet CA
+# @param ssl_ca_file
+#   CA certificate issued by the CA which signed the certificate specified by $ssl_cert_file.  Defaults to the Puppet CA.
+# @param influxdb_host
+#   fqdn of the host running InfluxDB.  Defaults to the fqdn of the local machine
+# @param intial_org
+#   Name of the initial organization to use during initial setup.  Defaults to puppetlabs
+# @param intial_bucket
+#   Name of the initial bucket to use during initial setup.  Defaults to puppet_data
+# @param admin_user
+#   Name of the administrative user to use during initial setup.  Defaults to admin
+# @param admin_pass
+#   Password for the administrative user in Sensitive format used during initial setup.  Defaults to puppetlabs
+# @param token_file
+#   File on disk containing an administrative token.  This class will write the token generated as part of initial setup to this file.  Note that functions or anything run in Puppet server will not be able to use this file, so setting $token after initial setup is recommended.
 class influxdb::install(
   Boolean $manage_repo = true,
   Boolean $manage_setup = true,
@@ -13,7 +57,6 @@ class influxdb::install(
   String  $ssl_cert_file = "/etc/puppetlabs/puppet/ssl/certs/${trusted['certname']}.pem",
   String  $ssl_key_file ="/etc/puppetlabs/puppet/ssl/private_keys/${trusted['certname']}.pem",
   String  $ssl_ca_file ="/etc/puppetlabs/puppet/ssl/certs/ca.pem",
-
 
   String  $influxdb_host = $influxdb::influxdb_host,
   String  $initial_org = 'puppetlabs',
