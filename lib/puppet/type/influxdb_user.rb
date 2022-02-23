@@ -5,20 +5,23 @@ require 'puppet/resource_api'
 Puppet::ResourceApi.register_type(
   name: 'influxdb_user',
   docs: <<-EOS,
-@summary a influxdb type
+@summary Manages users in InfluxDB.  Note that currently, passwords can only be set upon creating the user and must be updated manually using the cli.  A user must be added to an organization to be able to log in.
 @example
-influxdb {
-  ensure => 'present',
-}
+  influxdb_user {'bob':
+    ensure   => present,
+    password => Sensitive('thisisbobspassword'),
+  }
 
-This type provides the ability to manage InfluxDB organizations
-
+  influxdb_org {'my_org':
+    ensure => present,
+    members  => ['bob'],
+  }
 EOS
   features: [],
   attributes: {
     ensure: {
       type: 'Enum[present, absent]',
-      desc: 'Whether this resource should be present or absent on the target system.',
+      desc: 'Whether the user should be present or absent on the target system.',
       default: 'present',
     },
     name: {
@@ -32,13 +35,9 @@ EOS
       behavior: :parameter,
     },
     status: {
-      type: 'String',
+      type: 'Enum[active, inactive]'
       desc: 'Status of the user',
       default: 'active',
     },
-    #orgs: {
-    #  type: 'Array',
-    #  desc: 'Organizations to add the user to',
-    #},
   },
 )

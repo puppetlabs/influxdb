@@ -5,25 +5,27 @@ require 'puppet/resource_api'
 Puppet::ResourceApi.register_type(
   name: 'influxdb_setup',
   docs: <<-EOS,
-@summary a influxdb type
+@summary Manages initial setup of InfluxDB.  It is recommended to use the influxdb::install class instead of this resource directly.
 @example
-influxdb {
-  ensure => 'present',
-}
-
-This type provides the ability to perform initial setup of InfluxDB.  It is implemented as a separate type, as Puppet may be managing all aspects of InfluxDB (repository, installation, setup, etc), or it may be managing resources on an external InfluxDB host.
-
+  influxdb_setup {'<influx_fqdn>':
+    ensure     => 'present',
+    token_file => <path_to_token_file>,
+    bucket     => 'my_bucket',
+    org        => 'my_org',
+    username   => 'admin',
+    password   => 'admin',
+  }
 EOS
   features: [],
   attributes: {
     ensure: {
       type: 'Enum[present, absent]',
-      desc: 'Whether this resource should be present or absent on the target system.',
+      desc: 'Whether initial setup has been performed.  present/absent is determined by the response from the /setup api',
       default: 'present',
     },
     name: {
       type: 'String',
-      desc: 'The name of the resource you want to manage.',
+      desc: 'The fqdn of the host running InfluxDB',
       behaviour: :namevar,
     },
     token_file: {
@@ -38,17 +40,17 @@ EOS
     },
     org: {
       type: 'String',
-      desc: 'Name of the initial bucket to create',
+      desc: 'Name of the initial organization to create',
       behavior: :parameter
     },
     username: {
       type: 'String',
-      desc: 'Name of the initial bucket to create',
+      desc: 'Name of the initial admin user',
       behavior: :parameter
     },
     password: {
       type: 'Sensitive[String]',
-      desc: 'Name of the initial admin password',
+      desc: 'Initial admin user password',
       behavior: :parameter
     },
   },

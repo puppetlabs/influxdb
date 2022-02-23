@@ -5,20 +5,18 @@ require 'puppet/resource_api'
 Puppet::ResourceApi.register_type(
   name: 'influxdb_label',
   docs: <<-EOS,
-@summary a influxdb type
+@summary Manages labels in InfluxDB
 @example
-influxdb {
-  ensure => 'present',
-}
-
-This type provides the ability to manage InfluxDB organizations
-
+  influxdb_label {'puppetlabs/influxdb':
+    ensure  => present,
+    org     => 'puppetlabs',
+  }
 EOS
   features: [],
   attributes: {
     ensure: {
       type: 'Enum[present, absent]',
-      desc: 'Whether this resource should be present or absent on the target system.',
+      desc: 'Whether the label should be present or absent on the target system.',
       default: 'present',
     },
     name: {

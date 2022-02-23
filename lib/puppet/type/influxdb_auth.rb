@@ -5,25 +5,31 @@ require 'puppet/resource_api'
 Puppet::ResourceApi.register_type(
   name: 'influxdb_auth',
   docs: <<-EOS,
-@summary a influxdb type
+@summary Manages authentication tokens in InfluxDB
 @example
-influxdb {
-  ensure => 'present',
-}
-
-This type provides the ability to manage InfluxDB organizations
-
+  influxdb_auth {"telegraf read token":
+    ensure        => present,
+    org           => 'my_org'
+    permissions   => [
+      {
+        "action"   => "read",
+        "resource" => {
+          "type"   => "telegrafs"
+        }
+      },
+    ],
+  }
 EOS
   features: [],
   attributes: {
     name: {
       type: 'String',
-      desc: 'Description of the token',
+      desc: 'Name of the token.  Note that InfluxDB does not currently have a human readable identifer for token, so for convinience we use the description property as the namevar of this resource',
       behavior: :namevar,
     },
     ensure: {
       type: 'Enum[present, absent]',
-      desc: 'Whether this resource should be present or absent on the target system.',
+      desc: 'Whether the token should be present or absent on the target system.',
       default: 'present',
     },
     status: {
@@ -41,7 +47,7 @@ EOS
     },
     permissions: {
       type: 'Array[Hash]',
-      desc: 'List of permissions granted by the authorization',
+      desc: 'List of permissions granted by the token',
     },
   },
 )
