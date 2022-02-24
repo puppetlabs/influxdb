@@ -71,7 +71,7 @@ class influxdb::install(
 
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
   unless $influxdb_host == $facts['fqdn'] or $influxdb_host == 'localhost' {
-    fail("Unable to manage InfluxDB installation on host ${influxdb_host}")
+    fail("Unable to manage InfluxDB installation on host ${facts['fqdn']}")
   }
 
   # If we are managing the repository, set it up and install the package with a require on the repo
