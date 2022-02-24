@@ -2,9 +2,9 @@
   "name": "puppetlabs-influxdb",
   "version": "0.1.0",
   "author": "Adrian Parreiras Horta",
-  "summary": "",
+  "summary": "Installs and configures InfluxDB 2",
   "license": "Apache-2.0",
-  "source": "",
+  "source": "https://github.com/puppetlabs/influxdb",
   "dependencies": [
 
   ],
@@ -16,21 +16,15 @@
       ]
     },
     {
-      "operatingsystem": "OracleLinux",
-      "operatingsystemrelease": [
-        "7"
-      ]
-    },
-    {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
         "8"
       ]
     },
     {
-      "operatingsystem": "Scientific",
+      "operatingsystem": "SLES",
       "operatingsystemrelease": [
-        "7"
+        "12"
       ]
     },
     {
