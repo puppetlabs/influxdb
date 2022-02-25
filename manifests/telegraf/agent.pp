@@ -15,7 +15,7 @@ define influxdb::telegraf::agent (
     ensure => directory,
     owner  => 'telegraf',
     group  => 'telegraf',
-    mode   => '700',
+    mode   => '0700',
   }
   file {"/etc/systemd/system/${service_name}.service.d/override.conf":
     ensure  => file,
@@ -26,13 +26,13 @@ define influxdb::telegraf::agent (
     ensure  => present,
     content => epp('influxdb/telegraf_service.epp',
       { 'environment_file' => "/etc/systemd/system/${service_name}.service.d/override.conf",
-        'config_file'   => $config_file,
-        'config_dir'   => $config_dir,
+        'config_file'      => $config_file,
+        'config_dir'       => $config_dir,
       }
     )
   }
 
-  service {"$service_name":
+  service {$service_name:
     ensure    => running,
     enable    => true,
     subscribe => File["/etc/systemd/system/${service_name}.service", "/etc/systemd/system/${service_name}.service.d/override.conf"],

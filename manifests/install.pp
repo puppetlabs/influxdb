@@ -56,7 +56,7 @@ class influxdb::install(
   Boolean $manage_ssl = true,
   String  $ssl_cert_file = "/etc/puppetlabs/puppet/ssl/certs/${trusted['certname']}.pem",
   String  $ssl_key_file ="/etc/puppetlabs/puppet/ssl/private_keys/${trusted['certname']}.pem",
-  String  $ssl_ca_file ="/etc/puppetlabs/puppet/ssl/certs/ca.pem",
+  String  $ssl_ca_file ='/etc/puppetlabs/puppet/ssl/certs/ca.pem',
 
   String  $influxdb_host = $influxdb::influxdb_host,
   String  $initial_org = 'puppetlabs',
@@ -86,7 +86,7 @@ class influxdb::install(
         yumrepo {$repo_name:
           ensure   => 'present',
           name     => $repo_name,
-          baseurl  => "https://repos.influxdata.com/$dist/\$releasever/\$basearch/stable",
+          baseurl  => "https://repos.influxdata.com/${dist}/\$releasever/\$basearch/stable",
           gpgkey   => 'https://repos.influxdata.com/influxdb2.key https://repos.influxdata.com/influxdb.key',
           enabled  => '1',
           gpgcheck => '1',
@@ -117,8 +117,9 @@ class influxdb::install(
       default  => '/etc/sysconfig',
     }
     file {'/etc/systemd/system/influxdb.service':
-      ensure  => present,
-      content => epp('influxdb/influxdb_service.epp', env_file => "${base_dir}/influxdb2"),
+      ensure   => present,
+      content  => epp('influxdb/influxdb_service.epp',
+      env_file => "${base_dir}/influxdb2"),
     }
 
     archive { '/tmp/influxdb.tar.gz':
@@ -144,7 +145,7 @@ class influxdb::install(
       source => 'puppet:///modules/influxdb/influxd-systemd-start.sh',
       owner  => 'root',
       group  => 'root',
-      mode   => '775',
+      mode   => '0775',
       notify => Service['influxdb'],
     }
   }
@@ -175,12 +176,12 @@ class influxdb::install(
       }
     }
 
-    file {"/etc/systemd/system/influxdb.service.d":
+    file {'/etc/systemd/system/influxdb.service.d':
       ensure => directory,
       owner  => 'influxdb',
       notify => Service['influxdb'],
     }
-    file {"/etc/systemd/system/influxdb.service.d/override.conf":
+    file {'/etc/systemd/system/influxdb.service.d/override.conf':
       ensure  => file,
       #TODO: epp necessary?
       content => epp(
@@ -190,13 +191,13 @@ class influxdb::install(
           key  => '/etc/influxdb/key.pem',
         }
       ),
-      notify => Service['influxdb'],
+      notify  => Service['influxdb'],
     }
   }
 
   service {'influxdb':
-    ensure  => running,
-    enable  => true,
+    ensure => running,
+    enable => true,
   }
 
   if $manage_setup {
@@ -214,36 +215,36 @@ class influxdb::install(
       # Create a token with permissions to read and write timeseries data
       # The influxdb::retrieve_token() function cannot find a token during the catalog compilation which creates it
       #   i.e. it takes two agent runs to become available
-      influxdb_auth {"puppet telegraf token":
-        ensure        => present,
-        org           => $initial_org,
-        permissions   => [
+      influxdb_auth {'puppet telegraf token':
+        ensure      => present,
+        org         => $initial_org,
+        permissions => [
           {
-            "action"   => "read",
-            "resource" => {
-              "type"   => "telegrafs"
+            'action'   => 'read',
+            'resource' => {
+              'type'   => 'telegrafs'
             }
           },
           {
-            "action"   => "write",
-            "resource" => {
-              "type"   => "telegrafs"
+            'action'   => 'write',
+            'resource' => {
+              'type'   => 'telegrafs'
             }
           },
           {
-            "action"   => "read",
-            "resource" => {
-              "type"   => "buckets"
+            'action'   => 'read',
+            'resource' => {
+              'type'   => 'buckets'
             }
           },
           {
-            "action"   => "write",
-            "resource" => {
-              "type"   => "buckets"
+            'action'   => 'write',
+            'resource' => {
+              'type'   => 'buckets'
             }
           },
         ],
-        require    => Service['influxdb'],
+        require     => Service['influxdb'],
       }
     }
 
@@ -257,12 +258,12 @@ class influxdb::install(
       influxdb_bucket {$initial_bucket:
         ensure  => present,
         org     => $initial_org,
-        labels => ['puppetlabs/influxdb'],
+        labels  => ['puppetlabs/influxdb'],
         require => [Influxdb_setup[$influxdb_host], Influxdb_label['puppetlabs/influxdb']],
       }
 
       influxdb_org {$initial_org:
-        ensure => present,
+        ensure  => present,
         require => [Influxdb_setup[$influxdb_host], Influxdb_label['puppetlabs/influxdb']],
       }
     }

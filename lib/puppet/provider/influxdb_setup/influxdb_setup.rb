@@ -7,8 +7,8 @@ require 'puppet/resource_api/simple_provider'
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxdb::Influxdb
-  def get(context)
-    init_attrs()
+  def get(_context)
+    init_attrs
 
     response = influx_get('/api/v2/setup', params: {})
     [
@@ -31,11 +31,11 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxd
     File.write(should[:token_file], response['auth']['token'])
   end
 
-  def update(context, name, should)
-    context.warning("Unable to update setup resource")
+  def update(context, _name, _should)
+    context.warning('Unable to update setup resource')
   end
 
-  def delete(context, name)
-    context.warning("Unable to delete setup resource")
+  def delete(context, _name)
+    context.warning('Unable to delete setup resource')
   end
 end

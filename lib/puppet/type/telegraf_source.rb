@@ -46,13 +46,13 @@ EOS
       type: 'Optional[Array[String]]',
       desc: 'Labels applied to the Telegraf config',
     },
-    #TODO: manage this in the provider code?  e.g. use a String 'bucket' instead of a metadata hash
+    # TODO: manage this in the provider code?  e.g. use a String 'bucket' instead of a metadata hash
     metadata: {
       type: 'Hash',
       desc: 'Buckets go here',
     },
-    #TODO: only accept a config hash or URI
-    #TODO: how would this actually work
+    # TODO: only accept a config hash or URI
+    # TODO: how would this actually work
     source: {
       type: 'Optional[URI]',
       desc: 'URI which stores the complete configuration, e.g. an http server',

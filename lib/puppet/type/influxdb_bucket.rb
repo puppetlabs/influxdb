@@ -40,7 +40,7 @@ EOS
       default: [{
         'type' => 'expire',
         'everySeconds' => 0,
-        'shardGroupDurationSeconds' => 604800,
+        'shardGroupDurationSeconds' => 604_800,
       }]
     },
     members: {
