@@ -7,25 +7,26 @@ require 'puppet/resource_api/simple_provider'
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
 class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influxdb::Influxdb
-  def get(context)
-    init_attrs()
-    init_auth()
+  def get(_context)
+    init_attrs
+    init_auth
 
-    get_org_info()
-    get_bucket_info()
-    get_label_info()
-    get_dbrp_info()
-    get_user_info()
+    get_org_info
+    get_bucket_info
+    get_label_info
+    get_dbrp_info
+    get_user_info
 
     response = influx_get('/api/v2/buckets', params: {})
     if response['buckets']
-      response['buckets'].select{ |bucket| bucket['type'] == 'user'}.reduce([]) { |memo, value|
-        org_id, bucket_id = value['orgID'], value['id']
-        dbrp = influx_get("/api/v2/dbrps/?orgID=#{org_id}", params: {})['content'].find{ |d|
+      response['buckets'].select { |bucket| bucket['type'] == 'user' }.reduce([]) do |memo, value|
+        org_id = value['orgID']
+        bucket_id = value['id']
+        dbrp = influx_get("/api/v2/dbrps/?orgID=#{org_id}", params: {})['content'].find do |d|
           d['bucketID'] == bucket_id
-        }
+        end
 
-        links_hash = @bucket_hash.find{ |b| b['name'] == value['name']}
+        links_hash = @bucket_hash.find { |b| b['name'] == value['name'] }
         bucket_members = links_hash.dig('members', 'users')
         bucket_labels = links_hash.dig('labels', 'labels')
 
@@ -35,12 +36,12 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
             ensure: 'present',
             org: name_from_id(@org_hash, value['orgID']),
             retention_rules: value['retentionRules'],
-            members: bucket_members ? bucket_members.map {|member| member['name']} : [],
-            labels: bucket_labels ? bucket_labels.map {|label| label['name']} : [],
+            members: bucket_members ? bucket_members.map { |member| member['name'] } : [],
+            labels: bucket_labels ? bucket_labels.map { |label| label['name'] } : [],
             create_dbrp: dbrp ? true : false,
-          }
+          },
         ]
-      }
+      end
     else
       []
     end
@@ -56,9 +57,9 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
     }
     response = influx_post('/api/v2/buckets', JSON.dump(body))
     @bucket_hash = []
-    get_bucket_info()
+    get_bucket_info
 
-    update(context, name, should) if should[:labels] or should[:members] or should[:create_dbrp]
+    update(context, name, should) if should[:labels] || should[:members] || should[:create_dbrp]
   end
 
   def update(context, name, should)
@@ -68,18 +69,18 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
     should_members = should[:members] ? should[:members] : []
     should_labels = should[:labels] ? should[:labels] : []
 
-    bucket_members = @bucket_hash.find{ |bucket| bucket['name'] == name}.dig('members', 'users')
-    bucket_members = bucket_members ? bucket_members.map{ |user| user['name'] } : []
-    bucket_labels = @bucket_hash.find{ |bucket| bucket['name'] == name}.dig('labels', 'labels')
+    bucket_members = @bucket_hash.find { |bucket| bucket['name'] == name }.dig('members', 'users')
+    bucket_members = bucket_members ? bucket_members.map { |user| user['name'] } : []
+    bucket_labels = @bucket_hash.find { |bucket| bucket['name'] == name }.dig('labels', 'labels')
 
     users_to_remove = bucket_members - should_members
     users_to_add = should_members - bucket_members
 
-    users_to_remove.each{ |user|
-      user_id = bucket_members.select{ |u| u['name'] == user}.map{ |u| u['id'] }.first
+    users_to_remove.each do |user|
+      user_id = bucket_members.select { |u| u['name'] == user }.map { |u| u['id'] }.first
       influx_delete("/api/v2/buckets/#{bucket_id}/members/#{user_id}")
-    }
-    users_to_add.each{ |user|
+    end
+    users_to_add.each do |user|
       user_id = id_from_name(@user_map, user)
       if user_id
         body = { 'id' => user_id }
@@ -87,16 +88,16 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
       else
         context.warning("Could not find user #{user}")
       end
-    }
+    end
 
-    labels_to_remove = bucket_labels.map{ |label| label['name']} - should_labels
-    labels_to_add = should_labels - bucket_labels.map{ |label| label['name']}
+    labels_to_remove = bucket_labels.map { |label| label['name'] } - should_labels
+    labels_to_add = should_labels - bucket_labels.map { |label| label['name'] }
 
-    labels_to_remove.each{ |label|
+    labels_to_remove.each do |label|
       label_id = id_from_name(@label_hash, label)
       influx_delete("/api/v2/buckets/#{bucket_id}/labels/#{label_id}")
-    }
-    labels_to_add.each{ |label|
+    end
+    labels_to_add.each do |label|
       label_id = id_from_name(@label_hash, label)
       if label_id
         body = { 'labelID' => label_id }
@@ -104,10 +105,10 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
       else
         context.warning("Could not find label #{label}")
       end
-    }
+    end
 
-    dbrp = @dbrp_hash.map{ |dbrp| dbrp['content'] }.flatten.find{ |dbrp| dbrp['database'] == name }
-    if should[:create_dbrp] and !dbrp
+    dbrp = @dbrp_hash.map { |dbrp| dbrp['content'] }.flatten.find { |dbrp| dbrp['database'] == name }
+    if should[:create_dbrp] && !dbrp
       body = {
         bucketID: id_from_name(@bucket_hash, name),
         database: name,
@@ -117,7 +118,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::Provider::Influ
       }
       influx_post("/api/v2/dbrps?org=#{should[:org]}", JSON.dump(body))
 
-    elsif !should[:create_dbrp] and dbrp
+    elsif !should[:create_dbrp] && dbrp
       influx_delete("/api/v2/dbrps/#{dbrp['id']}?orgID=#{dbrp['orgID']}")
     end
 

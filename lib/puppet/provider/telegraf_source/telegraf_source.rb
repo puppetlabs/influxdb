@@ -8,17 +8,17 @@ require 'toml-rb'
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
 class Puppet::Provider::TelegrafSource::TelegrafSource < Puppet::Provider::Influxdb::Influxdb
-  def get(context)
-    init_attrs()
-    init_auth()
-    get_org_info()
-    get_telegraf_info()
-    get_label_info()
+  def get(_context)
+    init_attrs
+    init_auth
+    get_org_info
+    get_telegraf_info
+    get_label_info
 
     response = influx_get('/api/v2/telegrafs', params: {})
     if response['configurations']
-      response['configurations'].reduce([]) { |memo, value|
-        telegraf_labels = @telegraf_hash.find{ |label| label['name'] == value['name']}
+      response['configurations'].reduce([]) do |memo, value|
+        telegraf_labels = @telegraf_hash.find { |label| label['name'] == value['name'] }
         telegraf_labels = telegraf_labels ? telegraf_labels.dig('labels', 'labels') : []
 
         memo + [
@@ -30,10 +30,10 @@ class Puppet::Provider::TelegrafSource::TelegrafSource < Puppet::Provider::Influ
             description: value['description'],
             config: TomlRB.parse(value['config']),
             metadata: value['metadata'],
-            labels: telegraf_labels.map {|label| label['name']},
-          }
+            labels: telegraf_labels.map { |label| label['name'] },
+          },
         ]
-      }
+      end
     else
       []
     end
@@ -42,8 +42,8 @@ class Puppet::Provider::TelegrafSource::TelegrafSource < Puppet::Provider::Influ
   def create(context, name, should)
     context.info("Creating '#{name}' with #{should.inspect}")
 
-    #FIXME
-    if should[:config] and should[:source]
+    # FIXME
+    if should[:config] && should[:source]
       raise Puppet::DevError, "Recieved mutually exclusive parameters: 'config' and 'source'."
     end
 
@@ -62,21 +62,21 @@ class Puppet::Provider::TelegrafSource::TelegrafSource < Puppet::Provider::Influ
   def update(context, name, should)
     context.info("Updating '#{name}' with #{should.inspect}")
 
-    get_telegraf_info()
+    get_telegraf_info
     telegraf_id = id_from_name(@telegraf_hash, should[:name])
-    links_hash = @telegraf_hash.find{ |telegraf| telegraf['name'] == name}
+    links_hash = @telegraf_hash.find { |telegraf| telegraf['name'] == name }
 
     telegraf_labels = links_hash ? links_hash.dig('labels', 'labels') : []
     should_labels = should[:labels] ? should[:labels] : []
 
-    labels_to_remove = telegraf_labels.map{ |label| label['name']} - should_labels
-    labels_to_add = should_labels - telegraf_labels.map{ |label| label['name']}
+    labels_to_remove = telegraf_labels.map { |label| label['name'] } - should_labels
+    labels_to_add = should_labels - telegraf_labels.map { |label| label['name'] }
 
-    labels_to_remove.each{ |label|
+    labels_to_remove.each do |label|
       label_id = id_from_name(@label_hash, label)
       influx_delete("/api/v2/telegrafs/#{telegraf_id}/labels/#{label_id}")
-    }
-    labels_to_add.each{ |label|
+    end
+    labels_to_add.each do |label|
       label_id = id_from_name(@label_hash, label)
       if label_id
         body = { 'labelID' => label_id }
@@ -84,7 +84,7 @@ class Puppet::Provider::TelegrafSource::TelegrafSource < Puppet::Provider::Influ
       else
         context.warning("Could not find label #{label}")
       end
-    }
+    end
 
     body = {
       name: should[:name],
@@ -102,5 +102,4 @@ class Puppet::Provider::TelegrafSource::TelegrafSource < Puppet::Provider::Influ
     id = id_from_name(@telegraf_hash, name)
     influx_delete("/api/v2/telegrafs/#{id}")
   end
-
 end
