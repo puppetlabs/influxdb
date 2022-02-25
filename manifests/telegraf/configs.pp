@@ -65,9 +65,9 @@ class influxdb::telegraf::configs (
   #TODO: investigate --watch-config option for telegraf
   $configs.each |$config| {
     #TODO: dig() into the outputs hash to determine org and bucket
-    telegraf_config {"${config['name']}":
-      ensure => present,
-      config => $config['config'],
+    telegraf_config {$config['name']:
+      ensure        => present,
+      config        => $config['config'],
       influxdb_host => $influxdb_host,
       org           => $config['org'],
       metadata      => { 'buckets' => $config['buckets']},

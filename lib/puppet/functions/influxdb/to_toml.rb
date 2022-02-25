@@ -9,4 +9,3 @@ Puppet::Functions.create_function(:'influxdb::to_toml') do
     TomlRB.dump(hash)
   end
 end
-
