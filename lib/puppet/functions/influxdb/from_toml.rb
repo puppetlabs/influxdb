@@ -9,4 +9,3 @@ Puppet::Functions.create_function(:'influxdb::from_toml') do
     TomlRB.parse(file)
   end
 end
-

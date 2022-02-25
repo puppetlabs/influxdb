@@ -35,7 +35,7 @@ EOS
       behavior: :parameter,
     },
     status: {
-      type: 'Enum[active, inactive]'
+      type: 'Enum[active, inactive]',
       desc: 'Status of the user',
       default: 'active',
     },

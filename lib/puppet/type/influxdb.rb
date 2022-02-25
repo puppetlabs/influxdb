@@ -11,7 +11,7 @@ EOS
   features: ['canonicalize'],
   attributes: {
     ensure: {
-      type: 'Enum[present]',
+      type: 'Enum[present, absent]',
       desc: 'Because this resource is an abstraction, its ensure property is always "present".  It is used to provide the ensurable property so that it functions as a type/provider',
       default: 'present',
     },
