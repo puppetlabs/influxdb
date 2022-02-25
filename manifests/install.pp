@@ -66,8 +66,7 @@ class influxdb::install(
   Sensitive[String[1]] $admin_pass = Sensitive('puppetlabs'),
   String  $token_file = $influxdb::token_file,
 
-){
-  require influxdb
+) inherits influxdb {
 
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
   unless $influxdb_host == $facts['fqdn'] or $influxdb_host == 'localhost' {

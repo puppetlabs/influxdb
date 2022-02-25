@@ -7,6 +7,7 @@ require 'puppet/provider/influxdb/influxdb'
 
 RSpec.describe Puppet::Provider::Influxdb::Influxdb do
   subject(:provider) { described_class.new }
+
   let(:context) { instance_double('Puppet::ResourceApi::BaseContext', 'context') }
 
   let(:attrs) do
@@ -29,7 +30,7 @@ RSpec.describe Puppet::Provider::Influxdb::Influxdb do
 
   describe '#get' do
     it 'processes resources' do
-      #allow(provider).to receive(:influx_get).and_return(setup_api_response)
+      # allow(provider).to receive(:influx_get).and_return(setup_api_response)
       expect(context).to receive(:debug).with('Returning pre-canned example data')
       expect(provider.get(context)).to eq [
         {

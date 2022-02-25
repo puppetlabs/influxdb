@@ -10,7 +10,7 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxd
   def get(_context)
     init_attrs
 
-    response = influx_get('/api/v2/setup', params: {})
+    response = influx_get('/api/v2/setup')
     [
       {
         name: @influxdb_host,

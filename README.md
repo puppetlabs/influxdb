@@ -27,10 +27,14 @@ The first two items are provided by the `influxdb::install` class and are restri
 
 InfluxDB resources are managed by the various types and providers and have a dependency on the `influxdb` class.  This is because we need to be able to enumerate and query resources on either a local or remote machine, and the `influxdb` class provides a kind of "base" resource for the types and providers to inherit.
 
-When managing InfluxDB resources in Puppet code, you will need to include this class as a dependency, for example by including a `require`in your manifest.
+When managing InfluxDB resources in Puppet code, you will need to include this class as a dependency by inheriting from this class in your manifest.  For example:
 
 ```
-require influxdb
+class my_profile::my_class(
+  String $my_param,
+) inherits influxdb {
+
+}
 ```
 
 See [Usage](#usage) for more information about these use cases.
@@ -87,8 +91,7 @@ class {'influxdb::install':
 For managing InfluxDB resources, this module provides several types and providers that use the [InfluxDB 2.0 api](https://docs.influxdata.com/influxdb/v2.1/api/).  The resources have a dependency on an `influxdb` "base" resource which must be included in any catalog that uses them.  For example, to create an organization and bucket:
 
 ```
-class my_profile::my_influxdb {
-  require influxdb
+class my_profile::my_class inherits influxdb {
 
   influxdb_org {'my_org':
     ensure => present,
@@ -98,7 +101,6 @@ class my_profile::my_influxdb {
     ensure  => present,
     org     => 'my_org',
     labels  => ['my_label1', 'my_label2'],
-    require => Influxdb_org['my_org'],
   }
 }
 ```
@@ -120,7 +122,19 @@ For more complex resource management, here is an example of:
 * Creating a hash with `ensure => present` for each bucket
 * Creating the bucket resources with a default org of `myorg` and retention policy of 30 days.
 
+Hiera data:
+
 ```
+profile::buckets:
+  - 'bucket1'
+  - 'bucket2'
+  - 'bucket3'
+```
+
+Puppet code:
+
+```
+class my_profile::my_class inherits influxdb {
   $buckets = lookup('profile::buckets')
   $bucket_hash = $buckets.reduce({}) |$memo, $bucket| {
     $tmp = $memo.merge({"$bucket" => { "ensure" => present } })

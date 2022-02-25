@@ -100,7 +100,7 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
     context.debug("Deleting '#{name}'")
   end
 
-  def influx_get(name, params:)
+  def influx_get(name, params = {})
     response = @client.get(URI(@influxdb_uri + name), headers: @auth)
     if response.success?
       JSON.parse(response.body ? response.body : '{}')
