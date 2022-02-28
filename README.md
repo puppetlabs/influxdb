@@ -25,15 +25,25 @@ The primary things this module provides are:
 
 The first two items are provided by the `influxdb::install` class and are restricted to an InfluxDB instance running on the local machine.
 
-InfluxDB resources are managed by the various types and providers and have a dependency on the `influxdb` class.  This is because we need to be able to enumerate and query resources on either a local or remote machine, and the `influxdb` class provides a kind of "base" resource for the types and providers to inherit.
+InfluxDB resources are managed by the various types and providers Because we need to be able to enumerate and query resources on either a local or remote machine, the resources accept these parameters with the following defaults:
 
-When managing InfluxDB resources in Puppet code, you will need to include this class as a dependency by inheriting from this class in your manifest.  For example:
+* host - fqdn
+* port - 8086
+* token_file - ~/.influxdb_token
+* use_ssl - true
+* token (optional)
+
+Specifying a `token` in `Sensitive[String]` format is optional, but recommended. See [Beggining with Influxdb](#beginning-with-influxdb) for more info.
+
+Note that you are *not* able to use multiple combinations of these options in a given catalog.  Each provider class will set these values when first instantiated and will use the first value that it finds.  Therefore, it is best to use resource defaults for these parameters in your manifest, e.g.
 
 ```
 class my_profile::my_class(
-  String $my_param,
-) inherits influxdb {
-
+  Sensitive[String] $my_token,
+){
+  Influxdb_bucket {
+    token => $my_token,
+  }
 }
 ```
 
@@ -88,26 +98,46 @@ class {'influxdb::install':
 
 ### Resource management
 
-For managing InfluxDB resources, this module provides several types and providers that use the [InfluxDB 2.0 api](https://docs.influxdata.com/influxdb/v2.1/api/).  The resources have a dependency on an `influxdb` "base" resource which must be included in any catalog that uses them.  For example, to create an organization and bucket:
+For managing InfluxDB resources, this module provides several types and providers that use the [InfluxDB 2.0 api](https://docs.influxdata.com/influxdb/v2.1/api/).  As mentioned in [What influxdb affects](#what-influxdb-affects), the resources accept parameters to determine how to connect to the host which must be unique per resource type.  For example, to create an organization and bucket and specify a token and non-standard port:
 
 ```
-class my_profile::my_class inherits influxdb {
+class my_profile::my_class(
+  Sensitive[String] $token,
+){
 
   influxdb_org {'my_org':
     ensure => present,
+    token  => $token,
+    port   => 1234,
   }
 
   influxdb_bucket {'my_bucket':
     ensure  => present,
     org     => 'my_org',
     labels  => ['my_label1', 'my_label2'],
+    token  => $token,
+    port   => 1234,
   }
+}
+```
+
+Resource defaults are also a good option:
+
+```
+Influxdb_org {
+  token => $token,
+  port  => 1234,
+}
+
+Influxdb_bucket {
+  token => $token,
+  port  => 1234,
 }
 ```
 
 Note that the `influxdb_bucket` will create the labels in the `labels` parameter if they do not already exist.
 
-If InfluxDB is running locally and there is an admin token saved at `~/.influxdb_token`, it will be used in API calls.  However, it is recommended to set the token in hiera as an eyaml-encrypted string.  For example:
+If InfluxDB is running locally and there is an admin token saved at `~/.influxdb_token`, it will be used in API calls if the `token` parameter is unset.  However, it is recommended to set the token in hiera as an eyaml-encrypted string.  For example:
 
 ```
 influxdb::token: '<eyaml_string>'
@@ -134,7 +164,7 @@ profile::buckets:
 Puppet code:
 
 ```
-class my_profile::my_class inherits influxdb {
+class my_profile::my_class{
   $buckets = lookup('profile::buckets')
   $bucket_hash = $buckets.reduce({}) |$memo, $bucket| {
     $tmp = $memo.merge({"$bucket" => { "ensure" => present } })

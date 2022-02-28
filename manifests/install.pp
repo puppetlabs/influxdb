@@ -10,10 +10,6 @@
 #   Whether to manage a repository to provide InfluxDB packages.  Defaults to true
 # @param manage_setup
 #   Whether to perform initial setup of InfluxDB.  This will create an initial organization, bucket, and admin token.  Defaults to true.
-# @param manage_initial_resources
-#   Whether to manage the initial organization and bucket resources.  Defaults to true.
-# @param manage_telegraf_token
-#   Whether to create and manage a Telegraf token.  The token will have permissions to read and write all buckets and telegrafs in the initial organization
 # @param repo_name
 #   Name of the InfluxDB repository if using $manage_repo.  Defaults to influxdb2
 # @param version
@@ -45,28 +41,29 @@
 class influxdb::install(
   Boolean $manage_repo = true,
   Boolean $manage_setup = true,
-  Boolean $manage_initial_resources = true,
-  Boolean $manage_telegraf_token = true,
 
   String  $repo_name = 'influxdb2',
   String  $version = '2.1.1',
   String  $archive_source = 'https://dl.influxdata.com/influxdb/releases/influxdb2-2.1.1-linux-amd64.tar.gz',
 
-  Boolean $use_ssl = $influxdb::use_ssl,
+  Boolean $use_ssl = true,
   Boolean $manage_ssl = true,
   String  $ssl_cert_file = "/etc/puppetlabs/puppet/ssl/certs/${trusted['certname']}.pem",
   String  $ssl_key_file ="/etc/puppetlabs/puppet/ssl/private_keys/${trusted['certname']}.pem",
   String  $ssl_ca_file ='/etc/puppetlabs/puppet/ssl/certs/ca.pem',
 
-  String  $influxdb_host = $influxdb::influxdb_host,
+  String  $influxdb_host = $facts['fqdn'],
   String  $initial_org = 'puppetlabs',
   String  $initial_bucket = 'puppet_data',
 
   String  $admin_user = 'admin',
   Sensitive[String[1]] $admin_pass = Sensitive('puppetlabs'),
-  String  $token_file = $influxdb::token_file,
+  String  $token_file = $facts['identity']['user'] ? {
+                                      'root'  => '/root/.influxdb_token',
+                                      default => "/home/${facts['identity']['user']}/.influxdb_token"
+                                    },
 
-) inherits influxdb {
+){
 
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
   unless $influxdb_host == $facts['fqdn'] or $influxdb_host == 'localhost' {
@@ -210,61 +207,5 @@ class influxdb::install(
       require    => Service['influxdb'],
     }
 
-    if $manage_telegraf_token {
-      # Create a token with permissions to read and write timeseries data
-      # The influxdb::retrieve_token() function cannot find a token during the catalog compilation which creates it
-      #   i.e. it takes two agent runs to become available
-      influxdb_auth {'puppet telegraf token':
-        ensure      => present,
-        org         => $initial_org,
-        permissions => [
-          {
-            'action'   => 'read',
-            'resource' => {
-              'type'   => 'telegrafs'
-            }
-          },
-          {
-            'action'   => 'write',
-            'resource' => {
-              'type'   => 'telegrafs'
-            }
-          },
-          {
-            'action'   => 'read',
-            'resource' => {
-              'type'   => 'buckets'
-            }
-          },
-          {
-            'action'   => 'write',
-            'resource' => {
-              'type'   => 'buckets'
-            }
-          },
-        ],
-        require     => Service['influxdb'],
-      }
-    }
-
-    if $manage_initial_resources {
-      influxdb_label {'puppetlabs/influxdb':
-        ensure  => present,
-        org     => $initial_org,
-        require => Influxdb_setup[$influxdb_host],
-      }
-
-      influxdb_bucket {$initial_bucket:
-        ensure  => present,
-        org     => $initial_org,
-        labels  => ['puppetlabs/influxdb'],
-        require => [Influxdb_setup[$influxdb_host], Influxdb_label['puppetlabs/influxdb']],
-      }
-
-      influxdb_org {$initial_org:
-        ensure  => present,
-        require => [Influxdb_setup[$influxdb_host], Influxdb_label['puppetlabs/influxdb']],
-      }
-    }
   }
 }

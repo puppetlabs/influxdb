@@ -1,22 +1,22 @@
-# frozen_string_literal: true
-
-require 'puppet/resource_api/simple_provider'
 require 'puppet/http'
 require 'json'
 require 'uri'
 
 # Implementation for the influxdb type using the Resource API.
-class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
-  # Add these variables to this class' eigenclass, i.e. the class itself, as opposed to instances of the class
-  # Ideally we'd set these in initialize() as regular instance variables, but we don't know what
-  #   the resources will be during initialization
+module PuppetlabsInfluxdb
   class << self
-    attr_accessor :influxdb_host, :influxdb_port, :token, :token_file, :use_ssl
+    attr_accessor :host, :port, :token_file, :use_ssl
   end
+
+  self.host = Facter.value('fqdn')
+  self.port = 8086
+  self.use_ssl = true
+  self.token_file = Dir.home + '/.influxdb_token'
+
   attr_accessor :telegraf_hash, :user_map, :label_hash, :auth, :bucket_hash, :dbrp_hash
 
   def initialize
-    @client = Puppet.runtime[:http]
+    @client ||= Puppet.runtime[:http]
     @org_hash = []
     @telegraf_hash = []
     @label_hash = []
@@ -29,19 +29,25 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
 
   # Make class instance variables available as instance variables to whichever object calls this method
   # For subclasses which call super, the instance variables will be part of their scope
-  def init_attrs
-    @influxdb_host = Puppet::Provider::Influxdb::Influxdb.influxdb_host
-    @influxdb_port = Puppet::Provider::Influxdb::Influxdb.influxdb_port
+  def init_attrs(resources)
+    #TODO: Only one uri per resource type
+    resources.each {|resource|
+      @host ||= resource[:host] ? resource[:host] : PuppetlabsInfluxdb.host
+      @port ||= resource[:port] ? resource[:port] : PuppetlabsInfluxdb.port
+      @use_ssl ||= resource[:use_ssl] ? resource[:use_ssl] : PuppetlabsInfluxdb.use_ssl
+      @token ||= resource[:token]
+      @token_file ||= resource[:token_file] ? resource[:token_file] : PuppetlabsInfluxdb.token_file
+    }
 
-    protocol = Puppet::Provider::Influxdb::Influxdb.use_ssl ? 'https' : 'http'
-    @influxdb_uri = "#{protocol}://#{@influxdb_host}:#{@influxdb_port}"
+    protocol = @use_ssl ? 'https' : 'http'
+    @influxdb_uri = "#{protocol}://#{@host}:#{@port}"
   end
 
   def init_auth
-    @auth = if Puppet::Provider::Influxdb::Influxdb.token
-              { Authorization: "Token #{Puppet::Provider::Influxdb::Influxdb.token.unwrap}" }
-            elsif Puppet::Provider::Influxdb::Influxdb.token_file && File.file?(Puppet::Provider::Influxdb::Influxdb.token_file)
-              _token = File.read(Puppet::Provider::Influxdb::Influxdb.token_file)
+    @auth = if @token
+              { Authorization: "Token #{@token.unwrap}" }
+            elsif @token_file && File.file?(@token_file)
+              _token = File.read(@token_file)
               { Authorization: "Token #{_token}" }
             else
               {}
@@ -55,49 +61,6 @@ class Puppet::Provider::Influxdb::Influxdb < Puppet::ResourceApi::SimpleProvider
 
   def name_from_id(hashes, id)
     hashes.select { |user| user['id'] == id }.map { |user| user['name'] }.first
-  end
-
-  # Puppet calls this method before get(), so we can use it to set instance variables before querying state
-  # This is needed because all of our resources come from a remote source
-  # This method seems to be called twice, once with parameters and once without.  Why?
-  def canonicalize(_context, resources)
-    self.class.influxdb_host = resources[0][:name]
-    self.class.influxdb_port = resources[0][:influxdb_port]
-    self.class.use_ssl = resources[0][:use_ssl]
-
-    if resources[0][:token]
-      self.class.token = resources[0][:token]
-    elsif resources[0][:token_file]
-      self.class.token_file = resources[0][:token_file]
-    end
-
-    init_attrs
-    resources
-  end
-
-  def get(_context)
-    init_auth
-    [
-      {
-        name: @influxdb_host,
-        influxdb_port: @influxdb_port,
-        use_ssl: self.class.use_ssl,
-        ensure: 'present',
-      },
-    ]
-  end
-
-  # This base provider doesn't have any resources to manage at the moment.  Setup is done via the influxdb_setup type
-  def create(context, name, should)
-    context.debug("Creating '#{name}' with #{should.inspect}")
-  end
-
-  def update(context, name, should)
-    context.debug("Updating '#{name}' with #{should.inspect}")
-  end
-
-  def delete(context, name)
-    context.debug("Deleting '#{name}'")
   end
 
   def influx_get(name, params = {})

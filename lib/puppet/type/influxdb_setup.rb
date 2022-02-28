@@ -16,7 +16,7 @@ Puppet::ResourceApi.register_type(
     password   => 'admin',
   }
 EOS
-  features: [],
+  features: ['canonicalize'],
   attributes: {
     ensure: {
       type: 'Enum[present, absent]',
@@ -27,11 +27,6 @@ EOS
       type: 'String',
       desc: 'The fqdn of the host running InfluxDB',
       behaviour: :namevar,
-    },
-    token_file: {
-      type: 'String',
-      desc: 'Absolute path to save the initial admin token',
-      behavior: :parameter
     },
     bucket: {
       type: 'String',
@@ -53,5 +48,32 @@ EOS
       desc: 'Initial admin user password',
       behavior: :parameter
     },
+    host: {
+      type: 'Optional[String]',
+      desc: 'The host running InfluxDB',
+      behavior: :parameter
+    },
+    port: {
+      type: 'Optional[Integer]',
+      desc: 'Port used by the InfluxDB service',
+      default: 8086,
+      behavior: :parameter,
+    },
+    token: {
+      type: 'Optional[Sensitive[String]]',
+      desc: 'Administrative token used for authenticating API calls',
+      behavior: :parameter,
+    },
+    token_file: {
+      type: 'Optional[String]',
+      desc: 'File on disk containing an administrative token',
+      behavior: :parameter,
+    },
+    use_ssl: {
+      type: 'Boolean',
+      desc: 'Whether to enable SSL for the InfluxDB service',
+      default: true,
+      behavior: :parameter,
+    }
   },
 )

@@ -14,7 +14,7 @@ Puppet::ResourceApi.register_type(
     require => Influxdb_org['my_org'],
   }
 EOS
-  features: [],
+  features: ['canonicalize'],
   attributes: {
     ensure: {
       type: 'Enum[present, absent]',
@@ -52,5 +52,32 @@ EOS
       desc: 'Whether to create a "database retention policy" mapping to allow for legacy access',
       default: true,
     },
+    host: {
+      type: 'Optional[String]',
+      desc: 'The host running InfluxDB',
+      behavior: :parameter
+    },
+    port: {
+      type: 'Optional[Integer]',
+      desc: 'Port used by the InfluxDB service',
+      default: 8086,
+      behavior: :parameter,
+    },
+    token: {
+      type: 'Optional[Sensitive[String]]',
+      desc: 'Administrative token used for authenticating API calls',
+      behavior: :parameter,
+    },
+    token_file: {
+      type: 'Optional[String]',
+      desc: 'File on disk containing an administrative token',
+      behavior: :parameter,
+    },
+    use_ssl: {
+      type: 'Boolean',
+      desc: 'Whether to enable SSL for the InfluxDB service',
+      default: true,
+      behavior: :parameter,
+    }
   },
 )
