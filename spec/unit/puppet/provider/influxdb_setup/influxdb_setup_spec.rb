@@ -4,7 +4,6 @@ require 'spec_helper'
 require 'json'
 
 ensure_module_defined('Puppet::Provider::InfluxdbSetup')
-ensure_module_defined('PuppetX::Puppetlabs::PuppetlabsInfluxdb')
 require 'puppet/provider/influxdb_setup/influxdb_setup'
 require_relative '../../../../../lib/puppet_x/puppetlabs/influxdb/influxdb'
 include PuppetX::Puppetlabs::PuppetlabsInfluxdb
