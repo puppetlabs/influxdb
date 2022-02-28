@@ -2,7 +2,6 @@
 
 PATH="/opt/influxdb:${PATH}"
 
-#TODO: better way?
 influxd --bolt-path=/var/lib/influxdb/influxd.bolt --engine-path=/var/lib/influxdb/engine &
 PID=$!
 echo $PID > /var/lib/influxdb/influxd.pid
@@ -22,12 +21,13 @@ PORT=${BIND_ADDRESS##*:}
 set +e
 attempts=0
 url="$PROTOCOL://$HOST:$PORT/ready"
-result=$(curl -k -s -o /dev/null $url -w %{http_code})
+result="$(curl -k -s -o /dev/null "$url" -w '%{http_code}')"
 while [ "${result:0:2}" != "20" ] && [ "${result:0:2}" != "40" ]; do
-  attempts=$(($attempts+1))
+  # Don't trigger the error trap when incrementing
+  ((attempts++)) || true
   echo "InfluxDB API at $url unavailable after $attempts attempts..."
   sleep 1
-  result=$(curl -k -s -o /dev/null $url -w %{http_code})
+  result="$(curl -k -s -o /dev/null "$url" -w '%{http_code}')"
 done
 echo "InfluxDB started"
 set -e

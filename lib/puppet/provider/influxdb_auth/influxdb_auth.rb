@@ -1,35 +1,44 @@
 # frozen_string_literal: true
 
-require_relative '../influxdb/influxdb'
 require 'puppet/resource_api/simple_provider'
+require_relative '../../../puppet_x/puppetlabs/influxdb/influxdb'
 
 # Implementation for performing initial setup of InfluxDB using the Resource API.
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
-class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::Provider::Influxdb::Influxdb
+class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::SimpleProvider
+  include PuppetX::Puppetlabs::PuppetlabsInfluxdb
+  def initialize
+    @canonicalized_resources = []
+    super
+  end
 
-  def get(context)
-    init_attrs()
-    init_auth()
-    get_org_info()
+  def canonicalize(_context, resources)
+    init_attrs(resources)
+    resources
+  end
+
+  def get(_context)
+    init_auth
+    get_org_info
 
     response = influx_get('/api/v2/authorizations', params: {})
     if response['authorizations']
       @self_hash = response['authorizations']
 
-      response['authorizations'].reduce([]) { |memo, value|
+      response['authorizations'].reduce([]) do |memo, value|
         memo + [
           {
-            #TODO: terrible idea?  There's isn't a "name" attribute for a token, so what is our namevar
+            # TODO: terrible idea?  There's isn't a "name" attribute for a token, so what is our namevar
             name: value['description'],
             ensure: 'present',
             permissions: value['permissions'],
             status: value['status'],
             user: value['user'],
             org: value['org'],
-          }
+          },
         ]
-      }
+      end
     else
       []
     end
@@ -59,8 +68,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::Provider::Influxdb:
   def delete(context, name)
     context.debug("Deleting '#{name}'")
 
-    token_id = @self_hash.find {|auth| auth['description'] == name}.dig('id')
+    token_id = @self_hash.find { |auth| auth['description'] == name }.dig('id')
     influx_delete("/api/v2/authorizations/#{token_id}")
   end
-
 end

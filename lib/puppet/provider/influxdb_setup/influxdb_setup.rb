@@ -1,19 +1,26 @@
 # frozen_string_literal: true
 
-require_relative '../influxdb/influxdb'
 require 'puppet/resource_api/simple_provider'
+require_relative '../../../puppet_x/puppetlabs/influxdb/influxdb'
 
 # Implementation for performing initial setup of InfluxDB using the Resource API.
-# Inheriting from the base provider gives us the get() and put() methods, as
-#   well as a class variable for the connection
-class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxdb::Influxdb
-  def get(context)
-    init_attrs()
+class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::SimpleProvider
+  include PuppetX::Puppetlabs::PuppetlabsInfluxdb
+  def initialize
+    @canonicalized_resources = []
+    super
+  end
 
-    response = influx_get('/api/v2/setup', params: {})
+  def canonicalize(_context, resources)
+    init_attrs(resources)
+    resources
+  end
+
+  def get(_context)
+    response = influx_get('/api/v2/setup')
     [
       {
-        name: @influxdb_host,
+        name: @host,
         ensure: response['allowed'] == true ? 'absent' : 'present',
       },
     ]
@@ -31,11 +38,11 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::Provider::Influxd
     File.write(should[:token_file], response['auth']['token'])
   end
 
-  def update(context, name, should)
-    context.warning("Unable to update setup resource")
+  def update(context, _name, _should)
+    context.warning('Unable to update setup resource')
   end
 
-  def delete(context, name)
-    context.warning("Unable to delete setup resource")
+  def delete(context, _name)
+    context.warning('Unable to delete setup resource')
   end
 end
