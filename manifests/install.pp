@@ -23,7 +23,8 @@
 # @param ssl_cert_file
 #   SSL certificate to be used by the influxdb service.  Defaults to the agent certificate issued by the Puppet CA for the local machine.
 # @param ssl_key_file
-#   Private key used in the CSR for the certificate specified by $ssl_cert_file.  Defaults to the private key of the local machine for generating a CSR for the Puppet CA
+#   Private key used in the CSR for the certificate specified by $ssl_cert_file.
+#   Defaults to the private key of the local machine for generating a CSR for the Puppet CA
 # @param ssl_ca_file
 #   CA certificate issued by the CA which signed the certificate specified by $ssl_cert_file.  Defaults to the Puppet CA.
 # @param influxdb_host
@@ -37,7 +38,8 @@
 # @param admin_pass
 #   Password for the administrative user in Sensitive format used during initial setup.  Defaults to puppetlabs
 # @param token_file
-#   File on disk containing an administrative token.  This class will write the token generated as part of initial setup to this file.  Note that functions or anything run in Puppet server will not be able to use this file, so setting $token after initial setup is recommended.
+#   File on disk containing an administrative token.  This class will write the token generated as part of initial setup to this file.
+#   Note that functions or code run in Puppet server will not be able to use this file, so setting $token after setup is recommended.
 class influxdb::install(
   Boolean $manage_repo = true,
   Boolean $manage_setup = true,
@@ -89,7 +91,14 @@ class influxdb::install(
           target   => '/etc/yum.repos.d/influxdb2.repo',
         }
       }
+      default: {
+        notify {'influxdb_repo_warn':
+          message  => "Unable to manage repo on ${facts['os']['family']}, using archive source",
+          loglevel => 'warn',
+        }
+      }
     }
+
     package {'influxdb2':
       ensure  => $version,
       require => Yumrepo[$repo_name],
@@ -115,7 +124,7 @@ class influxdb::install(
     file {'/etc/systemd/system/influxdb.service':
       ensure   => present,
       content  => epp('influxdb/influxdb_service.epp',
-      env_file => "${base_dir}/influxdb2"),
+      env_file => "${default_dir}/influxdb2"),
     }
 
     archive { '/tmp/influxdb.tar.gz':

@@ -6,19 +6,19 @@ require_relative '../../../shared/influxdb'
 # Implementation for performing initial setup of InfluxDB using the Resource API.
 # Inheriting from the base provider gives us the get() and put() methods, as
 #   well as a class variable for the connection
-class Puppet::Provider::InfluxdbUser::InfluxdbUser <Puppet::ResourceApi::SimpleProvider
+class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::SimpleProvider
   include PuppetlabsInfluxdb
   def initialize
     @canonicalized_resources = []
     super
   end
 
-  def canonicalize(context, resources)
+  def canonicalize(_context, resources)
     init_attrs(resources)
     resources
   end
 
-  def get(context)
+  def get(_context)
     init_auth
     get_user_info
 
@@ -26,7 +26,6 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser <Puppet::ResourceApi::SimpleP
     if response['users']
       response['users'].reduce([]) do |memo, value|
         name = value['name']
-        id = value['id']
 
         memo + [
           {
@@ -52,10 +51,10 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser <Puppet::ResourceApi::SimpleP
 
     body = { name: should[:name] }
     response = influx_post('/api/v2/users', JSON.dump(body))
-    if should[:password] && response['id']
-      body = { password: should[:password].unwrap }
-      influx_post("/api/v2/users/#{response['id']}/password", JSON.dump(body))
-    end
+    return unless should[:password] && response['id']
+
+    body = { password: should[:password].unwrap }
+    influx_post("/api/v2/users/#{response['id']}/password", JSON.dump(body))
   end
 
   def update(context, name, should)

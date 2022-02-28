@@ -4,21 +4,19 @@ require 'puppet/resource_api/simple_provider'
 require_relative '../../../shared/influxdb'
 
 # Implementation for performing initial setup of InfluxDB using the Resource API.
-# Inheriting from the base provider gives us the get() and put() methods, as
-#   well as a class variable for the connection
-class Puppet::Provider::InfluxdbBucket::InfluxdbBucket <Puppet::ResourceApi::SimpleProvider
+class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::SimpleProvider
   include PuppetlabsInfluxdb
   def initialize
     @canonicalized_resources = []
     super
   end
 
-  def canonicalize(context, resources)
+  def canonicalize(_context, resources)
     init_attrs(resources)
     resources
   end
 
-  def get(context)
+  def get(_context)
     init_auth
     get_org_info
     get_bucket_info
@@ -64,7 +62,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket <Puppet::ResourceApi::Sim
       orgId: id_from_name(@org_hash, should[:org]),
       retentionRules: should[:retention_rules],
     }
-    response = influx_post('/api/v2/buckets', JSON.dump(body))
+    influx_post('/api/v2/buckets', JSON.dump(body))
     @bucket_hash = []
     get_bucket_info
 
@@ -116,8 +114,8 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket <Puppet::ResourceApi::Sim
       end
     end
 
-    dbrp = @dbrp_hash.map { |dbrp| dbrp['content'] }.flatten.find { |dbrp| dbrp['database'] == name }
-    if should[:create_dbrp] && !dbrp
+    has_dbrp = @dbrp_hash.map { |dbrp| dbrp['content'] }.flatten.find { |dbrp| dbrp['database'] == name }
+    if should[:create_dbrp] && !has_dbrp
       body = {
         bucketID: id_from_name(@bucket_hash, name),
         database: name,
@@ -127,7 +125,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket <Puppet::ResourceApi::Sim
       }
       influx_post("/api/v2/dbrps?org=#{should[:org]}", JSON.dump(body))
 
-    elsif !should[:create_dbrp] && dbrp
+    elsif !should[:create_dbrp] && has_dbrp
       influx_delete("/api/v2/dbrps/#{dbrp['id']}?orgID=#{dbrp['orgID']}")
     end
 

@@ -10,6 +10,7 @@ require 'puppet/provider/influxdb_setup/influxdb_setup'
 
 RSpec.describe Puppet::Provider::InfluxdbSetup::InfluxdbSetup do
   subject(:provider) { described_class.new }
+
   let(:context) { instance_double('Puppet::ResourceApi::BaseContext', 'context') }
 
   let(:attrs) do
@@ -36,6 +37,7 @@ RSpec.describe Puppet::Provider::InfluxdbSetup::InfluxdbSetup do
       Puppet::Provider::Influxdb::Influxdb.influxdb_port = 8086
     end
 
+    # rubocop:disable RSpec/SubjectStub
     context 'when not setup' do
       it 'processes resources' do
         allow(provider).to receive(:influx_get).with('/api/v2/setup').and_return({ 'allowed' => true })
@@ -78,7 +80,7 @@ RSpec.describe Puppet::Provider::InfluxdbSetup::InfluxdbSetup do
         password: 'puppetlabs'
       }
 
-      allow(provider).to receive(:influx_post).with('/api/v2/setup', JSON.dump(should_unwrapped)).and_return({'auth' => {'token' => 'token'}})
+      allow(provider).to receive(:influx_post).with('/api/v2/setup', JSON.dump(should_unwrapped)).and_return({ 'auth' => { 'token' => 'token' } })
 
       expect(context).to receive(:debug).with("Creating '/api/v2/setup' with #{should}")
       provider.create(context, '/api/v2/setup', should)
@@ -87,14 +89,14 @@ RSpec.describe Puppet::Provider::InfluxdbSetup::InfluxdbSetup do
 
   describe '#update' do
     it 'does nothing' do
-      expect(context).to receive(:warning).with("Unable to update setup resource")
+      expect(context).to receive(:warning).with('Unable to update setup resource')
       provider.update(context, nil, nil)
     end
   end
 
   describe '#delete' do
     it 'does nothing' do
-      expect(context).to receive(:warning).with("Unable to delete setup resource")
+      expect(context).to receive(:warning).with('Unable to delete setup resource')
       provider.delete(context, nil)
     end
   end

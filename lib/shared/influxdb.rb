@@ -30,14 +30,14 @@ module PuppetlabsInfluxdb
   # Make class instance variables available as instance variables to whichever object calls this method
   # For subclasses which call super, the instance variables will be part of their scope
   def init_attrs(resources)
-    #TODO: Only one uri per resource type
-    resources.each {|resource|
+    # TODO: Only one uri per resource type
+    resources.each do |resource|
       @host ||= resource[:host] ? resource[:host] : PuppetlabsInfluxdb.host
       @port ||= resource[:port] ? resource[:port] : PuppetlabsInfluxdb.port
       @use_ssl ||= resource[:use_ssl] ? resource[:use_ssl] : PuppetlabsInfluxdb.use_ssl
       @token ||= resource[:token]
       @token_file ||= resource[:token_file] ? resource[:token_file] : PuppetlabsInfluxdb.token_file
-    }
+    end
 
     protocol = @use_ssl ? 'https' : 'http'
     @influxdb_uri = "#{protocol}://#{@host}:#{@port}"
@@ -47,8 +47,8 @@ module PuppetlabsInfluxdb
     @auth = if @token
               { Authorization: "Token #{@token.unwrap}" }
             elsif @token_file && File.file?(@token_file)
-              _token = File.read(@token_file)
-              { Authorization: "Token #{_token}" }
+              token = File.read(@token_file)
+              { Authorization: "Token #{token}" }
             else
               {}
             end
@@ -63,7 +63,7 @@ module PuppetlabsInfluxdb
     hashes.select { |user| user['id'] == id }.map { |user| user['name'] }.first
   end
 
-  def influx_get(name, params = {})
+  def influx_get(name, _params = {})
     response = @client.get(URI(@influxdb_uri + name), headers: @auth)
     if response.success?
       JSON.parse(response.body ? response.body : '{}')
@@ -78,20 +78,16 @@ module PuppetlabsInfluxdb
 
   def influx_post(name, body)
     response = @client.post(URI(@influxdb_uri + name), body, headers: @auth.merge({ 'Content-Type' => 'application/json' }))
-    if response.success?
-      JSON.parse(response.body ? response.body : '{}')
-    else
-      raise Puppet::DevError, "Received HTTP code '#{response.code}' with message '#{response.reason}'"
-    end
+    raise Puppet::DevError, "Received HTTP code '#{response.code}' with message '#{response.reason}'" unless response.success?
+
+    JSON.parse(response.body ? response.body : '{}')
   end
 
   def influx_put(name, body)
     response = @client.put(URI(@influxdb_uri + name), body, headers: @auth.merge({ 'Content-Type' => 'application/json' }))
-    if response.success?
-      JSON.parse(response.body ? response.body : '{}')
-    else
-      raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}"
-    end
+    raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}" unless response.success?
+
+    JSON.parse(response.body ? response.body : '{}')
   end
 
   # Our HTTP class doesn't have a patch method, so we create the connection and use Net::HTTP manually
@@ -104,47 +100,43 @@ module PuppetlabsInfluxdb
 
       request.body = body
       response = conn.request(request)
-      if response.is_a?(Net::HTTPSuccess)
-        JSON.parse(response.body ? response.body : '{}')
-      else
-        raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}"
-      end
+      raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}" unless response.is_a?(Net::HTTPSuccess)
+
+      JSON.parse(response.body ? response.body : '{}')
     end
   end
 
   def influx_delete(name)
     response = @client.delete(URI(@influxdb_uri + name), headers: @auth)
-    if response.success?
-      JSON.parse(response.body ? response.body : '{}')
-    else
-      raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}"
-    end
+    raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}" unless response.success?
+
+    JSON.parse(response.body ? response.body : '{}')
   end
 
   def influx_setup
     response = influx_get('/api/v2/setup', params: {})
     response['allowed'] == false
-  rescue Exception => e
+  rescue StandardException
     false
   end
 
   def get_org_info
     response = influx_get('/api/v2/orgs', params: {})
-    if response['orgs']
-      response['orgs'].each do |org|
-        process_links(org, org['links'])
-        @org_hash << org
-      end
+    return unless response['orgs']
+
+    response['orgs'].each do |org|
+      process_links(org, org['links'])
+      @org_hash << org
     end
   end
 
   def get_bucket_info
     response = influx_get('/api/v2/buckets', params: {})
-    if response['buckets']
-      response['buckets'].each do |bucket|
-        process_links(bucket, bucket['links'])
-        @bucket_hash << bucket
-      end
+    return unless response['buckets']
+
+    response['buckets'].each do |bucket|
+      process_links(bucket, bucket['links'])
+      @bucket_hash << bucket
     end
   end
 
@@ -160,22 +152,21 @@ module PuppetlabsInfluxdb
 
   def get_telegraf_info
     response = influx_get('/api/v2/telegrafs', params: {})
+    return unless response['configurations']
 
-    if response['configurations']
-      response['configurations'].each do |telegraf|
-        process_links(telegraf, telegraf['links'])
-        @telegraf_hash << telegraf
-      end
+    response['configurations'].each do |telegraf|
+      process_links(telegraf, telegraf['links'])
+      @telegraf_hash << telegraf
     end
   end
 
   def get_user_info
     response = influx_get('/api/v2/users', params: {})
-    if response['users']
-      response['users'].each do |user|
-        process_links(user, user['links'])
-        @user_map << user
-      end
+    return unless response['users']
+
+    response['users'].each do |user|
+      process_links(user, user['links'])
+      @user_map << user
     end
   end
 

@@ -4,21 +4,19 @@ require 'puppet/resource_api/simple_provider'
 require_relative '../../../shared/influxdb'
 
 # Implementation for performing initial setup of InfluxDB using the Resource API.
-# Inheriting from the base provider gives us the get() and put() methods, as
-#   well as a class variable for the connection
-class Puppet::Provider::InfluxdbOrg::InfluxdbOrg <Puppet::ResourceApi::SimpleProvider
+class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimpleProvider
   include PuppetlabsInfluxdb
   def initialize
     @canonicalized_resources = []
     super
   end
 
-  def canonicalize(context, resources)
+  def canonicalize(_context, resources)
     init_attrs(resources)
     resources
   end
 
-  def get(context)
+  def get(_context)
     init_auth
     get_org_info
     get_user_info
@@ -62,11 +60,11 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg <Puppet::ResourceApi::SimplePro
     context.debug("Updating '#{name}' with #{should.inspect}")
     org_id = id_from_name(@org_hash, name)
     org_members = @org_hash.find { |org| org['name'] == name }.dig('members', 'users')
-    _members = org_members ? org_members : []
+    cur_members = org_members ? org_members : []
     should_members = should[:members] ? should[:members] : []
 
-    to_remove = _members.map { |member| member['name'] } - should_members
-    to_add = should_members - _members.map { |member| member['name'] }
+    to_remove = cur_members.map { |member| member['name'] } - should_members
+    to_add = should_members - cur_members.map { |member| member['name'] }
 
     to_remove.each do |user|
       next if user == 'admin'

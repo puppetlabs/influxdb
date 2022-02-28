@@ -3,19 +3,20 @@
 require 'puppet/resource_api/simple_provider'
 require_relative '../../../shared/influxdb'
 
-class Puppet::Provider::InfluxdbLabel::InfluxdbLabel <Puppet::ResourceApi::SimpleProvider
+# Implementation for managing InfluxDB labels using the Resource API.
+class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::SimpleProvider
   include PuppetlabsInfluxdb
   def initialize
     @canonicalized_resources = []
     super
   end
 
-  def canonicalize(context, resources)
+  def canonicalize(_context, resources)
     init_attrs(resources)
     resources
   end
 
-  def get(context)
+  def get(_context)
     init_auth
     get_org_info
     get_label_info
