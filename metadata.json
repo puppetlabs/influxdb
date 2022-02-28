@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "source": "https://github.com/puppetlabs/influxdb",
   "dependencies": [
-
+    { "name":"puppet/archive","version_requirement":">= 6.0.0 <7.0" }
   ],
   "operatingsystem_support": [
     {

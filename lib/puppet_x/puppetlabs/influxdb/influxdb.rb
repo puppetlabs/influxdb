@@ -3,6 +3,8 @@ require 'json'
 require 'uri'
 
 # Implementation for the influxdb type using the Resource API.
+module PuppetX
+module Puppetlabs
 module PuppetlabsInfluxdb
   class << self
     attr_accessor :host, :port, :token_file, :use_ssl
@@ -185,4 +187,6 @@ module PuppetlabsInfluxdb
       hash[k] = influx_get(v, params: {})
     end
   end
+end
+end
 end

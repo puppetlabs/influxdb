@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
 require 'puppet/resource_api/simple_provider'
-require_relative '../../../shared/influxdb'
+require_relative '../../../puppet_x/puppetlabs/influxdb/influxdb'
 
 # Implementation for performing initial setup of InfluxDB using the Resource API.
-# Inheriting from the base provider gives us the get() and put() methods, as
-#   well as a class variable for the connection
 class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::SimpleProvider
-  include PuppetlabsInfluxdb
+  include PuppetX::Puppetlabs::PuppetlabsInfluxdb
   def initialize
     @canonicalized_resources = []
     super

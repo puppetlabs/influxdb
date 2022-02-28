@@ -3,10 +3,10 @@
 require 'spec_helper'
 require 'json'
 
-ensure_module_defined('Puppet::Provider::Influxdb')
 ensure_module_defined('Puppet::Provider::InfluxdbSetup')
-require 'puppet/provider/influxdb/influxdb'
 require 'puppet/provider/influxdb_setup/influxdb_setup'
+require_relative '../../../../../lib/puppet_x/puppetlabs/influxdb/influxdb'
+include PuppetX::Puppetlabs::PuppetlabsInfluxdb
 
 RSpec.describe Puppet::Provider::InfluxdbSetup::InfluxdbSetup do
   subject(:provider) { described_class.new }
@@ -32,32 +32,17 @@ RSpec.describe Puppet::Provider::InfluxdbSetup::InfluxdbSetup do
   end
 
   describe '#get' do
-    before(:each) do
-      Puppet::Provider::Influxdb::Influxdb.influxdb_host = 'localhost'
-      Puppet::Provider::Influxdb::Influxdb.influxdb_port = 8086
-    end
-
     # rubocop:disable RSpec/SubjectStub
     context 'when not setup' do
       it 'processes resources' do
         allow(provider).to receive(:influx_get).with('/api/v2/setup').and_return({ 'allowed' => true })
-        expect(provider.get(context)).to eq [
-          {
-            name: 'localhost',
-            ensure: 'absent'
-          },
-        ]
+        expect(provider.get(context)[0][:ensure]).to eq 'absent'
       end
 
       context 'when setup' do
         it 'processes resources' do
           allow(provider).to receive(:influx_get).with('/api/v2/setup').and_return({ 'allowed' => false })
-          expect(provider.get(context)).to eq [
-            {
-              name: 'localhost',
-              ensure: 'present'
-            },
-          ]
+          expect(provider.get(context)[0][:ensure]).to eq 'present'
         end
       end
     end

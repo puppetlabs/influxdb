@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 require 'puppet/resource_api/simple_provider'
-require_relative '../../../shared/influxdb'
+require_relative '../../../puppet_x/puppetlabs/influxdb/influxdb'
 
 # Implementation for managing InfluxDB labels using the Resource API.
 class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::SimpleProvider
-  include PuppetlabsInfluxdb
+  include PuppetX::Puppetlabs::PuppetlabsInfluxdb
   def initialize
     @canonicalized_resources = []
     super
