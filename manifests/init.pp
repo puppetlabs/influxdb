@@ -1,8 +1,8 @@
 # @summary Installs, configures, and performs initial setup of InfluxDB 2.x
 # @example Basic usage
-#   include influxdb::install
+#   include influxdb
 #
-#   class {'influxdb::install':
+#   class {'influxdb':
 #     initial_org => 'my_org',
 #     initial_bucket => 'my_bucket',
 #   }
@@ -27,7 +27,7 @@
 #   Defaults to the private key of the local machine for generating a CSR for the Puppet CA
 # @param ssl_ca_file
 #   CA certificate issued by the CA which signed the certificate specified by $ssl_cert_file.  Defaults to the Puppet CA.
-# @param influxdb_host
+# @param host
 #   fqdn of the host running InfluxDB.  Defaults to the fqdn of the local machine
 # @param intial_org
 #   Name of the initial organization to use during initial setup.  Defaults to puppetlabs
@@ -40,7 +40,13 @@
 # @param token_file
 #   File on disk containing an administrative token.  This class will write the token generated as part of initial setup to this file.
 #   Note that functions or code run in Puppet server will not be able to use this file, so setting $token after setup is recommended.
-class influxdb::install(
+class influxdb(
+  # Provided by module data
+  String  $host,
+  Integer $port,
+  String  $initial_org,
+  String  $initial_bucket,
+
   Boolean $manage_repo = true,
   Boolean $manage_setup = true,
 
@@ -54,10 +60,6 @@ class influxdb::install(
   String  $ssl_key_file ="/etc/puppetlabs/puppet/ssl/private_keys/${trusted['certname']}.pem",
   String  $ssl_ca_file ='/etc/puppetlabs/puppet/ssl/certs/ca.pem',
 
-  String  $influxdb_host = $facts['fqdn'],
-  String  $initial_org = 'puppetlabs',
-  String  $initial_bucket = 'puppet_data',
-
   String  $admin_user = 'admin',
   Sensitive[String[1]] $admin_pass = Sensitive('puppetlabs'),
   String  $token_file = $facts['identity']['user'] ? {
@@ -68,7 +70,7 @@ class influxdb::install(
 ){
 
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
-  unless $influxdb_host == $facts['fqdn'] or $influxdb_host == 'localhost' {
+  unless $host == $facts['fqdn'] or $host == 'localhost' {
     fail("Unable to manage InfluxDB installation on host ${facts['fqdn']}")
   }
 
@@ -206,7 +208,7 @@ class influxdb::install(
   }
 
   if $manage_setup {
-    influxdb_setup {$influxdb_host:
+    influxdb_setup {$host:
       ensure     => 'present',
       token_file => $token_file,
       bucket     => $initial_bucket,
