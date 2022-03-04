@@ -2,4 +2,4 @@
 influxdb::host: "%{facts.fqdn}"
 influxdb::port: 8086
 influxdb::initial_org: 'puppetlabs'
-influxdb::initial_bucket: 'puppet'
+influxdb::initial_bucket: 'puppet_data'
