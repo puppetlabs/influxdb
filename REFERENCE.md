@@ -6,7 +6,7 @@
 
 ### Classes
 
-* [`influxdb::install`](#influxdbinstall): Installs, configures, and performs initial setup of InfluxDB 2.x
+* [`influxdb`](#influxdb): Installs, configures, and performs initial setup of InfluxDB 2.x
 * [`influxdb::profile::toml`](#influxdbprofiletoml): Installs the toml-rb gem inside Puppet server
 
 ### Resource types
@@ -28,7 +28,7 @@
 
 ## Classes
 
-### <a name="influxdbinstall"></a>`influxdb::install`
+### <a name="influxdb"></a>`influxdb`
 
 Installs, configures, and performs initial setup of InfluxDB 2.x
 
@@ -37,9 +37,9 @@ Installs, configures, and performs initial setup of InfluxDB 2.x
 ##### Basic usage
 
 ```puppet
-include influxdb::install
+include influxdb
 
-class {'influxdb::install':
+class {'influxdb':
   initial_org => 'my_org',
   initial_bucket => 'my_bucket',
 }
@@ -47,7 +47,7 @@ class {'influxdb::install':
 
 #### Parameters
 
-The following parameters are available in the `influxdb::install` class:
+The following parameters are available in the `influxdb` class:
 
 * [`manage_repo`](#manage_repo)
 * [`manage_setup`](#manage_setup)
@@ -59,12 +59,13 @@ The following parameters are available in the `influxdb::install` class:
 * [`ssl_cert_file`](#ssl_cert_file)
 * [`ssl_key_file`](#ssl_key_file)
 * [`ssl_ca_file`](#ssl_ca_file)
-* [`influxdb_host`](#influxdb_host)
+* [`host`](#host)
 * [`intial_org`](#intial_org)
 * [`intial_bucket`](#intial_bucket)
 * [`admin_user`](#admin_user)
 * [`admin_pass`](#admin_pass)
 * [`token_file`](#token_file)
+* [`port`](#port)
 * [`initial_org`](#initial_org)
 * [`initial_bucket`](#initial_bucket)
 
@@ -149,13 +150,11 @@ CA certificate issued by the CA which signed the certificate specified by $ssl_c
 
 Default value: `'/etc/puppetlabs/puppet/ssl/certs/ca.pem'`
 
-##### <a name="influxdb_host"></a>`influxdb_host`
+##### <a name="host"></a>`host`
 
 Data type: `String`
 
 fqdn of the host running InfluxDB.  Defaults to the fqdn of the local machine
-
-Default value: `$facts['fqdn']`
 
 ##### <a name="intial_org"></a>`intial_org`
 
@@ -190,21 +189,23 @@ Note that functions or code run in Puppet server will not be able to use this fi
 
 Default value: `$facts['identity']['user']`
 
+##### <a name="port"></a>`port`
+
+Data type: `Integer`
+
+
+
 ##### <a name="initial_org"></a>`initial_org`
 
 Data type: `String`
 
 
 
-Default value: `'puppetlabs'`
-
 ##### <a name="initial_bucket"></a>`initial_bucket`
 
 Data type: `String`
 
 
-
-Default value: `'puppet_data'`
 
 ### <a name="influxdbprofiletoml"></a>`influxdb::profile::toml`
 
