@@ -23,9 +23,9 @@ The primary things this module provides are:
 * Initial setup of the InfluxDB application
 * Configuration and management of InfluxDB resources such as organizations, buckets, etc
 
-The first two items are provided by the `influxdb::install` class and are restricted to an InfluxDB instance running on the local machine.
+The first two items are provided by the `influxdb` class and are restricted to an InfluxDB instance running on the local machine.
 
-InfluxDB resources are managed by the various types and providers Because we need to be able to enumerate and query resources on either a local or remote machine, the resources accept these parameters with the following defaults:
+InfluxDB resources are managed by the various types and providers. Because we need to be able to enumerate and query resources on either a local or remote machine, the resources accept these parameters with the following defaults:
 
 * host - fqdn
 * port - 8086
@@ -49,12 +49,12 @@ class my_profile::my_class(
 
 See [Usage](#usage) for more information about these use cases.
 
-### Beginning with influxdb
+### Beginning with InfluxDB
 
-The easiest way to get started using this module is by including the `influxdb::install` class to install and perform initial setup of the application.
+The easiest way to get started using this module is by including the `influxdb` class to install and perform initial setup of the application.
 
 ```
-include influxdb::install
+include influxdb
 ```
 
 Doing so will:
@@ -71,7 +71,7 @@ The type and provider code is able to use the token saved in this file, provided
 
 ### Installation
 
-As detailed in [Beginning with influxdb](#Beginning with influxdb), the `influxdb::install` class manages installation and initial setup of InfluxDB. The following aspects are managed by default:
+As detailed in [Beginning with influxdb](#Beginning with influxdb), the `influxdb` class manages installation and initial setup of InfluxDB. The following aspects are managed by default:
 
 * InfluxDB repository
 * SSL
@@ -83,14 +83,14 @@ Note that the admin user and password can be set prior to initial setup, but can
 For example, to use a different initial organization and bucket, set the parameters in hiera:
 
 ```
-influxdb::install::initial_org: 'my_org'
-influxdb::install::initial_bucket: 'my_bucket'
+influxdb::initial_org: 'my_org'
+influxdb::initial_bucket: 'my_bucket'
 ```
 
 Or use a class-like declaration
 
 ```
-class {'influxdb::install':
+class {'influxdb':
   initial_org    => 'my_org',
   initial_bucket => 'my_bucket',
 }

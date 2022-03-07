@@ -4,7 +4,7 @@ describe 'influxdb class' do
   context 'init with default parameters' do
     it 'installs influxdb' do
       pp = <<-MANIFEST
-        include influxdb::install
+        include influxdb
         MANIFEST
 
       idempotent_apply(pp)
