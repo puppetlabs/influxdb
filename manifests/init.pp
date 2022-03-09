@@ -85,6 +85,7 @@ class influxdb(
         }
         yumrepo {$repo_name:
           ensure   => 'present',
+          descr    => $repo_name,
           name     => $repo_name,
           baseurl  => "https://repos.influxdata.com/${dist}/\$releasever/\$basearch/stable",
           gpgkey   => 'https://repos.influxdata.com/influxdb2.key https://repos.influxdata.com/influxdb.key',
