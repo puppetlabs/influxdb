@@ -14,7 +14,11 @@ module PuppetX
       self.host = Facter.value('fqdn')
       self.port = 8086
       self.use_ssl = true
-      self.token_file = Dir.home + '/.influxdb_token'
+      self.token_file = if Facter.value('identity')['user'] == 'root'
+                          '/root/.influxdb_token'
+                        else
+                          "/home/#{Facter.value('identity')['user']}/.influxdb_token"
+                        end
 
       attr_accessor :telegraf_hash, :user_map, :label_hash, :auth, :bucket_hash, :dbrp_hash
 
