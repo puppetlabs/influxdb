@@ -9,7 +9,9 @@ Puppet::Functions.create_function(:'influxdb::retrieve_token') do
   end
 
   def retrieve_token(uri, token_name, admin_token_file)
+    return unless File.file?(admin_token_file)
     admin_token = File.read(admin_token_file)
+
     client = Puppet.runtime[:http]
     response = client.get(URI(uri + '/api/v2/authorizations'),
                            headers: { 'Authorization' => "Token #{admin_token}" })
