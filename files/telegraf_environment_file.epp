@@ -1,3 +1,3 @@
-<%- | Sensitive[String] $token | -%>
+<%- | Sensitive $token | -%>
 [Service]
 Environment="INFLUX_TOKEN=<%= $token %>"
