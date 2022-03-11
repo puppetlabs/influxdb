@@ -924,7 +924,7 @@ Type: Ruby 4.x API
 
 The influxdb::retrieve_token function.
 
-#### `influxdb::retrieve_token(String $uri, Sensitive[String] $admin_token, String $token_name)`
+#### `influxdb::retrieve_token(String $uri, String $token_name, String $admin_token_file)`
 
 The influxdb::retrieve_token function.
 
@@ -936,13 +936,13 @@ Data type: `String`
 
 
 
-##### `admin_token`
-
-Data type: `Sensitive[String]`
-
-
-
 ##### `token_name`
+
+Data type: `String`
+
+
+
+##### `admin_token_file`
 
 Data type: `String`
 

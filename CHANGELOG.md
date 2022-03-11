@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v0.3.0](https://github.com/puppetlabs/influxdb/tree/v0.3.0) (2022-03-11)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v0.2.1...v0.3.0)
+
+### Added
+
+- Use token file on disk to fetch tokens [\#17](https://github.com/puppetlabs/influxdb/pull/17) ([m0dular](https://github.com/m0dular))
+
+### Fixed
+
+- Check if token file exists on disk [\#18](https://github.com/puppetlabs/influxdb/pull/18) ([m0dular](https://github.com/m0dular))
+- add DSCR to influxdb2 repo  [\#16](https://github.com/puppetlabs/influxdb/pull/16) ([MartyEwings](https://github.com/MartyEwings))
+
 ## [v0.2.1](https://github.com/puppetlabs/influxdb/tree/v0.2.1) (2022-03-07)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v0.2.0...v0.2.1)
