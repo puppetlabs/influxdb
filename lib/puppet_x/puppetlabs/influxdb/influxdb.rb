@@ -150,9 +150,9 @@ module PuppetX
       def get_dbrp_info
         # org is a mandatory parameter, so we have to look over each org to get all dbrps
         # get_org_info must be called before this
-        orgs = @org_hash.map { |org| org['name'] }
+        orgs = @org_hash.map { |org| org['id'] }
         orgs.each do |org|
-          dbrp = influx_get("/api/v2/dbrps?org=#{org}", params: {})
+          dbrp = influx_get("/api/v2/dbrps?orgID=#{org}", params: {})
           @dbrp_hash << dbrp
         end
       end

@@ -29,7 +29,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
       response['buckets'].select { |bucket| bucket['type'] == 'user' }.reduce([]) do |memo, value|
         org_id = value['orgID']
         bucket_id = value['id']
-        dbrp = influx_get("/api/v2/dbrps/?orgID=#{org_id}", params: {})['content'].find do |d|
+        dbrp = influx_get("/api/v2/dbrps?orgID=#{org_id}", params: {})['content'].find do |d|
           d['bucketID'] == bucket_id
         end
 
@@ -63,6 +63,8 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
       retentionRules: should[:retention_rules],
     }
     influx_post('/api/v2/buckets', JSON.dump(body))
+
+    # Update this object's bucket cache to add the one we just created, and call update() if we need to create lables, members, or dbrps
     @bucket_hash = []
     get_bucket_info
 
