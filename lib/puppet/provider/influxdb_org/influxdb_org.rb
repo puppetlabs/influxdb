@@ -49,10 +49,10 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
   def create(context, name, should)
     context.debug("Creating '#{name}' with #{should.inspect}")
     body = {
-      name: should[:org],
+      name: name,
       description: should[:description],
     }
-    influx_post('/api/v2/orgs', body.to_s)
+    influx_post('/api/v2/orgs', JSON.dump(body))
   end
 
   # TODO: make this less ugly
@@ -68,15 +68,23 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
 
     to_remove.each do |user|
       next if user == 'admin'
+
       user_id = id_from_name(@user_map, user)
-      url = "/api/v2/orgs/#{org_id}/members/#{user_id}"
-      influx_delete(url)
+      if user_id
+        influx_delete("/api/v2/orgs/#{org_id}/members/#{user_id}")
+      else
+        context.warning("Could not find user #{user}")
+      end
     end
+
     to_add.each do |user|
       user_id = id_from_name(@user_map, user)
-      body = { name: user, id: user_id }
-      url = "/api/v2/orgs/#{org_id}/members"
-      influx_post(url, JSON.dump(body))
+      if user_id
+        body = { name: user, id: user_id }
+        influx_post("/api/v2/orgs/#{org_id}/members", JSON.dump(body))
+      else
+        context.warning("Could not find user #{user}")
+      end
     end
 
     body = { description: should[:description], }
@@ -85,5 +93,8 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
 
   def delete(context, name)
     context.debug("Deleting '#{name}'")
+
+    id = id_from_name(@org_hash, name)
+    influx_delete("/api/v2/orgs/#{id}")
   end
 end

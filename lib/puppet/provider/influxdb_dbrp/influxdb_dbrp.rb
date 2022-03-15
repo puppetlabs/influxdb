@@ -24,7 +24,7 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
     get_bucket_info
     get_dbrp_info
 
-    @dbrp_hash.map { |dbrp| dbrp['content'] }.flatten.reduce([]) do |memo, value|
+    @dbrp_hash.reduce([]) do |memo, value|
       memo + [
         {
           ensure: 'present',
@@ -53,15 +53,22 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
 
   def update(context, name, should)
     context.debug("Updating '#{name}' with #{should.inspect}")
-    # TODO
+
+    dbrp_id = id_from_name(@dbrp_hash, name)
+    body = {
+      default: should[:is_default],
+      retention_policy: should[:rp],
+    }
+
+    influx_patch("/api/v2/dbrps/#{dbrp_id}?org=#{should[:org]}", JSON.dump(body))
   end
 
   def delete(context, name)
     context.debug("Deleting '#{name}'")
 
-    self_entry = @dbrp_hash.map { |dbrp| dbrp['content'] }.flatten.find { |dbrp| dbrp['database'] == name }
+    self_entry = @dbrp_hash.find { |dbrp| dbrp['database'] == name }
     id = self_entry['id']
-    org = name_from_id(@org_hash, self_entry['orgID'])
+    org = name_from_id(@org_hash, self_entry['orgID'].to_i)
 
     influx_delete("/api/v2/dbrps/#{id}?org=#{org}")
   end

@@ -48,7 +48,9 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
     influx_post('/api/v2/labels', JSON.dump(body))
   end
 
-  def update(_context, name, should)
+  def update(context, name, should)
+    context.debug("Updating '#{name}' with #{should.inspect}")
+
     label_id = id_from_name(@label_hash, name)
     body = {
       name: name,
@@ -60,6 +62,7 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
 
   def delete(context, name)
     context.debug("Deleting '#{name}'")
+
     label_id = id_from_name(@label_hash, name)
     influx_delete("/api/v2/labels/#{label_id}")
   end
