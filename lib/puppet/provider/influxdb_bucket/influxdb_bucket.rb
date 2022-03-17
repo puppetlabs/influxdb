@@ -2,6 +2,7 @@
 
 require 'puppet/resource_api/simple_provider'
 require_relative '../../../puppet_x/puppetlabs/influxdb/influxdb'
+require 'pry'
 
 # Implementation for performing initial setup of InfluxDB using the Resource API.
 class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::SimpleProvider
@@ -92,7 +93,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     users_to_add.each do |user|
       user_id = id_from_name(@user_map, user)
       if user_id
-        body = { 'id' => user_id }
+        body = { id: user_id }
         influx_post("/api/v2/buckets/#{bucket_id}/members", JSON.dump(body))
       else
         context.warning("Could not find user #{user}")
