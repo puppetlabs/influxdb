@@ -135,7 +135,7 @@ Influxdb_bucket {
 }
 ```
 
-Note that the `influxdb_bucket` will create the labels in the `labels` parameter if they do not already exist.
+Note that the `influxdb_bucket` will produce a warning for each specified label that does not currently exist.
 
 If InfluxDB is running locally and there is an admin token saved at `~/.influxdb_token`, it will be used in API calls if the `token` parameter is unset.  However, it is recommended to set the token in hiera as an eyaml-encrypted string.  For example:
 

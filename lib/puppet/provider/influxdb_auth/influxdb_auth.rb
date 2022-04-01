@@ -29,7 +29,6 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
       response['authorizations'].reduce([]) do |memo, value|
         memo + [
           {
-            # TODO: terrible idea?  There's isn't a "name" attribute for a token, so what is our namevar
             name: value['description'],
             ensure: 'present',
             permissions: value['permissions'],
@@ -48,11 +47,11 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     context.debug("Creating '#{name}' with #{should.inspect}")
 
     body = {
-      influxdb_host: @influxdb_host,
       orgID: id_from_name(@org_hash, should[:org]),
       permissions: should[:permissions],
       description: name,
       status: should[:status],
+      user: should[:user] ? should[:user] : 'admin'
     }
 
     influx_post('/api/v2/authorizations', JSON.dump(body))
@@ -60,9 +59,20 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
 
   def update(context, name, should)
     context.debug("Updating '#{name}' with #{should.inspect}")
-    # A token cannot be updated, so we delete and create a new one
-    delete(context, name)
-    create(context, name, should)
+    self_token = @self_hash.find { |auth| auth['description'] == name }
+
+    # If the status property is unchanged, then a different, immutable property has been changed.
+    if self_token['status'] == should[:status]
+      context.warning("Unable to update properties other than 'status'.  Please delete and recreate resource with the desired properties")
+    else
+      auth_id = self_token['id']
+      body = {
+        status: should[:status],
+        description: name,
+      }
+
+      influx_patch("/api/v2/authorizations/#{auth_id}", JSON.dump(body))
+    end
   end
 
   def delete(context, name)

@@ -32,10 +32,12 @@ EOS
     bucket: {
       type: 'String',
       desc: 'The bucket to map to the retention policy to',
+      behavior: :init_only,
     },
     org: {
       type: 'String',
       desc: 'Name of the organization that owns the mapping',
+      behavior: :init_only,
     },
     is_default: {
       type: 'Optional[Boolean]',

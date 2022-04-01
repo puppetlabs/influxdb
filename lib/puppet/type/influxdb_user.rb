@@ -32,7 +32,7 @@ EOS
     password: {
       type: 'Optional[Sensitive[String]]',
       desc: 'User password',
-      behavior: :parameter,
+      behavior: :init_only,
     },
     status: {
       type: 'Enum[active, inactive]',
