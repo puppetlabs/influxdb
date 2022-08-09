@@ -7,11 +7,13 @@ fixtures:
     yumrepo: "puppetlabs/yumrepo_core"
     apt: "puppetlabs/apt"
   repositories:
-    facts: 'https://github.com/puppetlabs/puppetlabs-facts'
-    puppet_agent: 'https://github.com/puppetlabs/puppetlabs-puppet_agent'
-    provision: 'https://github.com/puppetlabs/provision'
     bootstrap: 'https://github.com/puppetlabs/puppetlabs-bootstrap'
+    deploy_pe: 'https://github.com/jarretlavallee/puppet-deploy_pe'
+    facts: 'https://github.com/puppetlabs/puppetlabs-facts'
+    provision: 'https://github.com/puppetlabs/provision'
+    puppet_agent: 'https://github.com/puppetlabs/puppetlabs-puppet_agent'
     puppet_conf: 'https://github.com/puppetlabs/puppetlabs-puppet_conf'
     ruby_task_helper: 'https://git@github.com/puppetlabs/puppetlabs-ruby_task_helper'
     stdlib: 'https://github.com/puppetlabs/puppetlabs-stdlib'
-    deploy_pe: 'https://github.com/jarretlavallee/puppet-deploy_pe'
+  symlinks:
+    influxdb: "#{source_dir}" # for custom type(s)

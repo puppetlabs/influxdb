@@ -1,4 +1,5 @@
 # @summary Installs, configures, and performs initial setup of InfluxDB 2.x
+#
 # @example Basic usage
 #   include influxdb
 #
@@ -6,6 +7,7 @@
 #     initial_org => 'my_org',
 #     initial_bucket => 'my_bucket',
 #   }
+#
 # @param manage_repo
 #   Whether to manage a repository to provide InfluxDB packages.  Defaults to true
 # @param manage_setup
