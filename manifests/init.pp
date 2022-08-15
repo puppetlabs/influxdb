@@ -15,7 +15,8 @@
 # @param version
 #   Version of InfluxDB to install.  Changing this is not recommended.
 # @param archive_source
-#   URL containing an InfluxDB archive if not installing from a repository or false to disable installing from source. Defaults to version 2-2.1.1 on amd64 architechture.
+#   URL containing an InfluxDB archive if not installing from a repository or false to disable installing from source.
+#   Defaults to version 2-2.1.1 on amd64 architechture.
 # @param use_ssl
 #   Whether to use http or https connections.  Defaults to true (https).
 # @param manage_ssl
@@ -122,9 +123,13 @@ class influxdb(
       group  => 'root',
     }
     file { '/var/lib/influxdb':
-      ensure => directory,
-      owner  => 'influxdb',
-      group  => 'influxdb',
+      ensure  => directory,
+      owner   => 'influxdb',
+      group   => 'influxdb',
+      require => [
+        Group['influxdb'],
+        User['influxdb'],
+      ]
     }
 
     $default_dir = $facts['os']['family'] ? {
@@ -176,6 +181,10 @@ class influxdb(
   else {
     package {'influxdb2':
       ensure  => installed,
+    }
+
+    service {'influxdb':
+      ensure  => running,
     }
   }
 
