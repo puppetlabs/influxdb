@@ -117,13 +117,9 @@ class influxdb(
       group  => 'root',
     }
     file { '/var/lib/influxdb':
-      ensure  => directory,
-      owner   => 'influxdb',
-      group   => 'influxdb',
-      require => [
-        Group['influxdb'],
-        User['influxdb'],
-      ]
+      ensure => directory,
+      owner  => 'influxdb',
+      group  => 'influxdb',
     }
 
     $default_dir = $facts['os']['family'] ? {
@@ -168,12 +164,8 @@ class influxdb(
   # Otherwise, assume we have a source for the package
   else {
     package {'influxdb2':
-      ensure  => installed,
-      before  => Service['influxdb'],
-    }
-
-    service {'influxdb':
-      ensure  => running,
+      ensure => installed,
+      before => Service['influxdb'],
     }
   }
 

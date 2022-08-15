@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pry'
 
 describe 'influxdb' do
   let(:facts) { { os: { family: 'RedHat' }, identity: { user: 'root' } } }
