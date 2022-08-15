@@ -2,7 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
-## [v1.0.0](https://github.com/puppetlabs/influxdb/tree/v1.0.0) (2022-04-30)
+## [v1.0.0](https://github.com/puppetlabs/influxdb/tree/v1.0.0) (2022-08-15)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.0.0...v1.0.0)
+
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
+
+- \(SUP-3557\) Add spec tests for the main class [\#32](https://github.com/puppetlabs/influxdb/pull/32) ([m0dular](https://github.com/m0dular))
+- provide an option to disable installing from source [\#29](https://github.com/puppetlabs/influxdb/pull/29) ([vchepkov](https://github.com/vchepkov))
+
+## [v1.0.0](https://github.com/puppetlabs/influxdb/tree/v1.0.0) (2022-05-02)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v0.3.0...v1.0.0)
 

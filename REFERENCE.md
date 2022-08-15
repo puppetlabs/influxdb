@@ -103,9 +103,10 @@ Default value: `'2.1.1'`
 
 ##### <a name="archive_source"></a>`archive_source`
 
-Data type: `String`
+Data type: `Variant[String,Boolean[false]]`
 
-URL containing an InfluxDB archive if not installing from a repository.  Defaults to version 2-2.1.1 on amd64 architechture.
+URL containing an InfluxDB archive if not installing from a repository or false to disable installing from source.
+Defaults to version 2-2.1.1 on amd64 architechture.
 
 Default value: `'https://dl.influxdata.com/influxdb/releases/influxdb2-2.1.1-linux-amd64.tar.gz'`
 
