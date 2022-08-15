@@ -15,7 +15,8 @@
 # @param version
 #   Version of InfluxDB to install.  Changing this is not recommended.
 # @param archive_source
-#   URL containing an InfluxDB archive if not installing from a repository or false to disable installing from source. Defaults to version 2-2.1.1 on amd64 architechture.
+#   URL containing an InfluxDB archive if not installing from a repository or false to disable installing from source.
+#   Defaults to version 2-2.1.1 on amd64 architechture.
 # @param use_ssl
 #   Whether to use http or https connections.  Defaults to true (https).
 # @param manage_ssl
@@ -105,14 +106,8 @@ class influxdb(
     package {'influxdb2':
       ensure  => $version,
       require => Yumrepo[$repo_name],
+      before  => Service['influxdb'],
     }
-
-    service {'influxdb':
-      ensure  => running,
-      enable  => true,
-      require => Package['influxdb2'],
-    }
-
   }
   # If not managing the repo, install the package from archive source
   elsif $archive_source {
@@ -145,6 +140,7 @@ class influxdb(
       source          => $archive_source,
       cleanup         => true,
       require         => File['/etc/influxdb', '/opt/influxdb'],
+      before          => Service['influxdb'],
     }
 
     group { 'influxdb':
@@ -163,20 +159,19 @@ class influxdb(
       mode   => '0775',
       notify => Service['influxdb'],
     }
-
-    service {'influxdb':
-      ensure  => running,
-      enable  => true,
-      require => File['/opt/influxdb'],
-    }
-
   }
 
   # Otherwise, assume we have a source for the package
   else {
     package {'influxdb2':
-      ensure  => installed,
+      ensure => installed,
+      before => Service['influxdb'],
     }
+  }
+
+  service {'influxdb':
+    ensure => running,
+    enable => true,
   }
 
   if $use_ssl {

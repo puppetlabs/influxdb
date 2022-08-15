@@ -5,14 +5,14 @@ describe 'influxdb class' do
     it 'installs influxdb' do
       pp = <<-MANIFEST
         include influxdb
-        MANIFEST
+      MANIFEST
 
       idempotent_apply(pp)
     end
 
     # Influxdb should be listening on port 8086 by default
-    describe port('8086') do
-      it { is_expected.to be_listening }
+    it 'is listening on port 8086' do
+      expect(run_shell('ss -Htln sport = :8086').stdout).to match(%r{LISTEN})
     end
   end
 end
