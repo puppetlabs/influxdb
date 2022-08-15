@@ -106,14 +106,8 @@ class influxdb(
     package {'influxdb2':
       ensure  => $version,
       require => Yumrepo[$repo_name],
+      before  => Service['influxdb'],
     }
-
-    service {'influxdb':
-      ensure  => running,
-      enable  => true,
-      require => Package['influxdb2'],
-    }
-
   }
   # If not managing the repo, install the package from archive source
   elsif $archive_source {
@@ -150,6 +144,7 @@ class influxdb(
       source          => $archive_source,
       cleanup         => true,
       require         => File['/etc/influxdb', '/opt/influxdb'],
+      before          => Service['influxdb'],
     }
 
     group { 'influxdb':
@@ -168,24 +163,23 @@ class influxdb(
       mode   => '0775',
       notify => Service['influxdb'],
     }
-
-    service {'influxdb':
-      ensure  => running,
-      enable  => true,
-      require => File['/opt/influxdb'],
-    }
-
   }
 
   # Otherwise, assume we have a source for the package
   else {
     package {'influxdb2':
       ensure  => installed,
+      before  => Service['influxdb'],
     }
 
     service {'influxdb':
       ensure  => running,
     }
+  }
+
+  service {'influxdb':
+    ensure => running,
+    enable => true,
   }
 
   if $use_ssl {
