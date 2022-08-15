@@ -195,7 +195,7 @@ class influxdb (
 
   # Otherwise, assume we have a source for the package
   else {
-    package { 'influxdb2':
+    package {'influxdb2':
       ensure => installed,
       before => $package_before,
     }
