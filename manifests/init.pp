@@ -145,6 +145,7 @@ class influxdb (
       owner  => 'root',
       group  => 'root',
     }
+
     file { '/var/lib/influxdb':
       ensure => directory,
       owner  => 'influxdb',
@@ -155,6 +156,7 @@ class influxdb (
       'Debian' => '/etc/default',
       default  => '/etc/sysconfig',
     }
+
     file { '/etc/systemd/system/influxdb.service':
       ensure   => file,
       content  => epp('influxdb/influxdb_service.epp',
@@ -175,6 +177,7 @@ class influxdb (
     group { 'influxdb':
       ensure => present,
     }
+
     user { 'influxdb':
       ensure => present,
       gid    => 'influxdb',
@@ -198,7 +201,7 @@ class influxdb (
     }
   }
 
-  service { 'influxdb':
+  service {'influxdb':
     ensure => running,
     enable => true,
   }
@@ -211,12 +214,14 @@ class influxdb (
         links  => 'follow',
         notify => Service['influxdb'],
       }
+
       file { '/etc/influxdb/key.pem':
         ensure => file,
         source => "file:///${ssl_key_file}",
         links  => 'follow',
         notify => Service['influxdb'],
       }
+
       file { '/etc/influxdb/ca.pem':
         ensure => file,
         source => "file:///${ssl_ca_file}",
@@ -230,6 +235,7 @@ class influxdb (
       owner  => 'influxdb',
       notify => Service['influxdb'],
     }
+
     file { '/etc/systemd/system/influxdb.service.d/override.conf':
       ensure  => file,
       #TODO: epp necessary?
