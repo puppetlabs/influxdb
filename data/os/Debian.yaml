@@ -1,0 +1,4 @@
+influxdb::repo_url: 'https://repos.influxdata.com/debian'
+influxdb::manage_repo: true
+influxdb::repo_gpg_key_url: 'https://repos.influxdata.com/influxdb.key'
+influxdb::version: latest
