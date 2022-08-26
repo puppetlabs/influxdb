@@ -30,9 +30,11 @@
 #   CA certificate issued by the CA which signed the certificate specified by $ssl_cert_file.  Defaults to the Puppet CA.
 # @param host
 #   fqdn of the host running InfluxDB.  Defaults to the fqdn of the local machine
-# @param intial_org
+# @param port
+#   port of the InfluxDB Service. Defaults to 8086
+# @param initial_org
 #   Name of the initial organization to use during initial setup.  Defaults to puppetlabs
-# @param intial_bucket
+# @param initial_bucket
 #   Name of the initial bucket to use during initial setup.  Defaults to puppet_data
 # @param admin_user
 #   Name of the administrative user to use during initial setup.  Defaults to admin
@@ -41,7 +43,7 @@
 # @param token_file
 #   File on disk containing an administrative token.  This class will write the token generated as part of initial setup to this file.
 #   Note that functions or code run in Puppet server will not be able to use this file, so setting $token after setup is recommended.
-class influxdb(
+class influxdb (
   # Provided by module data
   String  $host,
   Integer $port,
@@ -64,15 +66,13 @@ class influxdb(
   String  $admin_user = 'admin',
   Sensitive[String[1]] $admin_pass = Sensitive('puppetlabs'),
   String  $token_file = $facts['identity']['user'] ? {
-                                      'root'  => '/root/.influxdb_token',
-                                      default => "/home/${facts['identity']['user']}/.influxdb_token"
-                                    },
-
-){
-
+    'root'  => '/root/.influxdb_token',
+    default => "/home/${facts['identity']['user']}/.influxdb_token" #lint:ignore:parameter_documentation
+  },
+) {
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
-  unless $host == $facts['fqdn'] or $host == 'localhost' {
-    fail("Unable to manage InfluxDB installation on host ${facts['fqdn']}")
+  unless $host == $facts['networking']['fqdn'] or $host == 'localhost' {
+    fail("Unable to manage InfluxDB installation on host ${facts['networking']['fqdn']}")
   }
 
   # If we are managing the repository, set it up and install the package with a require on the repo
@@ -84,7 +84,7 @@ class influxdb(
           'CentOS' => 'centos',
           default  => 'rhel',
         }
-        yumrepo {$repo_name:
+        yumrepo { $repo_name:
           ensure   => 'present',
           descr    => $repo_name,
           name     => $repo_name,
@@ -96,14 +96,14 @@ class influxdb(
         }
       }
       default: {
-        notify {'influxdb_repo_warn':
+        notify { 'influxdb_repo_warn':
           message  => "Unable to manage repo on ${facts['os']['family']}, using archive source",
           loglevel => 'warn',
         }
       }
     }
 
-    package {'influxdb2':
+    package { 'influxdb2':
       ensure  => $version,
       require => Yumrepo[$repo_name],
       before  => Service['influxdb'],
@@ -111,7 +111,7 @@ class influxdb(
   }
   # If not managing the repo, install the package from archive source
   elsif $archive_source {
-    file {['/etc/influxdb', '/opt/influxdb', '/etc/influxdb/scripts']:
+    file { ['/etc/influxdb', '/opt/influxdb', '/etc/influxdb/scripts']:
       ensure => directory,
       owner  => 'root',
       group  => 'root',
@@ -126,8 +126,8 @@ class influxdb(
       'Debian' => '/etc/default',
       default  => '/etc/sysconfig',
     }
-    file {'/etc/systemd/system/influxdb.service':
-      ensure   => present,
+    file { '/etc/systemd/system/influxdb.service':
+      ensure   => file,
       content  => epp('influxdb/influxdb_service.epp',
       env_file => "${default_dir}/influxdb2"),
     }
@@ -151,8 +151,8 @@ class influxdb(
       gid    => 'influxdb',
     }
 
-    file {'/etc/influxdb/scripts/influxd-systemd-start.sh':
-      ensure => present,
+    file { '/etc/influxdb/scripts/influxd-systemd-start.sh':
+      ensure => file,
       source => 'puppet:///modules/influxdb/influxd-systemd-start.sh',
       owner  => 'root',
       group  => 'root',
@@ -163,42 +163,42 @@ class influxdb(
 
   # Otherwise, assume we have a source for the package
   else {
-    package {'influxdb2':
+    package { 'influxdb2':
       ensure => installed,
       before => Service['influxdb'],
     }
   }
 
-  service {'influxdb':
+  service { 'influxdb':
     ensure => running,
     enable => true,
   }
 
   if $use_ssl {
     if $manage_ssl {
-      file {'/etc/influxdb/cert.pem':
-        ensure => present,
+      file { '/etc/influxdb/cert.pem':
+        ensure => file,
         source => "file:///${ssl_cert_file}",
         notify => Service['influxdb'],
       }
-      file {'/etc/influxdb/key.pem':
-        ensure => present,
+      file { '/etc/influxdb/key.pem':
+        ensure => file,
         source => "file:///${ssl_key_file}",
         notify => Service['influxdb'],
       }
-      file {'/etc/influxdb/ca.pem':
-        ensure => present,
+      file { '/etc/influxdb/ca.pem':
+        ensure => file,
         source => "file:///${ssl_ca_file}",
         notify => Service['influxdb'],
       }
     }
 
-    file {'/etc/systemd/system/influxdb.service.d':
+    file { '/etc/systemd/system/influxdb.service.d':
       ensure => directory,
       owner  => 'influxdb',
       notify => Service['influxdb'],
     }
-    file {'/etc/systemd/system/influxdb.service.d/override.conf':
+    file { '/etc/systemd/system/influxdb.service.d/override.conf':
       ensure  => file,
       #TODO: epp necessary?
       content => epp(
@@ -213,7 +213,7 @@ class influxdb(
   }
 
   if $manage_setup {
-    influxdb_setup {$host:
+    influxdb_setup { $host:
       ensure     => 'present',
       token_file => $token_file,
       bucket     => $initial_bucket,
@@ -222,6 +222,5 @@ class influxdb(
       password   => $admin_pass,
       require    => Service['influxdb'],
     }
-
   }
 }
