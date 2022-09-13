@@ -1,0 +1,2 @@
+---
+influxdb::repo_url: 'https://repos.influxdata.com/centos/$releasever/$basearch/stable'

@@ -9,6 +9,7 @@ hierarchy:
   - name: "osfamily/major release"
     paths:
         # Used to distinguish between Debian and Ubuntu
+      - "os/%{facts.os.name}.yaml"
       - "os/%{facts.os.name}/%{facts.os.release.major}.yaml"
       - "os/%{facts.os.family}/%{facts.os.release.major}.yaml"
         # Used for Solaris
