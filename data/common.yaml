@@ -3,3 +3,4 @@ influxdb::host: "%{facts.fqdn}"
 influxdb::port: 8086
 influxdb::initial_org: 'puppetlabs'
 influxdb::initial_bucket: 'puppet_data'
+influxdb::repo_gpg_key_url: 'https://repos.influxdata.com/influxdb2.key https://repos.influxdata.com/influxdb.key'

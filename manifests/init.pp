@@ -43,16 +43,22 @@
 # @param token_file
 #   File on disk containing an administrative token.  This class will write the token generated as part of initial setup to this file.
 #   Note that functions or code run in Puppet server will not be able to use this file, so setting $token after setup is recommended.
+# @param repo_url 
+#   URL of the Package repository
+# @param repo_gpg_key_url
+#   URL of the GPG signing key
 class influxdb (
   # Provided by module data
   String  $host,
   Integer $port,
   String  $initial_org,
   String  $initial_bucket,
+  String  $repo_gpg_key_url,
 
   Boolean $manage_repo = true,
   Boolean $manage_setup = true,
 
+  Optional[String] $repo_url = undef,
   String  $repo_name = 'influxdb2',
   String  $version = '2.1.1',
   Variant[String,Boolean[false]] $archive_source = 'https://dl.influxdata.com/influxdb/releases/influxdb2-2.1.1-linux-amd64.tar.gz',
@@ -66,9 +72,9 @@ class influxdb (
   String  $admin_user = 'admin',
   Sensitive[String[1]] $admin_pass = Sensitive('puppetlabs'),
   String  $token_file = $facts['identity']['user'] ? {
-    'root'  => '/root/.influxdb_token',
+                                      'root'  => '/root/.influxdb_token',
     default => "/home/${facts['identity']['user']}/.influxdb_token" #lint:ignore:parameter_documentation
-  },
+                                    },
 ) {
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
   unless $host == $facts['networking']['fqdn'] or $host == 'localhost' {
@@ -80,16 +86,12 @@ class influxdb (
     #TODO: other distros
     case $facts['os']['family'] {
       'RedHat': {
-        $dist = $facts['os']['name'] ? {
-          'CentOS' => 'centos',
-          default  => 'rhel',
-        }
         yumrepo { $repo_name:
           ensure   => 'present',
           descr    => $repo_name,
           name     => $repo_name,
-          baseurl  => "https://repos.influxdata.com/${dist}/\$releasever/\$basearch/stable",
-          gpgkey   => 'https://repos.influxdata.com/influxdb2.key https://repos.influxdata.com/influxdb.key',
+          baseurl  => $repo_url,
+          gpgkey   => $repo_gpg_key_url,
           enabled  => '1',
           gpgcheck => '1',
           target   => '/etc/yum.repos.d/influxdb2.repo',
