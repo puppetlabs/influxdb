@@ -5,6 +5,7 @@ fixtures:
   forge_modules:
     archive: "puppet/archive"
     yumrepo: "puppetlabs/yumrepo_core"
+    apt: "puppetlabs/apt"
   repositories:
     facts: 'https://github.com/puppetlabs/puppetlabs-facts'
     puppet_agent: 'https://github.com/puppetlabs/puppetlabs-puppet_agent'

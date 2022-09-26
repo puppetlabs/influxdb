@@ -43,6 +43,8 @@
 # @param token_file
 #   File on disk containing an administrative token.  This class will write the token generated as part of initial setup to this file.
 #   Note that functions or code run in Puppet server will not be able to use this file, so setting $token after setup is recommended.
+# @param repo_gpg_key_id
+#   ID of the GPG signing key
 # @param repo_url 
 #   URL of the Package repository
 # @param repo_gpg_key_url
@@ -53,9 +55,10 @@ class influxdb (
   Integer $port,
   String  $initial_org,
   String  $initial_bucket,
+  String  $repo_gpg_key_id,
   String  $repo_gpg_key_url,
+  Boolean $manage_repo,
 
-  Boolean $manage_repo = true,
   Boolean $manage_setup = true,
 
   Optional[String] $repo_url = undef,
@@ -81,8 +84,19 @@ class influxdb (
     fail("Unable to manage InfluxDB installation on host ${facts['networking']['fqdn']}")
   }
 
+  # If managing SSL, install the package before managing files under /etc/influxdb in order to ensure the directory exists
+  $package_before = if $use_ssl and $manage_ssl {
+    [
+      File['/etc/influxdb/cert.pem', '/etc/influxdb/key.pem', '/etc/influxdb/ca.pem', '/etc/systemd/system/influxdb.service.d'],
+      Service['influxdb']
+    ]
+  }
+  else {
+    Service['influxdb']
+  }
+
   # If we are managing the repository, set it up and install the package with a require on the repo
-  if $manage_repo and $facts['os']['family'] in ['Redhat'] {
+  if $manage_repo {
     #TODO: other distros
     case $facts['os']['family'] {
       'RedHat': {
@@ -96,6 +110,22 @@ class influxdb (
           gpgcheck => '1',
           target   => '/etc/yum.repos.d/influxdb2.repo',
         }
+        $package_require = Yumrepo[$repo_name]
+      }
+      'Debian': {
+        include apt
+        apt::source { $repo_name:
+          ensure   => 'present',
+          comment  => 'The InfluxDB2 repository',
+          location => $repo_url,
+          release  => 'stable',
+          repos    => 'main',
+          key      => {
+            'id'     => $repo_gpg_key_id,
+            'source' => $repo_gpg_key_url,
+          },
+        }
+        $package_require = Apt::Source[$repo_name]
       }
       default: {
         notify { 'influxdb_repo_warn':
@@ -105,10 +135,10 @@ class influxdb (
       }
     }
 
-    package { 'influxdb2':
+    package {'influxdb2':
       ensure  => $version,
-      require => Yumrepo[$repo_name],
-      before  => Service['influxdb'],
+      require => $package_require,
+      before  => $package_before,
     }
   }
   # If not managing the repo, install the package from archive source
@@ -167,7 +197,7 @@ class influxdb (
   else {
     package { 'influxdb2':
       ensure => installed,
-      before => Service['influxdb'],
+      before => $package_before,
     }
   }
 

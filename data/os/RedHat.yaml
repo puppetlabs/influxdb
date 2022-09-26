@@ -1,2 +1,3 @@
 ---
 influxdb::repo_url: 'https://repos.influxdata.com/rhel/$releasever/$basearch/stable'
+influxdb::manage_repo: true
