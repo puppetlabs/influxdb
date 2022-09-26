@@ -84,6 +84,17 @@ class influxdb (
     fail("Unable to manage InfluxDB installation on host ${facts['networking']['fqdn']}")
   }
 
+  # If managing SSL, install the package before managing files under /etc/influxdb in order to ensure the directory exists
+  $package_before = if $use_ssl and $manage_ssl {
+    [
+      File['/etc/influxdb/cert.pem', '/etc/influxdb/key.pem', '/etc/influxdb/ca.pem', '/etc/systemd/system/influxdb.service.d'],
+      Service['influxdb']
+    ]
+  }
+  else {
+    Service['influxdb']
+  }
+
   # If we are managing the repository, set it up and install the package with a require on the repo
   if $manage_repo {
     #TODO: other distros
@@ -124,10 +135,10 @@ class influxdb (
       }
     }
 
-    package { 'influxdb2':
+    package {'influxdb2':
       ensure  => $version,
       require => $package_require,
-      before  => Service['influxdb'],
+      before  => $package_before,
     }
   }
   # If not managing the repo, install the package from archive source
@@ -186,7 +197,7 @@ class influxdb (
   else {
     package { 'influxdb2':
       ensure => installed,
-      before => Service['influxdb'],
+      before => $package_before,
     }
   }
 

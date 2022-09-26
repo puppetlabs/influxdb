@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'pry'
 
 describe 'influxdb' do
   let(:facts) { { os: { family: 'RedHat' }, identity: { user: 'root' } } }
@@ -25,6 +26,13 @@ describe 'influxdb' do
       )
 
       is_expected.to contain_service('influxdb').with_ensure('running')
+      is_expected.to contain_package('influxdb2').that_comes_before([
+                                                                      'File[/etc/influxdb/cert.pem]',
+                                                                      'File[/etc/influxdb/key.pem]',
+                                                                      'File[/etc/influxdb/ca.pem]',
+                                                                      'File[/etc/systemd/system/influxdb.service.d]',
+                                                                      'Service[influxdb]',
+                                                                    ])
       is_expected.to contain_package('influxdb2').with_ensure('2.1.1')
 
       ['/etc/influxdb/cert.pem', '/etc/influxdb/ca.pem', '/etc/influxdb/key.pem'].each do |file|
