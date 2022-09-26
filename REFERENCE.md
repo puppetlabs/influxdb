@@ -60,22 +60,21 @@ The following parameters are available in the `influxdb` class:
 * [`ssl_key_file`](#ssl_key_file)
 * [`ssl_ca_file`](#ssl_ca_file)
 * [`host`](#host)
-* [`intial_org`](#intial_org)
-* [`intial_bucket`](#intial_bucket)
-* [`admin_user`](#admin_user)
-* [`admin_pass`](#admin_pass)
-* [`token_file`](#token_file)
 * [`port`](#port)
 * [`initial_org`](#initial_org)
 * [`initial_bucket`](#initial_bucket)
+* [`admin_user`](#admin_user)
+* [`admin_pass`](#admin_pass)
+* [`token_file`](#token_file)
+* [`repo_gpg_key_id`](#repo_gpg_key_id)
+* [`repo_url`](#repo_url)
+* [`repo_gpg_key_url`](#repo_gpg_key_url)
 
 ##### <a name="manage_repo"></a>`manage_repo`
 
 Data type: `Boolean`
 
 Whether to manage a repository to provide InfluxDB packages.  Defaults to true
-
-Default value: ``true``
 
 ##### <a name="manage_setup"></a>`manage_setup`
 
@@ -157,11 +156,21 @@ Data type: `String`
 
 fqdn of the host running InfluxDB.  Defaults to the fqdn of the local machine
 
-##### <a name="intial_org"></a>`intial_org`
+##### <a name="port"></a>`port`
+
+Data type: `Integer`
+
+port of the InfluxDB Service. Defaults to 8086
+
+##### <a name="initial_org"></a>`initial_org`
+
+Data type: `String`
 
 Name of the initial organization to use during initial setup.  Defaults to puppetlabs
 
-##### <a name="intial_bucket"></a>`intial_bucket`
+##### <a name="initial_bucket"></a>`initial_bucket`
+
+Data type: `String`
 
 Name of the initial bucket to use during initial setup.  Defaults to puppet_data
 
@@ -190,23 +199,25 @@ Note that functions or code run in Puppet server will not be able to use this fi
 
 Default value: `$facts['identity']['user']`
 
-##### <a name="port"></a>`port`
-
-Data type: `Integer`
-
-
-
-##### <a name="initial_org"></a>`initial_org`
+##### <a name="repo_gpg_key_id"></a>`repo_gpg_key_id`
 
 Data type: `String`
 
+ID of the GPG signing key
 
+##### <a name="repo_url"></a>`repo_url`
 
-##### <a name="initial_bucket"></a>`initial_bucket`
+Data type: `Optional[String]`
+
+URL of the Package repository
+
+Default value: ``undef``
+
+##### <a name="repo_gpg_key_url"></a>`repo_gpg_key_url`
 
 Data type: `String`
 
-
+URL of the GPG signing key
 
 ### <a name="influxdbprofiletoml"></a>`influxdb::profile::toml`
 
