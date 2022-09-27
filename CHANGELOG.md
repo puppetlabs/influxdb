@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
-## [v1.1.0](https://github.com/puppetlabs/influxdb/tree/v1.1.0) (2022-08-15)
+## [v1.2.0](https://github.com/puppetlabs/influxdb/tree/v1.2.0) (2022-09-26)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.1.0...v1.2.0)
+
+### Added
+
+- Add support for installing from repository on Debian/Ubuntu [\#40](https://github.com/puppetlabs/influxdb/pull/40) ([m0dular](https://github.com/m0dular))
+- add debian repo support [\#37](https://github.com/puppetlabs/influxdb/pull/37) ([SimonHoenscheid](https://github.com/SimonHoenscheid))
+- Add options to set custom influxdb repo. [\#36](https://github.com/puppetlabs/influxdb/pull/36) ([SimonHoenscheid](https://github.com/SimonHoenscheid))
+
+## [v1.1.0](https://github.com/puppetlabs/influxdb/tree/v1.1.0) (2022-08-17)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.0.0...v1.1.0)
 
