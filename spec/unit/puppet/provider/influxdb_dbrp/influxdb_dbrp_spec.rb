@@ -96,6 +96,7 @@ RSpec.describe Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp do
     context 'with bucket resources' do
       # rubocop:disable RSpec/SubjectStub
       it 'processes resources' do
+        provider.instance_variable_set('@use_ssl', true)
         allow(provider).to receive(:influx_get).with('/api/v2/orgs', params: {}).and_return(org_response)
         allow(provider).to receive(:influx_get).with('/api/v2/dbrps?orgID=123', params: {}).and_return(dbrp_response)
         allow(provider).to receive(:influx_get).with('/api/v2/buckets', params: {}).and_return(bucket_response)
@@ -103,6 +104,7 @@ RSpec.describe Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp do
         should_hash = [{
           bucket: 'puppet_data',
           ensure: 'present',
+          use_ssl: true,
           is_default: true,
           name: 'puppet_data',
           org: 'puppetlabs',

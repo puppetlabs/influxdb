@@ -65,6 +65,7 @@ RSpec.describe Puppet::Provider::InfluxdbOrg::InfluxdbOrg do
   describe '#get' do
     # rubocop:disable RSpec/SubjectStub
     it 'processes resources' do
+      provider.instance_variable_set('@use_ssl', true)
       allow(provider).to receive(:influx_get).with('/api/v2/orgs', params: {}).and_return(org_response)
       allow(provider).to receive(:influx_get).with('/api/v2/users', params: {}).and_return(user_response)
 
@@ -72,6 +73,7 @@ RSpec.describe Puppet::Provider::InfluxdbOrg::InfluxdbOrg do
         {
           name: 'puppetlabs',
           ensure: 'present',
+          use_ssl: true,
           description: nil,
           members: [],
         },

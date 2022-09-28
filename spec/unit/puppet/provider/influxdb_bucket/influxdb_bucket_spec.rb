@@ -142,9 +142,12 @@ RSpec.describe Puppet::Provider::InfluxdbBucket::InfluxdbBucket do
         allow(provider).to receive(:influx_get).with('/api/v2/dbrps?orgID=123', params: {}).and_return(dbrp_response)
         allow(provider).to receive(:influx_get).with('/api/v2/users', params: {}).and_return(user_response)
 
+        provider.instance_variable_set('@use_ssl', true)
+
         should_hash = [
           { name: 'puppet_data',
             ensure: 'present',
+            use_ssl: true,
             org: 'puppetlabs',
             retention_rules: [{ 'type' => 'expire', 'everySeconds' => 2_592_000, 'shardGroupDurationSeconds' => 604_800 }],
             members: [],
