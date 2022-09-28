@@ -26,6 +26,7 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
       response['labels'].map do |label|
         {
           name: label['name'],
+          use_ssl: @use_ssl,
           ensure: 'present',
           org: name_from_id(@org_hash, label['orgID']),
           properties: label['properties'],

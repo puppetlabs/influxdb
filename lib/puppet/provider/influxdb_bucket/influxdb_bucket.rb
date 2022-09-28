@@ -41,6 +41,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
           {
             name: value['name'],
             ensure: 'present',
+            use_ssl: @use_ssl,
             org: name_from_id(@org_hash, value['orgID']),
             retention_rules: value['retentionRules'],
             members: bucket_members ? bucket_members.map { |member| member['name'] } : [],

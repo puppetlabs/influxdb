@@ -21,6 +21,7 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::Simp
     [
       {
         name: @host,
+        use_ssl: @use_ssl,
         ensure: response['allowed'] == true ? 'absent' : 'present',
       },
     ]

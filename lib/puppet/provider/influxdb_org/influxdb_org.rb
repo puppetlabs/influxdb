@@ -28,6 +28,7 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
         memo + [
           {
             name: value['name'],
+            use_ssl: @use_ssl,
             ensure: 'present',
             members: org_members ? org_members.map { |member| member['name'] } : [],
             description: value['description']
