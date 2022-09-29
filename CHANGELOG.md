@@ -2,7 +2,15 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
-## [v1.2.0](https://github.com/puppetlabs/influxdb/tree/v1.2.0) (2022-09-26)
+## [v1.2.0](https://github.com/puppetlabs/influxdb/tree/v1.2.0) (2022-09-29)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.2.0...v1.2.0)
+
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
+
+- \(Sup 3678\) Fix use\_ssl parameter [\#42](https://github.com/puppetlabs/influxdb/pull/42) ([m0dular](https://github.com/m0dular))
+
+## [v1.2.0](https://github.com/puppetlabs/influxdb/tree/v1.2.0) (2022-09-27)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.1.0...v1.2.0)
 
