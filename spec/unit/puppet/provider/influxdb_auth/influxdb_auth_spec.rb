@@ -81,10 +81,12 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
     # rubocop:disable RSpec/SubjectStub
     it 'processes resources' do
       allow(provider).to receive(:influx_get).with('/api/v2/orgs', params: {}).and_return(org_response)
+      provider.instance_variable_set('@use_ssl', true)
 
       should_hash = [
         {
           ensure: 'present',
+          use_ssl: true,
           user: 'admin',
           name: 'token_1',
           status: 'active',

@@ -28,6 +28,7 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
         memo + [
           {
             name: name,
+            use_ssl: @use_ssl,
             ensure: 'present',
             status: value['status'],
           },

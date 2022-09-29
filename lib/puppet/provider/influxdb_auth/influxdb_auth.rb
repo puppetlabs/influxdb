@@ -31,6 +31,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
           {
             name: value['description'],
             ensure: 'present',
+            use_ssl: @use_ssl,
             permissions: value['permissions'],
             status: value['status'],
             user: value['user'],

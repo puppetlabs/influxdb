@@ -247,6 +247,7 @@ class influxdb (
   if $manage_setup {
     influxdb_setup { $host:
       ensure     => 'present',
+      use_ssl    => $use_ssl,
       token_file => $token_file,
       bucket     => $initial_bucket,
       org        => $initial_org,

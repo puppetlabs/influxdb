@@ -28,6 +28,7 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
       memo + [
         {
           ensure: 'present',
+          use_ssl: @use_ssl,
           name: value['database'],
           org: name_from_id(@org_hash, value['orgID']),
           bucket: name_from_id(@bucket_hash, value['bucketID']),
