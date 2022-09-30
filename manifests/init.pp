@@ -30,8 +30,6 @@
 #   CA certificate issued by the CA which signed the certificate specified by $ssl_cert_file.  Defaults to the Puppet CA.
 # @param host
 #   fqdn of the host running InfluxDB.  Defaults to the fqdn of the local machine
-# @param port
-#   port of the InfluxDB Service. Defaults to 8086
 # @param initial_org
 #   Name of the initial organization to use during initial setup.  Defaults to puppetlabs
 # @param initial_bucket
@@ -52,7 +50,6 @@
 class influxdb (
   # Provided by module data
   String  $host,
-  Integer $port,
   String  $initial_org,
   String  $initial_bucket,
   String  $repo_gpg_key_id,
@@ -75,9 +72,9 @@ class influxdb (
   String  $admin_user = 'admin',
   Sensitive[String[1]] $admin_pass = Sensitive('puppetlabs'),
   String  $token_file = $facts['identity']['user'] ? {
-                                      'root'  => '/root/.influxdb_token',
+    'root'  => '/root/.influxdb_token',
     default => "/home/${facts['identity']['user']}/.influxdb_token" #lint:ignore:parameter_documentation
-                                    },
+  },
 ) {
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
   unless $host == $facts['networking']['fqdn'] or $host == 'localhost' {
@@ -135,7 +132,7 @@ class influxdb (
       }
     }
 
-    package {'influxdb2':
+    package { 'influxdb2':
       ensure  => $version,
       require => $package_require,
       before  => $package_before,
@@ -211,16 +208,19 @@ class influxdb (
       file { '/etc/influxdb/cert.pem':
         ensure => file,
         source => "file:///${ssl_cert_file}",
+        links  => 'follow',
         notify => Service['influxdb'],
       }
       file { '/etc/influxdb/key.pem':
         ensure => file,
         source => "file:///${ssl_key_file}",
+        links  => 'follow',
         notify => Service['influxdb'],
       }
       file { '/etc/influxdb/ca.pem':
         ensure => file,
         source => "file:///${ssl_ca_file}",
+        links  => 'follow',
         notify => Service['influxdb'],
       }
     }
