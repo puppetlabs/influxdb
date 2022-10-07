@@ -81,7 +81,12 @@ class influxdb (
 ) {
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
   unless $host == $facts['networking']['fqdn'] or $host == 'localhost' {
-    fail("Unable to manage InfluxDB installation on host ${facts['networking']['fqdn']}")
+    fail(
+      @("MSG")
+        Unable to manage InfluxDB installation on host ${facts['networking']['fqdn']}
+        - We can only manage repos, packages, services, etc on the node we are compiling a catalog for.
+      | MSG
+    )
   }
 
   # If managing SSL, install the package before managing files under /etc/influxdb in order to ensure the directory exists
