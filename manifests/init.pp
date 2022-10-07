@@ -83,8 +83,8 @@ class influxdb (
   unless $host == $facts['networking']['fqdn'] or $host == 'localhost' {
     fail(
       @("MSG")
-        Unable to manage InfluxDB installation on host ${facts['networking']['fqdn']}
-        - We can only manage repos, packages, services, etc on the node we are compiling a catalog for.
+        Unable to manage InfluxDB installation on host: ${host}.
+        Management of repos, packages and services etc is only possible on the local host (${facts['networking']['fqdn']}).
       | MSG
     )
   }
