@@ -130,7 +130,10 @@ class influxdb (
             'source' => $repo_gpg_key_url,
           },
         }
-        $package_require = Apt::Source[$repo_name]
+        $package_require = [
+          Apt::Source[$repo_name],
+          Class['Apt::Update']
+        ]
       }
       default: {
         notify { 'influxdb_repo_warn':
