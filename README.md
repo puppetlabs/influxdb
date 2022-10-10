@@ -40,11 +40,11 @@ InfluxDB resources are managed by the various types and providers. Because we ne
 * use_ssl - true
 * token (optional)
 
-Specifying a `token` in `Sensitive[String]` format is optional, but recommended. See [Beggining with Influxdb](#beginning-with-influxdb) for more info.
+Specifying a `token` in `Sensitive[String]` format is optional, but recommended. See [Beginning with Influxdb](#beginning-with-influxdb) for more info.
 
 Note that you are *not* able to use multiple combinations of these options in a given catalog.  Each provider class will set these values when first instantiated and will use the first value that it finds.  Therefore, it is best to use resource defaults for these parameters in your manifest, e.g.
 
-```
+```puppet
 class my_profile::my_class(
   Sensitive[String] $my_token,
 ){
@@ -60,7 +60,7 @@ See [Usage](#usage) for more information about these use cases.
 
 The easiest way to get started using this module is by including the `influxdb` class to install and perform initial setup of the application.
 
-```
+```puppet
 include influxdb
 ```
 
@@ -89,14 +89,14 @@ Note that the admin user and password can be set prior to initial setup, but can
 
 For example, to use a different initial organization and bucket, set the parameters in hiera:
 
-```
+```puppet
 influxdb::initial_org: 'my_org'
 influxdb::initial_bucket: 'my_bucket'
 ```
 
 Or use a class-like declaration
 
-```
+```puppet
 class {'influxdb':
   initial_org    => 'my_org',
   initial_bucket => 'my_bucket',
@@ -107,7 +107,7 @@ class {'influxdb':
 
 For managing InfluxDB resources, this module provides several types and providers that use the [InfluxDB 2.0 api](https://docs.influxdata.com/influxdb/v2.1/api/).  As mentioned in [What influxdb affects](#what-influxdb-affects), the resources accept parameters to determine how to connect to the host which must be unique per resource type.  For example, to create an organization and bucket and specify a token and non-standard port:
 
-```
+```puppet
 class my_profile::my_class(
   Sensitive[String] $token,
 ){
@@ -130,7 +130,7 @@ class my_profile::my_class(
 
 Resource defaults are also a good option:
 
-```
+```puppet
 Influxdb_org {
   token => $token,
   port  => 1234,
@@ -146,7 +146,7 @@ Note that the `influxdb_bucket` will produce a warning for each specified label 
 
 If InfluxDB is running locally and there is an admin token saved at `~/.influxdb_token`, it will be used in API calls if the `token` parameter is unset.  However, it is recommended to set the token in hiera as an eyaml-encrypted string.  For example:
 
-```
+```yaml
 influxdb::token: '<eyaml_string>'
 lookup_options:
    influxdb::token:
@@ -161,7 +161,7 @@ For more complex resource management, here is an example of:
 
 Hiera data:
 
-```
+```yaml
 profile::buckets:
   - 'bucket1'
   - 'bucket2'
@@ -170,7 +170,7 @@ profile::buckets:
 
 Puppet code:
 
-```
+```puppet
 class my_profile::my_class{
   $buckets = lookup('profile::buckets')
   $bucket_hash = $buckets.reduce({}) |$memo, $bucket| {

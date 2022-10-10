@@ -9,6 +9,17 @@ describe 'influxdb' do
       let(:facts) { os_facts }
 
       it { is_expected.to compile }
+
+      it {
+        is_expected.to contain_influxdb_setup(Facter.value(:networking)['fqdn']).with(
+          ensure: 'present',
+          token_file: '/root/.influxdb_token',
+          bucket: 'puppet_data',
+          org: 'puppetlabs',
+          username: 'admin',
+          password: RSpec::Puppet::Sensitive.new('puppetlabs'),
+        ).that_requires('Service[influxdb]')
+      }
     end
   end
 
@@ -18,7 +29,6 @@ describe 'influxdb' do
     it {
       is_expected.to contain_class('influxdb').with(
         host: 'localhost',
-        port: 8086,
         use_ssl: true,
         initial_org: 'puppetlabs',
         token: nil,
@@ -61,7 +71,9 @@ describe 'influxdb' do
       is_expected.to contain_class('influxdb').with(use_ssl: false)
 
       is_expected.not_to contain_file('/etc/influxdb/cert.pem')
+
       is_expected.not_to contain_file('/etc/influxdb/ca.pem')
+
       is_expected.not_to contain_file('/etc/influxdb/key.pem')
     }
   end
@@ -98,11 +110,13 @@ describe 'influxdb' do
           group: 'root',
         )
       end
+
       is_expected.to contain_file('/var/lib/influxdb').with(
         ensure: 'directory',
         owner: 'influxdb',
         group: 'influxdb',
       )
+
       is_expected.to contain_file('/var/lib/influxdb').that_requires(['User[influxdb]', 'Group[influxdb]'])
 
       ['/etc/influxdb/scripts/influxd-systemd-start.sh', '/etc/systemd/system/influxdb.service'].each do |file|
@@ -110,11 +124,13 @@ describe 'influxdb' do
       end
 
       is_expected.to contain_user('influxdb')
+
       is_expected.to contain_group('influxdb')
 
       is_expected.to contain_archive('/tmp/influxdb.tar.gz').with(
         source: 'https://dl.influxdata.com/influxdb/releases/influxdb2-2.1.1-linux-amd64.tar.gz',
       )
+
       is_expected.to contain_archive('/tmp/influxdb.tar.gz').that_requires(
         ['File[/etc/influxdb]', 'File[/opt/influxdb]'],
       )
@@ -126,6 +142,7 @@ describe 'influxdb' do
 
     it {
       is_expected.not_to contain_yumrepo('influxdb2')
+
       is_expected.not_to contain_archive('/tmp/influxdb.tar.gz')
     }
   end
