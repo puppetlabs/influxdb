@@ -82,11 +82,19 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
     it 'processes resources' do
       allow(provider).to receive(:influx_get).with('/api/v2/orgs', params: {}).and_return(org_response)
       provider.instance_variable_set('@use_ssl', true)
+      provider.instance_variable_set('@host', 'foo.bar.com')
+      provider.instance_variable_set('@port', 8086)
+      provider.instance_variable_set('@token_file', '/root/.influxdb_token')
+      provider.instance_variable_set('@token', RSpec::Puppet::Sensitive.new('puppetlabs'))
 
       should_hash = [
         {
           ensure: 'present',
           use_ssl: true,
+          host: 'foo.bar.com',
+          port: 8086,
+          token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+          token_file: '/root/.influxdb_token',
           user: 'admin',
           name: 'token_1',
           status: 'active',

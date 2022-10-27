@@ -143,11 +143,19 @@ RSpec.describe Puppet::Provider::InfluxdbBucket::InfluxdbBucket do
         allow(provider).to receive(:influx_get).with('/api/v2/users', params: {}).and_return(user_response)
 
         provider.instance_variable_set('@use_ssl', true)
+        provider.instance_variable_set('@host', 'foo.bar.com')
+        provider.instance_variable_set('@port', 8086)
+        provider.instance_variable_set('@token_file', '/root/.influxdb_token')
+        provider.instance_variable_set('@token', RSpec::Puppet::Sensitive.new('puppetlabs'))
 
         should_hash = [
           { name: 'puppet_data',
             ensure: 'present',
             use_ssl: true,
+            host: 'foo.bar.com',
+            port: 8086,
+            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+            token_file: '/root/.influxdb_token',
             org: 'puppetlabs',
             retention_rules: [{ 'type' => 'expire', 'everySeconds' => 2_592_000, 'shardGroupDurationSeconds' => 604_800 }],
             members: [],

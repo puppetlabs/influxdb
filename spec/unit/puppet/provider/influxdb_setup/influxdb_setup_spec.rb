@@ -50,7 +50,17 @@ RSpec.describe Puppet::Provider::InfluxdbSetup::InfluxdbSetup do
 
   describe '#create' do
     it 'creates resources' do
+      provider.instance_variable_set('@use_ssl', true)
+      provider.instance_variable_set('@host', 'foo.bar.com')
+      provider.instance_variable_set('@port', 8086)
+      provider.instance_variable_set('@token_file', '/root/.influxdb_token')
+      provider.instance_variable_set('@token', RSpec::Puppet::Sensitive.new('puppetlabs'))
+
       should = {
+        use_ssl: true,
+        host: 'foo.bar.com',
+        port: 8086,
+        token: RSpec::Puppet::Sensitive.new('puppetlabs'),
         bucket: 'puppet',
         org: 'puppetlabs',
         username: 'admin',

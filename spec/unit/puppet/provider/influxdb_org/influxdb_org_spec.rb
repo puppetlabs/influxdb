@@ -66,6 +66,11 @@ RSpec.describe Puppet::Provider::InfluxdbOrg::InfluxdbOrg do
     # rubocop:disable RSpec/SubjectStub
     it 'processes resources' do
       provider.instance_variable_set('@use_ssl', true)
+      provider.instance_variable_set('@host', 'foo.bar.com')
+      provider.instance_variable_set('@port', 8086)
+      provider.instance_variable_set('@token_file', '/root/.influxdb_token')
+      provider.instance_variable_set('@token', RSpec::Puppet::Sensitive.new('puppetlabs'))
+
       allow(provider).to receive(:influx_get).with('/api/v2/orgs', params: {}).and_return(org_response)
       allow(provider).to receive(:influx_get).with('/api/v2/users', params: {}).and_return(user_response)
 
@@ -74,6 +79,10 @@ RSpec.describe Puppet::Provider::InfluxdbOrg::InfluxdbOrg do
           name: 'puppetlabs',
           ensure: 'present',
           use_ssl: true,
+          host: 'foo.bar.com',
+          port: 8086,
+          token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+          token_file: '/root/.influxdb_token',
           description: nil,
           members: [],
         },
