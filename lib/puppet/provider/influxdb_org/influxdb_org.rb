@@ -29,6 +29,10 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
           {
             name: value['name'],
             use_ssl: @use_ssl,
+            host: @host,
+            port: @port,
+            token: @token,
+            token_file: @token_file,
             ensure: 'present',
             members: org_members ? org_members.map { |member| member['name'] } : [],
             description: value['description']

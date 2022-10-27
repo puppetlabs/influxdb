@@ -22,6 +22,9 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::Simp
       {
         name: @host,
         use_ssl: @use_ssl,
+        port: @port,
+        token: @token,
+        token_file: @token_file,
         ensure: response['allowed'] == true ? 'absent' : 'present',
       },
     ]

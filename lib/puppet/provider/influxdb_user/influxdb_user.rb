@@ -29,6 +29,10 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
           {
             name: name,
             use_ssl: @use_ssl,
+            host: @host,
+            port: @port,
+            token: @token,
+            token_file: @token_file,
             ensure: 'present',
             status: value['status'],
           },

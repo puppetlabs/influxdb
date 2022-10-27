@@ -27,6 +27,10 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
         {
           name: label['name'],
           use_ssl: @use_ssl,
+          host: @host,
+          port: @port,
+          token: @token,
+          token_file: @token_file,
           ensure: 'present',
           org: name_from_id(@org_hash, label['orgID']),
           properties: label['properties'],
