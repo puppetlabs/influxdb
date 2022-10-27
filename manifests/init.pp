@@ -246,6 +246,7 @@ class influxdb (
         {
           cert => '/etc/influxdb/cert.pem',
           key  => '/etc/influxdb/key.pem',
+          port => $port,
         }
       ),
       notify  => Service['influxdb'],
@@ -255,6 +256,7 @@ class influxdb (
   if $manage_setup {
     influxdb_setup { $host:
       ensure     => 'present',
+      port       => $port,
       use_ssl    => $use_ssl,
       token_file => $token_file,
       bucket     => $initial_bucket,
