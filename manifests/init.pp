@@ -52,7 +52,7 @@
 class influxdb (
   # Provided by module data
   String  $host,
-  Integer $port,
+  Stdlib::Port::Unprivileged $port,
   String  $initial_org,
   String  $initial_bucket,
   String  $repo_gpg_key_id,
