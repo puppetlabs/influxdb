@@ -29,6 +29,10 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
         {
           ensure: 'present',
           use_ssl: @use_ssl,
+          host: @host,
+          port: @port,
+          token: @token,
+          token_file: @token_file,
           name: value['database'],
           org: name_from_id(@org_hash, value['orgID']),
           bucket: name_from_id(@bucket_hash, value['bucketID']),

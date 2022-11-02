@@ -1,4 +1,5 @@
-<%- | String $cert, String $key | -%>
+<%- | String $cert, String $key, Integer $port | -%>
 [Service]
 Environment="INFLUXD_TLS_CERT=<%= $cert %>"
 Environment="INFLUXD_TLS_KEY=<%= $key %>"
+Environment="INFLUXD_HTTP_BIND_ADDRESS=:<%= $port %>"
