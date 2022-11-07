@@ -158,7 +158,7 @@ fqdn of the host running InfluxDB.  Defaults to the fqdn of the local machine
 
 ##### <a name="port"></a>`port`
 
-Data type: `Integer`
+Data type: `Stdlib::Port::Unprivileged`
 
 port of the InfluxDB Service. Defaults to 8086
 
