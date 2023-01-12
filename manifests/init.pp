@@ -80,7 +80,7 @@ class influxdb (
                                     },
 ) {
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
-  unless $host == $facts['networking']['fqdn'] or $host == 'localhost' {
+  unless $host == $facts['networking']['fqdn'] or $host == $facts['networking']['hostname'] or $host == 'localhost' {
     fail(
       @("MSG")
         Unable to manage InfluxDB installation on host: ${host}.
