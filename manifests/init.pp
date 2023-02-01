@@ -85,7 +85,7 @@ class influxdb (
       @("MSG")
                                                 Unable to manage InfluxDB installation on host: ${host}.
         Management of repos, packages and services etc is only possible on the local host (${facts['networking']['fqdn']}).
-      | MSG
+        | MSG
     )
   }
 
