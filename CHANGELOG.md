@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v1.5.0](https://github.com/puppetlabs/influxdb/tree/v1.5.0) (2023-02-03)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.4.0...v1.5.0)
+
+### Added
+
+- GPG key changes [\#62](https://github.com/puppetlabs/influxdb/pull/62) ([m0dular](https://github.com/m0dular))
+- Permit short hostnames to be used [\#60](https://github.com/puppetlabs/influxdb/pull/60) ([seanmil](https://github.com/seanmil))
+
+### Fixed
+
+- Update influxdb repo key [\#61](https://github.com/puppetlabs/influxdb/pull/61) ([elfranne](https://github.com/elfranne))
+
 ## [v1.4.0](https://github.com/puppetlabs/influxdb/tree/v1.4.0) (2022-11-07)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.3.1...v1.4.0)

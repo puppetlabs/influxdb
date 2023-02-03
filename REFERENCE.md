@@ -98,16 +98,16 @@ Data type: `String`
 
 Version of InfluxDB to install.  Changing this is not recommended.
 
-Default value: `'2.1.1'`
+Default value: `'2.6.1'`
 
 ##### <a name="archive_source"></a>`archive_source`
 
 Data type: `Variant[String,Boolean[false]]`
 
 URL containing an InfluxDB archive if not installing from a repository or false to disable installing from source.
-Defaults to version 2-2.1.1 on amd64 architechture.
+Defaults to version 2.6.1 on amd64 architechture.
 
-Default value: `'https://dl.influxdata.com/influxdb/releases/influxdb2-2.1.1-linux-amd64.tar.gz'`
+Default value: `'https://dl.influxdata.com/influxdb/releases/influxdb2-2.6.1-linux-amd64.tar.gz'`
 
 ##### <a name="use_ssl"></a>`use_ssl`
 
