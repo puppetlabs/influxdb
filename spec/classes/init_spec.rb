@@ -33,7 +33,7 @@ describe 'influxdb' do
                                                                       'File[/etc/systemd/system/influxdb.service.d]',
                                                                       'Service[influxdb]',
                                                                     ])
-      is_expected.to contain_package('influxdb2').with_ensure('2.1.1')
+      is_expected.to contain_package('influxdb2').with_ensure('2.6.1')
 
       ['/etc/influxdb/cert.pem', '/etc/influxdb/ca.pem', '/etc/influxdb/key.pem'].each do |file|
         is_expected.to contain_file(file)
@@ -113,7 +113,7 @@ describe 'influxdb' do
       is_expected.to contain_group('influxdb')
 
       is_expected.to contain_archive('/tmp/influxdb.tar.gz').with(
-        source: 'https://dl.influxdata.com/influxdb/releases/influxdb2-2.1.1-linux-amd64.tar.gz',
+        source: 'https://dl.influxdata.com/influxdb/releases/influxdb2-2.6.1-linux-amd64.tar.gz',
       )
       is_expected.to contain_archive('/tmp/influxdb.tar.gz').that_requires(
         ['File[/etc/influxdb]', 'File[/opt/influxdb]'],
