@@ -75,7 +75,7 @@ describe 'influxdb' do
           descr: 'influxdb2',
           name: 'influxdb2',
           baseurl: 'https://repos.influxdata.com/rhel/$releasever/$basearch/stable',
-          gpgkey: 'https://repos.influxdata.com/influxdb2.key https://repos.influxdata.com/influxdb.key',
+          gpgkey: 'https://repos.influxdata.com/influxdata-archive_compat.key',
           enabled: '1',
           gpgcheck: '1',
           target: '/etc/yum.repos.d/influxdb2.repo',
