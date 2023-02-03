@@ -42,6 +42,7 @@ Gemfile:
   optional:
     ":development":
     - gem: github_changelog_generator
+      version: '= 1.15.2'
     - gem: 'toml-rb'
     - gem: 'octokit'
       version:
