@@ -28,7 +28,7 @@ RSpec.describe Puppet::Provider::InfluxdbLabel::InfluxdbLabel do
   end
 
   let(:org_response) do
-    {
+    [{
       'links' => {
         'self' => '/api/v2/orgs'
       },
@@ -41,11 +41,11 @@ RSpec.describe Puppet::Provider::InfluxdbLabel::InfluxdbLabel do
           },
         },
       ]
-    }
+    }]
   end
 
   let(:label_response) do
-    {
+    [{
       'links' => {
         'self' => '/api/v2/labels'
       },
@@ -59,11 +59,11 @@ RSpec.describe Puppet::Provider::InfluxdbLabel::InfluxdbLabel do
           },
         },
       ]
-    }
+    }]
   end
 
   let(:user_response) do
-    {
+    [{
       'links' => {
         'self' => '/api/v2/users'
       },
@@ -77,7 +77,7 @@ RSpec.describe Puppet::Provider::InfluxdbLabel::InfluxdbLabel do
           'status' => 'active'
         },
       ]
-    }
+    }]
   end
 
   describe '#get' do
@@ -89,8 +89,8 @@ RSpec.describe Puppet::Provider::InfluxdbLabel::InfluxdbLabel do
       provider.instance_variable_set('@token_file', '/root/.influxdb_token')
       provider.instance_variable_set('@token', RSpec::Puppet::Sensitive.new('puppetlabs'))
 
-      allow(provider).to receive(:influx_get).with('/api/v2/orgs', params: {}).and_return(org_response)
-      allow(provider).to receive(:influx_get).with('/api/v2/labels', params: {}).and_return(label_response)
+      allow(provider).to receive(:influx_get).with('/api/v2/orgs').and_return(org_response)
+      allow(provider).to receive(:influx_get).with('/api/v2/labels').and_return(label_response)
 
       should_hash = [
         {

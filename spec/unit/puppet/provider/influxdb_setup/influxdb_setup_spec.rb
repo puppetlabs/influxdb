@@ -27,21 +27,17 @@ RSpec.describe Puppet::Provider::InfluxdbSetup::InfluxdbSetup do
     }
   end
 
-  let(:setup_api_response) do
-    { allowed: true }
-  end
-
   describe '#get' do
     # rubocop:disable RSpec/SubjectStub
     context 'when not setup' do
       it 'processes resources' do
-        allow(provider).to receive(:influx_get).with('/api/v2/setup').and_return({ 'allowed' => true })
+        allow(provider).to receive(:influx_get).with('/api/v2/setup').and_return([{ 'allowed' => true }])
         expect(provider.get(context)[0][:ensure]).to eq 'absent'
       end
 
       context 'when setup' do
         it 'processes resources' do
-          allow(provider).to receive(:influx_get).with('/api/v2/setup').and_return({ 'allowed' => false })
+          allow(provider).to receive(:influx_get).with('/api/v2/setup').and_return([{ 'allowed' => false }])
           expect(provider.get(context)[0][:ensure]).to eq 'present'
         end
       end

@@ -28,7 +28,7 @@ RSpec.describe Puppet::Provider::InfluxdbUser::InfluxdbUser do
   end
 
   let(:user_response) do
-    {
+    [{
       'links' => {
         'self' => '/api/v2/users'
       },
@@ -42,7 +42,7 @@ RSpec.describe Puppet::Provider::InfluxdbUser::InfluxdbUser do
           'status' => 'active'
         },
       ]
-    }
+    }]
   end
 
   describe '#get' do
@@ -54,7 +54,7 @@ RSpec.describe Puppet::Provider::InfluxdbUser::InfluxdbUser do
       provider.instance_variable_set('@token_file', '/root/.influxdb_token')
       provider.instance_variable_set('@token', RSpec::Puppet::Sensitive.new('puppetlabs'))
 
-      allow(provider).to receive(:influx_get).with('/api/v2/users', params: {}).and_return(user_response)
+      allow(provider).to receive(:influx_get).with('/api/v2/users').and_return(user_response)
 
       should_hash = [
         {

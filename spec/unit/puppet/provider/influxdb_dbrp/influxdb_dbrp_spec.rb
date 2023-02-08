@@ -34,7 +34,7 @@ RSpec.describe Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp do
   end
 
   let(:bucket_response) do
-    {
+    [{
       'links' => {
         'self' => '/api/v2/buckets?descending=false&limit=20&offset=0'
       },
@@ -57,11 +57,11 @@ RSpec.describe Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp do
           'labels' => { 'links' => { 'self' => '/api/v2/labels' }, 'labels' => [] }
         },
       ]
-    }
+    }]
   end
 
   let(:org_response) do
-    {
+    [{
       'links' => {
         'self' => '/api/v2/orgs'
       },
@@ -74,11 +74,11 @@ RSpec.describe Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp do
           },
         },
       ]
-    }
+    }]
   end
 
   let(:dbrp_response) do
-    {
+    [{
       'content' => [
         {
           'id' => '1234567',
@@ -89,7 +89,7 @@ RSpec.describe Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp do
           'bucketID' => '12345'
         },
       ]
-    }
+    }]
   end
 
   describe '#get' do
@@ -102,9 +102,9 @@ RSpec.describe Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp do
         provider.instance_variable_set('@token_file', '/root/.influxdb_token')
         provider.instance_variable_set('@token', RSpec::Puppet::Sensitive.new('puppetlabs'))
 
-        allow(provider).to receive(:influx_get).with('/api/v2/orgs', params: {}).and_return(org_response)
-        allow(provider).to receive(:influx_get).with('/api/v2/dbrps?orgID=123', params: {}).and_return(dbrp_response)
-        allow(provider).to receive(:influx_get).with('/api/v2/buckets', params: {}).and_return(bucket_response)
+        allow(provider).to receive(:influx_get).with('/api/v2/orgs').and_return(org_response)
+        allow(provider).to receive(:influx_get).with('/api/v2/dbrps?orgID=123').and_return(dbrp_response)
+        allow(provider).to receive(:influx_get).with('/api/v2/buckets').and_return(bucket_response)
 
         should_hash = [{
           bucket: 'puppet_data',
