@@ -12,7 +12,7 @@ Puppet::ResourceApi.register_type(
     org     => 'puppetlabs',
   }
 EOS
-  features: ['canonicalize'],
+  features: ['canonicalize', 'simple_get_filter'],
   attributes: {
     ensure: {
       type: 'Enum[present, absent]',

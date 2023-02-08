@@ -20,7 +20,7 @@ Puppet::ResourceApi.register_type(
     ],
   }
 EOS
-  features: ['canonicalize'],
+  features: ['canonicalize', 'simple_get_filter'],
   attributes: {
     name: {
       type: 'String',

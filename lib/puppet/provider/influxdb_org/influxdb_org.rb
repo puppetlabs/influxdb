@@ -20,7 +20,7 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
     nil
   end
 
-  def get(context)
+  def get(context, names = nil)
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
     get_user_info if @user_map.empty?
@@ -30,7 +30,7 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
     response.each do |r|
       next unless r['orgs']
 
-      r['orgs'].each do |value|
+      r['orgs'].select { |s| names.nil? || names.include?(s['name']) }.each do |value|
         org_members = @org_hash.find { |org| org['name'] == value['name'] }.dig('members', 0, 'users')
         ret << {
           name: value['name'],

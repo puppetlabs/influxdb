@@ -11,7 +11,7 @@ Puppet::ResourceApi.register_type(
     ensure  => present,
   }
 EOS
-  features: ['canonicalize'],
+  features: ['canonicalize', 'simple_get_filter'],
   attributes: {
     ensure: {
       type: 'Enum[present, absent]',

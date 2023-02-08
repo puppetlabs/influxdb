@@ -22,7 +22,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     nil
   end
 
-  def get(context)
+  def get(context, names = nil)
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
 
@@ -33,7 +33,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     response.each do |r|
       next unless r['authorizations']
 
-      r['authorizations'].each do |auth|
+      r['authorizations'].select { |s| names.nil? || names.include?(s['description']) }.each do |auth|
         val = {
           name: auth['description'],
           ensure: 'present',
