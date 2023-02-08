@@ -75,6 +75,12 @@ EOS
       desc: 'Whether to enable SSL for the InfluxDB service',
       default: true,
       behavior: :parameter,
+    },
+    force: {
+      type: 'Boolean',
+      desc: 'Recreate resource if immutable property changes',
+      default: false,
+      behavior: :parameter,
     }
   },
 )

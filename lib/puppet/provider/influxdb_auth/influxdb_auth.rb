@@ -106,7 +106,12 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
 
     # If the status property is unchanged, then a different, immutable property has been changed.
     if self_token['status'] == should[:status]
-      context.warning("Unable to update properties other than 'status'.  Please delete and recreate resource with the desired properties")
+      if should[:force]
+        create(context, name, should)
+        delete(context, name)
+      else
+        context.warning("Unable to update properties other than 'status'.  Please delete and recreate resource with the desired properties")
+      end
     else
       auth_id = self_token['id']
       body = {
