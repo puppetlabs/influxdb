@@ -23,6 +23,9 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
   end
 
   def get(_context)
+    init_auth if @auth.empty?
+    get_org_info if @org_hash.empty?
+
     init_auth
     get_org_info
 

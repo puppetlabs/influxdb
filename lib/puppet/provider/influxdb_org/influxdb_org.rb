@@ -21,6 +21,10 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
   end
 
   def get(_context)
+    init_auth if @auth.empty?
+    get_org_info if @org_hash.empty?
+    get_user_info if @user_map.empty?
+
     init_auth
     get_org_info
     get_user_info

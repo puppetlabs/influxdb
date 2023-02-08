@@ -21,6 +21,9 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
   end
 
   def get(_context)
+    init_auth if @auth.empty?
+    get_org_info if @org_hash.empty?
+    get_label_info if @label_hash.empty?
     init_auth
     get_org_info
     get_label_info

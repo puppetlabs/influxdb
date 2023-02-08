@@ -23,6 +23,10 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
   end
 
   def get(_context)
+    init_auth if @auth.empty?
+    get_org_info if @org_hash.empty?
+    get_bucket_info if @bucket_hash.empty?
+    get_dbrp_info if @dbrp_hash.empty?
     init_auth
     get_org_info
     get_bucket_info

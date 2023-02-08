@@ -21,6 +21,8 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
   end
 
   def get(_context)
+    init_auth if @auth.empty?
+    get_user_info if @user_map.empty?
     init_auth
     get_user_info
 

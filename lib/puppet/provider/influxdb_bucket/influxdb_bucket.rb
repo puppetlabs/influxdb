@@ -57,6 +57,13 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
             create_dbrp: dbrp ? true : false,
           },
         ]
+    init_auth if @auth.empty?
+    get_org_info if @org_hash.empty?
+    get_bucket_info if @bucket_hash.empty?
+    get_label_info if @label_hash.empty?
+    get_dbrp_info if @dbrp_hash.empty?
+    get_user_info if @user_map.empty?
+
       end
     else
       []
