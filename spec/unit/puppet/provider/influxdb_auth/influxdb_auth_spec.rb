@@ -147,10 +147,11 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
         ],
         description: 'token_1',
         status: 'active',
-        user: 'admin'
+        userID: 123,
       }
 
       provider.instance_variable_set('@org_hash', [{ 'name' => 'puppetlabs', 'id' => 123 }])
+      provider.instance_variable_set('@user_map', [{ 'name' => 'admin', 'id' => 123 }])
 
       expect(provider).to receive(:influx_post).with('/api/v2/authorizations', JSON.dump(post_args))
       expect(context).to receive(:debug).with("Creating '#{should_hash[:name]}' with #{should_hash.inspect}")
@@ -308,6 +309,7 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
       should_hash = {
         ensure: 'absent',
         name: 'token_1',
+        token_id: '123',
       }
 
       expect(context).to receive(:debug).with("Deleting '#{should_hash[:name]}'")
