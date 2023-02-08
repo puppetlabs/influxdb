@@ -34,7 +34,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
       next unless r['authorizations']
 
       r['authorizations'].each do |auth|
-        _val = {
+        val = {
           name: auth['description'],
           ensure: 'present',
           use_ssl: @use_ssl,
@@ -48,8 +48,8 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
           org: auth['org'],
         }
 
-      @self_hash << auth
-      ret << _val
+        @self_hash << auth
+        ret << val
       end
     end
     ret
@@ -105,8 +105,8 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     token_id = @self_hash.find { |auth| auth['description'] == name }.dig('id')
     influx_delete("/api/v2/authorizations/#{token_id}")
   end
-  rescue StandardError => e
-    context.err("Error deleting auth state: #{e.message}")
-    context.err(e.backtrace)
-    nil
+rescue StandardError => e
+  context.err("Error deleting auth state: #{e.message}")
+  context.err(e.backtrace)
+  nil
 end

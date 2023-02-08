@@ -93,8 +93,8 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
 
     influx_delete("/api/v2/dbrps/#{id}?org=#{org}")
   end
-  rescue StandardError => e
-    context.err("Error deleting dbrp state: #{e.message}")
-    context.err(e.backtrace)
-    nil
+rescue StandardError => e
+  context.err("Error deleting dbrp state: #{e.message}")
+  context.err(e.backtrace)
+  nil
 end

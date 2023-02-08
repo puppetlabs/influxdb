@@ -94,9 +94,9 @@ module PuppetX
         []
       end
 
-      #def influx_get(name)
+      # def influx_get(name)
       #  _influx_get(name)
-      #end
+      # end
 
       def influx_post(name, body)
         response = @client.post(URI(@influxdb_uri + name), body, headers: @auth.merge({ 'Content-Type' => 'application/json' }))

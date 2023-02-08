@@ -33,7 +33,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     response.each do |r|
       next unless r['buckets']
       r['buckets'].select { |bucket| bucket['type'] == 'user' }.each do |bucket|
-        dbrp = @dbrp_hash.find { |dbrp| dbrp['bucketID'] == bucket['id'] }
+        dbrp = @dbrp_hash.find { |d| d['bucketID'] == bucket['id'] }
 
         links_hash = @bucket_hash.find { |b| b['name'] == bucket['name'] }
         bucket_members = links_hash.dig('members', 0, 'users')
@@ -172,8 +172,8 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     context.err(e.backtrace)
     nil
   end
-  rescue StandardError => e
-    context.err("Error deleting bucket state: #{e.message}")
-    context.err(e.backtrace)
-    nil
+rescue StandardError => e
+  context.err("Error deleting bucket state: #{e.message}")
+  context.err(e.backtrace)
+  nil
 end

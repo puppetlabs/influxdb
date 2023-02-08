@@ -84,8 +84,8 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
     id = id_from_name(@user_map, name)
     influx_delete("/api/v2/users/#{id}")
   end
-  rescue StandardError => e
-    context.err("Error deleting user state: #{e.message}")
-    context.err(e.backtrace)
-    nil
+rescue StandardError => e
+  context.err("Error deleting user state: #{e.message}")
+  context.err(e.backtrace)
+  nil
 end

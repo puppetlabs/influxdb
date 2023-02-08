@@ -112,8 +112,8 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
     id = id_from_name(@org_hash, name)
     influx_delete("/api/v2/orgs/#{id}")
   end
-  rescue StandardError => e
-    context.err("Error deleting org state: #{e.message}")
-    context.err(e.backtrace)
-    nil
+rescue StandardError => e
+  context.err("Error deleting org state: #{e.message}")
+  context.err(e.backtrace)
+  nil
 end

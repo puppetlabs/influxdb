@@ -90,8 +90,8 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
     label_id = id_from_name(@label_hash, name)
     influx_delete("/api/v2/labels/#{label_id}")
   end
-  rescue StandardError => e
-    context.err("Error deleting label state: #{e.message}")
-    context.err(e.backtrace)
-    nil
+rescue StandardError => e
+  context.err("Error deleting label state: #{e.message}")
+  context.err(e.backtrace)
+  nil
 end

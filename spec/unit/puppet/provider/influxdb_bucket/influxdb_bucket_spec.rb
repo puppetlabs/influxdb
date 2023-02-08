@@ -167,7 +167,7 @@ RSpec.describe Puppet::Provider::InfluxdbBucket::InfluxdbBucket do
       end
     end
 
-    #context 'with paginated api response' do
+    # context 'with paginated api response' do
     #  it 'processes paginated responses' do
     #    response_1 = [{
     #      'links' => {
@@ -561,7 +561,7 @@ RSpec.describe Puppet::Provider::InfluxdbBucket::InfluxdbBucket do
     #    expect(provider).to receive(:influx_get).with("/api/v2/buckets?descending=false&limit=20&offset=20")
     #    provider.get(context)
     #  end
-    #end
+    # end
   end
 
   describe '#create' do
