@@ -86,7 +86,7 @@ module PuppetX
         elsif response.code == 404
           results
         else
-          raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}"
+          raise Puppet::DevError, "Received HTTP code #{response.code} for get #{name} with message #{response.reason}"
         end
       rescue StandardError => e
         Puppet.err("Error in get call: #{e.message}")
@@ -100,14 +100,14 @@ module PuppetX
 
       def influx_post(name, body)
         response = @client.post(URI(@influxdb_uri + name), body, headers: @auth.merge({ 'Content-Type' => 'application/json' }))
-        raise Puppet::DevError, "Received HTTP code '#{response.code}' with message '#{response.reason}'" unless response.success?
+        raise Puppet::DevError, "Received HTTP code '#{response.code}' for post #{name} with message '#{response.reason}' '#{body}" unless response.success?
 
         JSON.parse(response.body ? response.body : '{}')
       end
 
       def influx_put(name, body)
         response = @client.put(URI(@influxdb_uri + name), body, headers: @auth.merge({ 'Content-Type' => 'application/json' }))
-        raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}" unless response.success?
+        raise Puppet::DevError, "Received HTTP code #{response.code} for put #{name} with message #{response.reason}" unless response.success?
 
         JSON.parse(response.body ? response.body : '{}')
       end
@@ -122,7 +122,7 @@ module PuppetX
 
           request.body = body
           response = conn.request(request)
-          raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}" unless response.is_a?(Net::HTTPSuccess)
+          raise Puppet::DevError, "Received HTTP code #{response.code} for patch #{name} with message #{response.reason}" unless response.is_a?(Net::HTTPSuccess)
 
           JSON.parse(response.body ? response.body : '{}')
         end
@@ -130,7 +130,7 @@ module PuppetX
 
       def influx_delete(name)
         response = @client.delete(URI(@influxdb_uri + name), headers: @auth)
-        raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}" unless response.success?
+        raise Puppet::DevError, "Received HTTP code #{response.code} for delete #{name} with message #{response.reason}" unless response.success?
 
         JSON.parse(response.body ? response.body : '{}')
       end
