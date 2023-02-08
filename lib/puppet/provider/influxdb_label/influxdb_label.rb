@@ -24,14 +24,14 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
     get_label_info if @label_hash.empty?
-    init_auth
-    get_org_info
-    get_label_info
 
-    response = influx_get('/api/v2/labels', params: {})
-    if response['labels']
-      response['labels'].map do |label|
-        {
+    response = influx_get('/api/v2/labels')
+    ret = []
+
+    response.each do |r|
+      next unless r['labels']
+      r['labels'].each do |label|
+        ret << {
           name: label['name'],
           use_ssl: @use_ssl,
           host: @host,
@@ -43,9 +43,9 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
           properties: label['properties'],
         }
       end
-    else
-      []
     end
+
+    ret
   rescue StandardError => e
     context.err("Error getting label state: #{e.message}")
     context.err(e.backtrace)

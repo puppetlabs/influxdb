@@ -23,36 +23,27 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
   def get(_context)
     init_auth if @auth.empty?
     get_user_info if @user_map.empty?
-    init_auth
-    get_user_info
 
-    response = influx_get('/api/v2/users', params: {})
-    if response['users']
-      response['users'].reduce([]) do |memo, value|
-        name = value['name']
+    response = influx_get('/api/v2/users')
+    ret = []
+    response.each do |r|
+      next unless r['users']
 
-        memo + [
-          {
-            name: name,
-            use_ssl: @use_ssl,
-            host: @host,
-            port: @port,
-            token: @token,
-            token_file: @token_file,
-            ensure: 'present',
-            status: value['status'],
-          },
-        ]
+      r['users'].each do |value|
+        ret << {
+          name: value['name'],
+          use_ssl: @use_ssl,
+          host: @host,
+          port: @port,
+          token: @token,
+          token_file: @token_file,
+          ensure: 'present',
+          status: value['status'],
+        }
       end
-    else
-      [
-        {
-          name: nil,
-          ensure: 'absent',
-          status: nil,
-        },
-      ]
     end
+
+    ret
   rescue StandardError => e
     context.err("Error getting user state: #{e.message}")
     context.err(e.backtrace)
@@ -93,4 +84,8 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
     id = id_from_name(@user_map, name)
     influx_delete("/api/v2/users/#{id}")
   end
+  rescue StandardError => e
+    context.err("Error deleting user state: #{e.message}")
+    context.err(e.backtrace)
+    nil
 end

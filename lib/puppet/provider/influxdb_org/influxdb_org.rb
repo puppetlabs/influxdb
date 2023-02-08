@@ -25,38 +25,28 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
     get_org_info if @org_hash.empty?
     get_user_info if @user_map.empty?
 
-    init_auth
-    get_org_info
-    get_user_info
+    response = influx_get('/api/v2/orgs')
+    ret = []
+    response.each do |r|
+      next unless r['orgs']
 
-    response = influx_get('/api/v2/orgs', params: {})
-    if response['orgs']
-      response['orgs'].reduce([]) do |memo, value|
-        org_members = @org_hash.find { |org| org['name'] == value['name'] }.dig('members', 'users')
-        memo + [
-          {
-            name: value['name'],
-            use_ssl: @use_ssl,
-            host: @host,
-            port: @port,
-            token: @token,
-            token_file: @token_file,
-            ensure: 'present',
-            members: org_members ? org_members.map { |member| member['name'] } : [],
-            description: value['description']
-          },
-        ]
+      r['orgs'].each do |value|
+        org_members = @org_hash.find { |org| org['name'] == value['name'] }.dig('members', 0, 'users')
+        ret << {
+          name: value['name'],
+          use_ssl: @use_ssl,
+          host: @host,
+          port: @port,
+          token: @token,
+          token_file: @token_file,
+          ensure: 'present',
+          members: org_members ? org_members.map { |member| member['name'] } : [],
+          description: value['description']
+        }
       end
-    else
-      [
-        {
-          influxdb_host: @influxdb_host,
-          org: nil,
-          ensure: 'absent',
-          description: nil,
-        },
-      ]
     end
+
+    ret
   rescue StandardError => e
     context.err("Error getting org state: #{e.message}")
     context.err(e.backtrace)
@@ -80,7 +70,7 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
   def update(context, name, should)
     context.debug("Updating '#{name}' with #{should.inspect}")
     org_id = id_from_name(@org_hash, name)
-    org_members = @org_hash.find { |org| org['name'] == name }.dig('members', 'users')
+    org_members = @org_hash.find { |org| org['name'] == name }.dig('members', 0, 'users')
     cur_members = org_members ? org_members : []
     should_members = should[:members] ? should[:members] : []
 

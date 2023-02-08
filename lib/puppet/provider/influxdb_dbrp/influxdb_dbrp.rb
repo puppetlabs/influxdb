@@ -27,10 +27,6 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
     get_org_info if @org_hash.empty?
     get_bucket_info if @bucket_hash.empty?
     get_dbrp_info if @dbrp_hash.empty?
-    init_auth
-    get_org_info
-    get_bucket_info
-    get_dbrp_info
 
     @dbrp_hash.reduce([]) do |memo, value|
       memo + [

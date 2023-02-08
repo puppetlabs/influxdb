@@ -26,33 +26,33 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
 
-    init_auth
-    get_org_info
+    response = influx_get('/api/v2/authorizations')
+    ret = []
+    @self_hash = []
 
-    response = influx_get('/api/v2/authorizations', params: {})
-    if response['authorizations']
-      @self_hash = response['authorizations']
+    response.each do |r|
+      next unless r['authorizations']
 
-      response['authorizations'].reduce([]) do |memo, value|
-        memo + [
-          {
-            name: value['description'],
-            ensure: 'present',
-            use_ssl: @use_ssl,
-            host: @host,
-            port: @port,
-            token: @token,
-            token_file: @token_file,
-            permissions: value['permissions'],
-            status: value['status'],
-            user: value['user'],
-            org: value['org'],
-          },
-        ]
+      r['authorizations'].each do |auth|
+        _val = {
+          name: auth['description'],
+          ensure: 'present',
+          use_ssl: @use_ssl,
+          host: @host,
+          port: @port,
+          token: @token,
+          token_file: @token_file,
+          permissions: auth['permissions'],
+          status: auth['status'],
+          user: auth['user'],
+          org: auth['org'],
+        }
+
+      @self_hash << auth
+      ret << _val
       end
-    else
-      []
     end
+    ret
   rescue StandardError => e
     context.err("Error getting auth state: #{e.message}")
     context.err(e.backtrace)

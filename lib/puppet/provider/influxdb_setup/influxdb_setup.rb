@@ -21,7 +21,7 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::Simp
   end
 
   def get(_context)
-    response = influx_get('/api/v2/setup')
+    response = influx_get('/api/v2/setup')[0]
     [
       {
         name: @host,

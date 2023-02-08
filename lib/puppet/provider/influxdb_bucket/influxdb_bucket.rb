@@ -20,43 +20,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     nil
   end
 
-  def get(_context)
-    init_auth
-    get_org_info
-    get_bucket_info
-    get_label_info
-    get_dbrp_info
-    get_user_info
-
-    response = influx_get('/api/v2/buckets', params: {})
-    if response['buckets']
-      response['buckets'].select { |bucket| bucket['type'] == 'user' }.reduce([]) do |memo, value|
-        org_id = value['orgID']
-        bucket_id = value['id']
-        dbrp = influx_get("/api/v2/dbrps?orgID=#{org_id}", params: {})['content'].find do |d|
-          d['bucketID'] == bucket_id
-        end
-
-        links_hash = @bucket_hash.find { |b| b['name'] == value['name'] }
-        bucket_members = links_hash.dig('members', 'users')
-        bucket_labels = links_hash.dig('labels', 'labels')
-
-        memo + [
-          {
-            name: value['name'],
-            ensure: 'present',
-            use_ssl: @use_ssl,
-            host: @host,
-            port: @port,
-            token: @token,
-            token_file: @token_file,
-            org: name_from_id(@org_hash, value['orgID']),
-            retention_rules: value['retentionRules'],
-            members: bucket_members ? bucket_members.map { |member| member['name'] } : [],
-            labels: bucket_labels ? bucket_labels.map { |label| label['name'] } : [],
-            create_dbrp: dbrp ? true : false,
-          },
-        ]
+  def get(context)
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
     get_bucket_info if @bucket_hash.empty?
@@ -64,10 +28,35 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     get_dbrp_info if @dbrp_hash.empty?
     get_user_info if @user_map.empty?
 
+    response = influx_get('/api/v2/buckets')
+    ret = []
+    response.each do |r|
+      next unless r['buckets']
+      r['buckets'].select { |bucket| bucket['type'] == 'user' }.each do |bucket|
+        dbrp = @dbrp_hash.find { |dbrp| dbrp['bucketID'] == bucket['id'] }
+
+        links_hash = @bucket_hash.find { |b| b['name'] == bucket['name'] }
+        bucket_members = links_hash.dig('members', 0, 'users')
+        bucket_labels = links_hash.dig('labels', 0, 'labels')
+
+        ret << {
+          name: bucket['name'],
+          ensure: 'present',
+          use_ssl: @use_ssl,
+          host: @host,
+          port: @port,
+          token: @token,
+          token_file: @token_file,
+          org: name_from_id(@org_hash, bucket['orgID']),
+          retention_rules: bucket['retentionRules'],
+          members: bucket_members ? bucket_members.map { |member| member['name'] } : [],
+          labels: bucket_labels ? bucket_labels.map { |label| label['name'] } : [],
+          create_dbrp: dbrp ? true : false,
+        }
       end
-    else
-      []
     end
+
+    ret
   rescue StandardError => e
     context.err("Error getting bucket state: #{e.message}")
     context.err(e.backtrace)
@@ -102,16 +91,20 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     should_members = should[:members] ? should[:members] : []
     should_labels = should[:labels] ? should[:labels] : []
 
-    bucket_members = @bucket_hash.find { |bucket| bucket['name'] == name }.dig('members', 'users')
+    bucket_members = @bucket_hash.find { |bucket| bucket['name'] == name }.dig('members', 0, 'users')
     bucket_members = bucket_members ? bucket_members.map { |user| user['name'] } : []
-    bucket_labels = @bucket_hash.find { |bucket| bucket['name'] == name }.dig('labels', 'labels')
+    bucket_labels = @bucket_hash.find { |bucket| bucket['name'] == name }.dig('labels', 0, 'labels')
 
     users_to_remove = bucket_members - should_members
     users_to_add = should_members - bucket_members
 
     users_to_remove.each do |user|
-      user_id = bucket_members.select { |u| u['name'] == user }.map { |u| u['id'] }.first
-      influx_delete("/api/v2/buckets/#{bucket_id}/members/#{user_id}")
+      user_id = id_from_name(@user_map, user)
+      if user_id
+        influx_delete("/api/v2/buckets/#{bucket_id}/members/#{user_id}")
+      else
+        context.warning("Could not find user #{user}")
+      end
     end
     users_to_add.each do |user|
       user_id = id_from_name(@user_map, user)
@@ -128,7 +121,11 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
 
     labels_to_remove.each do |label|
       label_id = id_from_name(@label_hash, label)
-      influx_delete("/api/v2/buckets/#{bucket_id}/labels/#{label_id}")
+      if label_id
+        influx_delete("/api/v2/buckets/#{bucket_id}/labels/#{label_id}")
+      else
+        context.warning("Could not find label #{label}")
+      end
     end
     labels_to_add.each do |label|
       label_id = id_from_name(@label_hash, label)
@@ -170,6 +167,10 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     context.debug("Deleting '#{name}'")
     id = id_from_name(@bucket_hash, name)
     influx_delete("/api/v2/buckets/#{id}")
+  rescue StandardError => e
+    context.err("Error deleting bucket: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
   rescue StandardError => e
     context.err("Error deleting bucket state: #{e.message}")

@@ -70,14 +70,21 @@ module PuppetX
         hashes.select { |user| user['id'] == id }.map { |user| user['name'] }.first
       end
 
-      def influx_get(name, _params = {})
+      # Helper function to process paginated responses.  Returns an array of responses
+      def influx_get(name, results = [])
+        # Return the current data if there is no 'next' object
+        return results if name.nil?
+
         response = @client.get(URI(@influxdb_uri + name), headers: @auth)
         if response.success?
-          JSON.parse(response.body ? response.body : '{}')
-          # We may receive a 404 if the api path doesn't exists, such as a /links request for an org with no labels
-          # We won't consider this a fatal error
+          # Recursively append the results of calling the URL in the 'next' object to our array
+          body = JSON.parse(response.body)
+          results << body
+          influx_get(body.dig('links', 'next'), results)
+        # We may receive a 404 if the api path doesn't exists, such as a /links request for an org with no labels
+        # We won't consider this a fatal error
         elsif response.code == 404
-          {}
+          results
         else
           raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}"
         end
@@ -86,6 +93,10 @@ module PuppetX
         Puppet.err(e.backtrace)
         []
       end
+
+      #def influx_get(name)
+      #  _influx_get(name)
+      #end
 
       def influx_post(name, body)
         response = @client.post(URI(@influxdb_uri + name), body, headers: @auth.merge({ 'Content-Type' => 'application/json' }))
@@ -125,19 +136,21 @@ module PuppetX
       end
 
       def influx_setup
-        response = influx_get('/api/v2/setup', params: {})
+        response = influx_get('/api/v2/setup')
         response['allowed'] == false
       rescue StandardException
         false
       end
 
       def get_org_info
-        response = influx_get('/api/v2/orgs', params: {})
-        return unless response['orgs']
+        response = influx_get('/api/v2/orgs')
 
-        response['orgs'].each do |org|
-          process_links(org, org['links'])
-          @org_hash << org
+        response.each do |r|
+          next unless r['orgs']
+          r['orgs'].each do |org|
+            process_links(org, org['links'])
+            @org_hash << org
+          end
         end
       rescue StandardError => e
         Puppet.err("Error getting org state: #{e.message}")
@@ -146,12 +159,13 @@ module PuppetX
       end
 
       def get_bucket_info
-        response = influx_get('/api/v2/buckets', params: {})
-        return unless response['buckets']
-
-        response['buckets'].each do |bucket|
-          process_links(bucket, bucket['links'])
-          @bucket_hash << bucket
+        response = influx_get('/api/v2/buckets')
+        response.each do |r|
+          next unless r['buckets']
+          r['buckets'].each do |bucket|
+            process_links(bucket, bucket['links'])
+            @bucket_hash << bucket
+          end
         end
       rescue StandardError => e
         Puppet.err("Error getting bucket state: #{e.message}")
@@ -164,9 +178,12 @@ module PuppetX
         # get_org_info must be called before this
         orgs = @org_hash.map { |org| org['id'] }
         orgs.each do |org|
-          dbrp_response = influx_get("/api/v2/dbrps?orgID=#{org}", params: {})
-          dbrp_response['content'].each do |dbrp|
-            @dbrp_hash << dbrp.merge('name' => dbrp['database'])
+          dbrp_response = influx_get("/api/v2/dbrps?orgID=#{org}")
+          dbrp_response.each do |r|
+            next unless r['content']
+            r['content'].each do |dbrp|
+              @dbrp_hash << dbrp.merge('name' => dbrp['database'])
+            end
           end
         end
       rescue StandardError => e
@@ -175,23 +192,14 @@ module PuppetX
         nil
       end
 
-      def get_telegraf_info
-        response = influx_get('/api/v2/telegrafs', params: {})
-        return unless response['configurations']
-
-        response['configurations'].each do |telegraf|
-          process_links(telegraf, telegraf['links'])
-          @telegraf_hash << telegraf
-        end
-      end
-
       def get_user_info
-        response = influx_get('/api/v2/users', params: {})
-        return unless response['users']
-
-        response['users'].each do |user|
-          process_links(user, user['links'])
-          @user_map << user
+        response = influx_get('/api/v2/users')
+        response.each do |r|
+          next unless r['users']
+          r['users'].each do |user|
+            process_links(user, user['links'])
+            @user_map << user
+          end
         end
       rescue StandardError => e
         Puppet.err("Error getting user state: #{e.message}")
@@ -201,8 +209,13 @@ module PuppetX
 
       # No links entries for labels other than self
       def get_label_info
-        response = influx_get('/api/v2/labels', params: {})
-        @label_hash = response['labels'] ? response['labels'] : []
+        response = influx_get('/api/v2/labels')
+        response.each do |r|
+          next unless r['labels']
+          r['labels'].each do |label|
+            @label_hash << label
+          end
+        end
       rescue StandardError => e
         Puppet.err("Error getting label state: #{e.message}")
         Puppet.err(e.backtrace)
@@ -215,7 +228,7 @@ module PuppetX
         #   add the results of the "buckets" api call to a "buckets" key
         links.each do |k, v|
           next if (k == 'self') || (k == 'write')
-          hash[k] = influx_get(v, params: {})
+          hash[k] = influx_get(v)
         end
       rescue StandardError => e
         Puppet.err("Error processing links: #{e.message}")
