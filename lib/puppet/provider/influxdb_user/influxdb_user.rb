@@ -14,6 +14,10 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
   def canonicalize(_context, resources)
     init_attrs(resources)
     resources
+  rescue StandardError => e
+    context.err("Error canonicalizing resources: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def get(_context)
@@ -47,6 +51,10 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
         },
       ]
     end
+  rescue StandardError => e
+    context.err("Error getting user state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def create(context, name, should)
@@ -58,6 +66,10 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
 
     body = { password: should[:password].unwrap }
     influx_post("/api/v2/users/#{response['id']}/password", JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error creating user state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def update(context, name, should)
@@ -68,6 +80,10 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
       status: should[:status],
     }
     influx_patch("/api/v2/users/#{user_id}", JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error updating user state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def delete(context, name)

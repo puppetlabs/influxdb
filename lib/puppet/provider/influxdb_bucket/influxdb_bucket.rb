@@ -14,6 +14,10 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
   def canonicalize(_context, resources)
     init_attrs(resources)
     resources
+  rescue StandardError => e
+    context.err("Error canonicalizing resources: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def get(_context)
@@ -57,6 +61,10 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     else
       []
     end
+  rescue StandardError => e
+    context.err("Error getting bucket state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def create(context, name, should)
@@ -74,6 +82,10 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     get_bucket_info
 
     update(context, name, should) if should[:labels] || should[:members] || should[:create_dbrp]
+  rescue StandardError => e
+    context.err("Error creating bucket: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def update(context, name, should)
@@ -141,6 +153,10 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
       retentionRules: should[:retention_rules],
     }
     influx_patch("/api/v2/buckets/#{bucket_id}", JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error updating buckets: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def delete(context, name)
@@ -148,4 +164,8 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     id = id_from_name(@bucket_hash, name)
     influx_delete("/api/v2/buckets/#{id}")
   end
+  rescue StandardError => e
+    context.err("Error deleting bucket state: #{e.message}")
+    context.err(e.backtrace)
+    nil
 end

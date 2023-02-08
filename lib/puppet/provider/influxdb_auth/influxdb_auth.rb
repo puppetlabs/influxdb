@@ -16,6 +16,10 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
   def canonicalize(_context, resources)
     init_attrs(resources)
     resources
+  rescue StandardError => e
+    context.err("Error canonicalizing resources: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def get(_context)
@@ -46,6 +50,10 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     else
       []
     end
+  rescue StandardError => e
+    context.err("Error getting auth state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def create(context, name, should)
@@ -60,6 +68,10 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     }
 
     influx_post('/api/v2/authorizations', JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error creating auth state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def update(context, name, should)
@@ -78,6 +90,10 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
 
       influx_patch("/api/v2/authorizations/#{auth_id}", JSON.dump(body))
     end
+  rescue StandardError => e
+    context.err("Error updating auth state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def delete(context, name)
@@ -86,4 +102,8 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     token_id = @self_hash.find { |auth| auth['description'] == name }.dig('id')
     influx_delete("/api/v2/authorizations/#{token_id}")
   end
+  rescue StandardError => e
+    context.err("Error deleting auth state: #{e.message}")
+    context.err(e.backtrace)
+    nil
 end

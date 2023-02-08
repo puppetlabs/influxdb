@@ -81,6 +81,10 @@ module PuppetX
         else
           raise Puppet::DevError, "Received HTTP code #{response.code} with message #{response.reason}"
         end
+      rescue StandardError => e
+        Puppet.err("Error in get call: #{e.message}")
+        Puppet.err(e.backtrace)
+        []
       end
 
       def influx_post(name, body)
@@ -135,6 +139,10 @@ module PuppetX
           process_links(org, org['links'])
           @org_hash << org
         end
+      rescue StandardError => e
+        Puppet.err("Error getting org state: #{e.message}")
+        Puppet.err(e.backtrace)
+        nil
       end
 
       def get_bucket_info
@@ -145,6 +153,10 @@ module PuppetX
           process_links(bucket, bucket['links'])
           @bucket_hash << bucket
         end
+      rescue StandardError => e
+        Puppet.err("Error getting bucket state: #{e.message}")
+        Puppet.err(e.backtrace)
+        nil
       end
 
       def get_dbrp_info
@@ -157,6 +169,10 @@ module PuppetX
             @dbrp_hash << dbrp.merge('name' => dbrp['database'])
           end
         end
+      rescue StandardError => e
+        Puppet.err("Error getting dbrp state: #{e.message}")
+        Puppet.err(e.backtrace)
+        nil
       end
 
       def get_telegraf_info
@@ -177,12 +193,20 @@ module PuppetX
           process_links(user, user['links'])
           @user_map << user
         end
+      rescue StandardError => e
+        Puppet.err("Error getting user state: #{e.message}")
+        Puppet.err(e.backtrace)
+        nil
       end
 
       # No links entries for labels other than self
       def get_label_info
         response = influx_get('/api/v2/labels', params: {})
         @label_hash = response['labels'] ? response['labels'] : []
+      rescue StandardError => e
+        Puppet.err("Error getting label state: #{e.message}")
+        Puppet.err(e.backtrace)
+        nil
       end
 
       def process_links(hash, links)
@@ -193,6 +217,10 @@ module PuppetX
           next if (k == 'self') || (k == 'write')
           hash[k] = influx_get(v, params: {})
         end
+      rescue StandardError => e
+        Puppet.err("Error processing links: #{e.message}")
+        Puppet.err(e.backtrace)
+        nil
       end
     end
   end

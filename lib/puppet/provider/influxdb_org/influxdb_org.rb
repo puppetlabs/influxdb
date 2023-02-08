@@ -14,6 +14,10 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
   def canonicalize(_context, resources)
     init_attrs(resources)
     resources
+  rescue StandardError => e
+    context.err("Error canonicalizing resources: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def get(_context)
@@ -49,6 +53,10 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
         },
       ]
     end
+  rescue StandardError => e
+    context.err("Error getting org state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def create(context, name, should)
@@ -58,6 +66,10 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
       description: should[:description],
     }
     influx_post('/api/v2/orgs', JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error creating org state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   # TODO: make this less ugly
@@ -94,6 +106,10 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
 
     body = { description: should[:description], }
     influx_patch("/api/v2/orgs/#{org_id}", JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error updating org state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def delete(context, name)
@@ -102,4 +118,8 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
     id = id_from_name(@org_hash, name)
     influx_delete("/api/v2/orgs/#{id}")
   end
+  rescue StandardError => e
+    context.err("Error deleting org state: #{e.message}")
+    context.err(e.backtrace)
+    nil
 end
