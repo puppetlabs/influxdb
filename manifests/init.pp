@@ -75,15 +75,15 @@ class influxdb (
   String  $admin_user = 'admin',
   Sensitive[String[1]] $admin_pass = Sensitive('puppetlabs'),
   String  $token_file = $facts['identity']['user'] ? {
-                                      'root'  => '/root/.influxdb_token',
+    'root'  => '/root/.influxdb_token',
     default => "/home/${facts['identity']['user']}/.influxdb_token" #lint:ignore:parameter_documentation
-                                    },
+  },
 ) {
   # We can only manage repos, packages, services, etc on the node we are compiling a catalog for
   unless $host == $facts['networking']['fqdn'] or $host == $facts['networking']['hostname'] or $host == 'localhost' {
     fail(
       @("MSG")
-        Unable to manage InfluxDB installation on host: ${host}.
+                Unable to manage InfluxDB installation on host: ${host}.
         Management of repos, packages and services etc is only possible on the local host (${facts['networking']['fqdn']}).
       | MSG
     )
@@ -143,7 +143,7 @@ class influxdb (
       }
     }
 
-    package {'influxdb2':
+    package { 'influxdb2':
       ensure  => $version,
       require => $package_require,
       before  => $package_before,
