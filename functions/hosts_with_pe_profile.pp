@@ -13,7 +13,7 @@ function influxdb::hosts_with_pe_profile(
   String $profile,
 ) >> Array {
   if $settings::storeconfigs {
-    $hosts = puppetdb_query("resources[certname] {
+  $hosts = puppetdb_query("resources[certname] {
       type = 'Class' and
       title = 'Puppet_enterprise::Profile::${profile}' and
       nodes { deactivated is null and expired is null }
