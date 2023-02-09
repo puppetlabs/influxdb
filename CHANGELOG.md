@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v1.5.1](https://github.com/puppetlabs/influxdb/tree/v1.5.1) (2023-02-09)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.5.0...v1.5.1)
+
+### Fixed
+
+- \(SUP-3968\) Support paginated api responses [\#65](https://github.com/puppetlabs/influxdb/pull/65) ([m0dular](https://github.com/m0dular))
+
 ## [v1.5.0](https://github.com/puppetlabs/influxdb/tree/v1.5.0) (2023-02-03)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.4.0...v1.5.0)
