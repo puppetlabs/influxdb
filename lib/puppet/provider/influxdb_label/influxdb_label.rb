@@ -14,17 +14,24 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
   def canonicalize(_context, resources)
     init_attrs(resources)
     resources
+  rescue StandardError => e
+    context.err("Error canonicalizing resources: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def get(_context)
-    init_auth
-    get_org_info
-    get_label_info
+    init_auth if @auth.empty?
+    get_org_info if @org_hash.empty?
+    get_label_info if @label_hash.empty?
 
-    response = influx_get('/api/v2/labels', params: {})
-    if response['labels']
-      response['labels'].map do |label|
-        {
+    response = influx_get('/api/v2/labels')
+    ret = []
+
+    response.each do |r|
+      next unless r['labels']
+      r['labels'].each do |label|
+        ret << {
           name: label['name'],
           use_ssl: @use_ssl,
           host: @host,
@@ -36,9 +43,13 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
           properties: label['properties'],
         }
       end
-    else
-      []
     end
+
+    ret
+  rescue StandardError => e
+    context.err("Error getting label state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def create(context, name, should)
@@ -51,6 +62,10 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
     }
 
     influx_post('/api/v2/labels', JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error setting label state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def update(context, name, should)
@@ -63,6 +78,10 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
     }
 
     influx_patch("/api/v2/labels/#{label_id}", JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error updating label state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def delete(context, name)
@@ -71,4 +90,8 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
     label_id = id_from_name(@label_hash, name)
     influx_delete("/api/v2/labels/#{label_id}")
   end
+rescue StandardError => e
+  context.err("Error deleting label state: #{e.message}")
+  context.err(e.backtrace)
+  nil
 end

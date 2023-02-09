@@ -14,10 +14,14 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::Simp
   def canonicalize(_context, resources)
     init_attrs(resources)
     resources
+  rescue StandardError => e
+    context.err("Error canonicalizing resources: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def get(_context)
-    response = influx_get('/api/v2/setup')
+    response = influx_get('/api/v2/setup')[0]
     [
       {
         name: @host,
@@ -28,6 +32,10 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::Simp
         ensure: response['allowed'] == true ? 'absent' : 'present',
       },
     ]
+  rescue StandardError => e
+    context.err("Error getting setup state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def create(context, name, should)
@@ -40,6 +48,10 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::Simp
     }
     response = influx_post('/api/v2/setup', JSON.dump(body))
     File.write(should[:token_file], response['auth']['token'])
+  rescue StandardError => e
+    context.err("Error creating setup state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def update(context, _name, _should)

@@ -16,13 +16,17 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
   def canonicalize(_context, resources)
     init_attrs(resources)
     resources
+  rescue StandardError => e
+    context.err("Error canonicalizing resources: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def get(_context)
-    init_auth
-    get_org_info
-    get_bucket_info
-    get_dbrp_info
+    init_auth if @auth.empty?
+    get_org_info if @org_hash.empty?
+    get_bucket_info if @bucket_hash.empty?
+    get_dbrp_info if @dbrp_hash.empty?
 
     @dbrp_hash.reduce([]) do |memo, value|
       memo + [
@@ -41,6 +45,10 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
         },
       ]
     end
+  rescue StandardError => e
+    context.err("Error getting dbrp state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def create(context, name, should)
@@ -54,6 +62,10 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
       default: should[:is_default],
     }
     influx_post("/api/v2/dbrps?org=#{should[:org]}", JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error creating dbrp state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def update(context, name, should)
@@ -66,6 +78,10 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
     }
 
     influx_patch("/api/v2/dbrps/#{dbrp_id}?org=#{should[:org]}", JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error updating dbrp state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def delete(context, name)
@@ -77,4 +93,8 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
 
     influx_delete("/api/v2/dbrps/#{id}?org=#{org}")
   end
+rescue StandardError => e
+  context.err("Error deleting dbrp state: #{e.message}")
+  context.err(e.backtrace)
+  nil
 end

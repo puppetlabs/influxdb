@@ -31,7 +31,7 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
   end
 
   let(:org_response) do
-    {
+    [{
       'links' => {
         'self' => '/api/v2/orgs'
       },
@@ -44,11 +44,11 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
           },
         },
       ]
-    }
+    }]
   end
 
   let(:auth_response) do
-    {
+    [{
       'links' => {
         'self' => '/api/v2/authorizations'
       },
@@ -74,13 +74,13 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
         }
       },
     ]
-    }
+    }]
   end
 
   describe '#get' do
     # rubocop:disable RSpec/SubjectStub
     it 'processes resources' do
-      allow(provider).to receive(:influx_get).with('/api/v2/orgs', params: {}).and_return(org_response)
+      allow(provider).to receive(:influx_get).with('/api/v2/orgs').and_return(org_response)
       provider.instance_variable_set('@use_ssl', true)
       provider.instance_variable_set('@host', 'foo.bar.com')
       provider.instance_variable_set('@port', 8086)
@@ -110,7 +110,7 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
         },
       ]
 
-      allow(provider).to receive(:influx_get).with('/api/v2/authorizations', params: {}).and_return(auth_response)
+      allow(provider).to receive(:influx_get).with('/api/v2/authorizations').and_return(auth_response)
       expect(provider.get(context)).to eq should_hash
     end
   end

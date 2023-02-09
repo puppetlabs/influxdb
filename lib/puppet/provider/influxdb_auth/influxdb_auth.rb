@@ -16,36 +16,47 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
   def canonicalize(_context, resources)
     init_attrs(resources)
     resources
+  rescue StandardError => e
+    context.err("Error canonicalizing resources: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def get(_context)
-    init_auth
-    get_org_info
+    init_auth if @auth.empty?
+    get_org_info if @org_hash.empty?
 
-    response = influx_get('/api/v2/authorizations', params: {})
-    if response['authorizations']
-      @self_hash = response['authorizations']
+    response = influx_get('/api/v2/authorizations')
+    ret = []
+    @self_hash = []
 
-      response['authorizations'].reduce([]) do |memo, value|
-        memo + [
-          {
-            name: value['description'],
-            ensure: 'present',
-            use_ssl: @use_ssl,
-            host: @host,
-            port: @port,
-            token: @token,
-            token_file: @token_file,
-            permissions: value['permissions'],
-            status: value['status'],
-            user: value['user'],
-            org: value['org'],
-          },
-        ]
+    response.each do |r|
+      next unless r['authorizations']
+
+      r['authorizations'].each do |auth|
+        val = {
+          name: auth['description'],
+          ensure: 'present',
+          use_ssl: @use_ssl,
+          host: @host,
+          port: @port,
+          token: @token,
+          token_file: @token_file,
+          permissions: auth['permissions'],
+          status: auth['status'],
+          user: auth['user'],
+          org: auth['org'],
+        }
+
+        @self_hash << auth
+        ret << val
       end
-    else
-      []
     end
+    ret
+  rescue StandardError => e
+    context.err("Error getting auth state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def create(context, name, should)
@@ -60,6 +71,10 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     }
 
     influx_post('/api/v2/authorizations', JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error creating auth state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def update(context, name, should)
@@ -78,6 +93,10 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
 
       influx_patch("/api/v2/authorizations/#{auth_id}", JSON.dump(body))
     end
+  rescue StandardError => e
+    context.err("Error updating auth state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def delete(context, name)
@@ -86,4 +105,8 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     token_id = @self_hash.find { |auth| auth['description'] == name }.dig('id')
     influx_delete("/api/v2/authorizations/#{token_id}")
   end
+rescue StandardError => e
+  context.err("Error deleting auth state: #{e.message}")
+  context.err(e.backtrace)
+  nil
 end

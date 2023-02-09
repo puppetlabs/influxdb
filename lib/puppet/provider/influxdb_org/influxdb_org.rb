@@ -14,41 +14,43 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
   def canonicalize(_context, resources)
     init_attrs(resources)
     resources
+  rescue StandardError => e
+    context.err("Error canonicalizing resources: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def get(_context)
-    init_auth
-    get_org_info
-    get_user_info
+    init_auth if @auth.empty?
+    get_org_info if @org_hash.empty?
+    get_user_info if @user_map.empty?
 
-    response = influx_get('/api/v2/orgs', params: {})
-    if response['orgs']
-      response['orgs'].reduce([]) do |memo, value|
-        org_members = @org_hash.find { |org| org['name'] == value['name'] }.dig('members', 'users')
-        memo + [
-          {
-            name: value['name'],
-            use_ssl: @use_ssl,
-            host: @host,
-            port: @port,
-            token: @token,
-            token_file: @token_file,
-            ensure: 'present',
-            members: org_members ? org_members.map { |member| member['name'] } : [],
-            description: value['description']
-          },
-        ]
+    response = influx_get('/api/v2/orgs')
+    ret = []
+    response.each do |r|
+      next unless r['orgs']
+
+      r['orgs'].each do |value|
+        org_members = @org_hash.find { |org| org['name'] == value['name'] }.dig('members', 0, 'users')
+        ret << {
+          name: value['name'],
+          use_ssl: @use_ssl,
+          host: @host,
+          port: @port,
+          token: @token,
+          token_file: @token_file,
+          ensure: 'present',
+          members: org_members ? org_members.map { |member| member['name'] } : [],
+          description: value['description']
+        }
       end
-    else
-      [
-        {
-          influxdb_host: @influxdb_host,
-          org: nil,
-          ensure: 'absent',
-          description: nil,
-        },
-      ]
     end
+
+    ret
+  rescue StandardError => e
+    context.err("Error getting org state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def create(context, name, should)
@@ -58,13 +60,17 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
       description: should[:description],
     }
     influx_post('/api/v2/orgs', JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error creating org state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   # TODO: make this less ugly
   def update(context, name, should)
     context.debug("Updating '#{name}' with #{should.inspect}")
     org_id = id_from_name(@org_hash, name)
-    org_members = @org_hash.find { |org| org['name'] == name }.dig('members', 'users')
+    org_members = @org_hash.find { |org| org['name'] == name }.dig('members', 0, 'users')
     cur_members = org_members ? org_members : []
     should_members = should[:members] ? should[:members] : []
 
@@ -94,6 +100,10 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
 
     body = { description: should[:description], }
     influx_patch("/api/v2/orgs/#{org_id}", JSON.dump(body))
+  rescue StandardError => e
+    context.err("Error updating org state: #{e.message}")
+    context.err(e.backtrace)
+    nil
   end
 
   def delete(context, name)
@@ -102,4 +112,8 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
     id = id_from_name(@org_hash, name)
     influx_delete("/api/v2/orgs/#{id}")
   end
+rescue StandardError => e
+  context.err("Error deleting org state: #{e.message}")
+  context.err(e.backtrace)
+  nil
 end
