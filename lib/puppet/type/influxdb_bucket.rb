@@ -39,7 +39,7 @@ EOS
       desc: 'Rules to determine retention of data inside the bucket',
       default: [{
         'type' => 'expire',
-        'everySeconds' => 0,
+        'everySeconds' => 7_776_000,
         'shardGroupDurationSeconds' => 604_800,
       }]
     },

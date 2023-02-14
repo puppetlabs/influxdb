@@ -1,6 +1,8 @@
 # @summary Installs the toml-rb gem inside Puppet server
 # @example Basic usage
 #   include influxdb::profile::toml
+# @param version
+#   Version of the toml-rb gem to install
 class influxdb::profile::toml (
   String $version = '2.1.1',
 ) {
