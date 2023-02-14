@@ -241,7 +241,7 @@ The following parameters are available in the `influxdb::profile::toml` class:
 
 Data type: `String`
 
-
+Version of the toml-rb gem to install
 
 Default value: `'2.1.1'`
 
@@ -429,7 +429,7 @@ Data type: `Array`
 
 Rules to determine retention of data inside the bucket
 
-Default value: `[{"type"=>"expire", "everySeconds"=>0, "shardGroupDurationSeconds"=>604800}]`
+Default value: `[{"type"=>"expire", "everySeconds"=>7776000, "shardGroupDurationSeconds"=>604800}]`
 
 ##### `token`
 
