@@ -178,6 +178,27 @@ RSpec.describe Puppet::Provider::InfluxdbOrg::InfluxdbOrg do
       end
     end
 
+    context 'with the admin user' do
+      let(:should_hash) do
+        {
+          name: 'puppetlabs',
+          members: ['admin']
+        }
+      end
+
+      it 'does not add the admin user' do
+        provider.instance_variable_set('@org_hash', [{ 'name' => 'puppetlabs', 'id' => 123 }])
+        patch_args = ['/api/v2/orgs/123', JSON.dump({ description: nil })]
+
+        expect(context).to receive(:debug).with("Updating '#{should_hash[:name]}' with #{should_hash.inspect}")
+        expect(context).to receive(:warning).with('Unable to add the admin user.  Please remove it from your members[] entry.')
+        expect(provider).to receive(:influx_patch).with(*patch_args)
+        expect(provider).not_to receive(:influx_post)
+
+        provider.update(context, should_hash[:name], should_hash)
+      end
+    end
+
     describe '#delete' do
       it 'deletes resources' do
         provider.instance_variable_set('@org_hash', [{ 'name' => 'puppetlabs', 'id' => 123 }])
