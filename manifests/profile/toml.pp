@@ -1,4 +1,4 @@
-# @summary Installs the toml-rb gem inside Puppet server
+# @summary Installs the toml-rb gem inside Puppet server and agent
 # @example Basic usage
 #   include influxdb::profile::toml
 # @param version
@@ -15,5 +15,11 @@ class influxdb::profile::toml (
     ensure   => $version,
     provider => 'puppetserver_gem',
     notify   => Service[$service_name],
+  }
+
+  package { 'toml-rb agent':
+    ensure   => $version,
+    name     => 'toml-rb',
+    provider => 'puppet_gem',
   }
 }
