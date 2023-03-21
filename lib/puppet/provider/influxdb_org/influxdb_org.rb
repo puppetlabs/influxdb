@@ -78,7 +78,10 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
     to_add = should_members - cur_members.map { |member| member['name'] }
 
     to_remove.each do |user|
-      next if user == 'admin'
+      if user == 'admin'
+        context.warning('Unable to remove the admin user.  Please remove it from your members[] entry.')
+        next
+      end
 
       user_id = id_from_name(@user_map, user)
       if user_id
@@ -89,6 +92,12 @@ class Puppet::Provider::InfluxdbOrg::InfluxdbOrg < Puppet::ResourceApi::SimplePr
     end
 
     to_add.each do |user|
+      # Admin is already an owner of all orgs
+      if user == 'admin'
+        context.warning('Unable to add the admin user.  Please remove it from your members[] entry.')
+        next
+      end
+
       user_id = id_from_name(@user_map, user)
       if user_id
         body = { name: user, id: user_id }
