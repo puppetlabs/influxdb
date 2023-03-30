@@ -7,7 +7,7 @@
 ### Classes
 
 * [`influxdb`](#influxdb): Installs, configures, and performs initial setup of InfluxDB 2.x
-* [`influxdb::profile::toml`](#influxdbprofiletoml): Installs the toml-rb gem inside Puppet server
+* [`influxdb::profile::toml`](#influxdbprofiletoml): Installs the toml-rb gem inside Puppet server and agent
 
 ### Resource types
 
@@ -221,7 +221,7 @@ URL of the GPG signing key
 
 ### <a name="influxdbprofiletoml"></a>`influxdb::profile::toml`
 
-Installs the toml-rb gem inside Puppet server
+Installs the toml-rb gem inside Puppet server and agent
 
 #### Examples
 
@@ -236,6 +236,8 @@ include influxdb::profile::toml
 The following parameters are available in the `influxdb::profile::toml` class:
 
 * [`version`](#version)
+* [`install_options_server`](#install_options_server)
+* [`install_options_agent`](#install_options_agent)
 
 ##### <a name="version"></a>`version`
 
@@ -244,6 +246,22 @@ Data type: `String`
 Version of the toml-rb gem to install
 
 Default value: `'2.1.1'`
+
+##### <a name="install_options_server"></a>`install_options_server`
+
+Data type: `Array[String[1]]`
+
+Pass additional parameters to the puppetserver gem installation
+
+Default value: `[]`
+
+##### <a name="install_options_agent"></a>`install_options_agent`
+
+Data type: `Array[String[1]]`
+
+Pass additional parameters to the puppetserver gem installation
+
+Default value: `[]`
 
 ## Resource types
 
