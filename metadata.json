@@ -17,40 +17,61 @@
   ],
   "operatingsystem_support": [
     {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    },
+    {
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
         "7"
       ]
     },
     {
-      "operatingsystem": "RedHat",
+      "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
-        "8"
+        "7"
       ]
     },
     {
-      "operatingsystem": "SLES",
+      "operatingsystem": "Scientific",
       "operatingsystemrelease": [
-        "12"
-      ]
-    },
-    {
-      "operatingsystem": "Debian",
-      "operatingsystemrelease": [
-        "10"
+        "7"
       ]
     },
     {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
-        "18.04"
+        "18.04",
+        "20.04"
+      ]
+    },
+    {
+      "operatingsystem": "SLES",
+      "operatingsystemrelease": [
+        "12",
+        "15"
+      ]
+    },
+    {
+      "operatingsystem": "AlmaLinux",
+      "operatingsystemrelease": [
+        "8"
+      ]
+    },
+    {
+      "operatingsystem": "RockyLinux",
+      "operatingsystemrelease": [
+        "8"
       ]
     }
   ],
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 6.21.0 < 8.0.0"
+      "version_requirement": ">= 7.18.0 < 8.0.0"
     }
   ],
   "pdk-version": "2.6.1",
