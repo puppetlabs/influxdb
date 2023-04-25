@@ -13,7 +13,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     super
   end
 
-  def canonicalize(_context, resources)
+  def canonicalize(context, resources)
     init_attrs(resources)
     resources
   rescue StandardError => e
@@ -22,7 +22,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     nil
   end
 
-  def get(_context)
+  def get(context)
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
 
