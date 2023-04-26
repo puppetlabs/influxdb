@@ -29,7 +29,7 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::Simp
         port: @port,
         token: @token,
         token_file: @token_file,
-        ensure: response['allowed'] == true ? 'absent' : 'present',
+        ensure: (response['allowed'] == true) ? 'absent' : 'present',
       },
     ]
   rescue StandardError => e
