@@ -41,6 +41,7 @@ def changelog_future_release
 end
 
 PuppetLint.configuration.send('disable_relative')
+PuppetLint.configuration.send('disable_strict-indent')
 
 
 if Bundler.rubygems.find_name('github_changelog_generator').any?
