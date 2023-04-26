@@ -35,7 +35,7 @@ spec/spec_helper.rb:
 Rakefile:
   changelog_user: "puppetlabs"
   extra_disabled_lint_checks:
-    - strict-indent
+    - strict_indent
 spec/default_facts.yml:
   extra_facts:
     pe_build: '2021.4.0'
