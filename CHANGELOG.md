@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v2.0.0](https://github.com/puppetlabs/influxdb/tree/v2.0.0) (2023-04-27)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.6.0...v2.0.0)
+
+### Changed
+
+- \(SUP-3952\) Remove Puppet 6 as a supported platform [\#78](https://github.com/puppetlabs/influxdb/pull/78) ([elainemccloskey](https://github.com/elainemccloskey))
+
+### Added
+
+- \(SUP-4195\) Puppet 8 release prep [\#79](https://github.com/puppetlabs/influxdb/pull/79) ([MartyEwings](https://github.com/MartyEwings))
+- toml installation: Support `install_options` [\#77](https://github.com/puppetlabs/influxdb/pull/77) ([bastelfreak](https://github.com/bastelfreak))
+- install toml-rb gem inside puppet agent [\#75](https://github.com/puppetlabs/influxdb/pull/75) ([vchepkov](https://github.com/vchepkov))
+
+### Fixed
+
+- \(SUP-3397\) Do not add/remove the admin user [\#74](https://github.com/puppetlabs/influxdb/pull/74) ([m0dular](https://github.com/m0dular))
+
 ## [v1.6.0](https://github.com/puppetlabs/influxdb/tree/v1.6.0) (2023-02-14)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.5.1...v1.6.0)
