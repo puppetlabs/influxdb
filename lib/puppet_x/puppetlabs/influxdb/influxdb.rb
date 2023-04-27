@@ -41,7 +41,7 @@ module PuppetX
         resources.each do |resource|
           @host ||= resource[:host] ? resource[:host] : PuppetlabsInfluxdb.host
           @port ||= resource[:port] ? resource[:port] : PuppetlabsInfluxdb.port
-          @use_ssl ||= !resource[:use_ssl].nil? ? resource[:use_ssl] : PuppetlabsInfluxdb.use_ssl
+          @use_ssl ||= (!resource[:use_ssl].nil?) ? resource[:use_ssl] : PuppetlabsInfluxdb.use_ssl
           @token ||= resource[:token]
           @token_file ||= resource[:token_file] ? resource[:token_file] : PuppetlabsInfluxdb.token_file
         end
