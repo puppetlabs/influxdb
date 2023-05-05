@@ -177,6 +177,7 @@ class influxdb (
       extract         => true,
       extract_command => 'tar xfz %s --strip-components=1',
       extract_path    => '/opt/influxdb',
+      creates         => '/opt/influxdb/influxd',
       source          => $archive_source,
       cleanup         => true,
       require         => File['/etc/influxdb', '/opt/influxdb'],
