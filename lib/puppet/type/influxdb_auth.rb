@@ -20,7 +20,7 @@ Puppet::ResourceApi.register_type(
     ],
   }
 EOS
-  features: ['canonicalize'],
+  features: ['canonicalize', 'simple_get_filter'],
   attributes: {
     name: {
       type: 'String',
@@ -74,6 +74,12 @@ EOS
       type: 'Boolean',
       desc: 'Whether to enable SSL for the InfluxDB service',
       default: true,
+      behavior: :parameter,
+    },
+    force: {
+      type: 'Boolean',
+      desc: 'Recreate resource if immutable property changes',
+      default: false,
       behavior: :parameter,
     }
   },

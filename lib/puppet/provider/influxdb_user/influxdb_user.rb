@@ -20,7 +20,7 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
     nil
   end
 
-  def get(_context)
+  def get(_context, names = nil)
     init_auth if @auth.empty?
     get_user_info if @user_map.empty?
 
@@ -29,7 +29,7 @@ class Puppet::Provider::InfluxdbUser::InfluxdbUser < Puppet::ResourceApi::Simple
     response.each do |r|
       next unless r['users']
 
-      r['users'].each do |value|
+      r['users'].select { |s| names.nil? || names.include?(s['name']) }.each do |value|
         ret << {
           name: value['name'],
           use_ssl: @use_ssl,

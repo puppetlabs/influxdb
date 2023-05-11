@@ -147,10 +147,11 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
         ],
         description: 'token_1',
         status: 'active',
-        user: 'admin'
+        userID: 123,
       }
 
       provider.instance_variable_set('@org_hash', [{ 'name' => 'puppetlabs', 'id' => 123 }])
+      provider.instance_variable_set('@user_map', [{ 'name' => 'admin', 'id' => 123 }])
 
       expect(provider).to receive(:influx_post).with('/api/v2/authorizations', JSON.dump(post_args))
       expect(context).to receive(:debug).with("Creating '#{should_hash[:name]}' with #{should_hash.inspect}")
@@ -274,6 +275,96 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
         provider.update(context, should_hash[:name], should_hash)
       end
     end
+
+    context 'when force updating immutable properties' do
+      it 'updates resources' do
+        should_hash = {
+          ensure: 'present',
+          user: 'admin',
+          name: 'token_1',
+          status: 'active',
+          org: 'puppetlabs',
+          force: true,
+          permissions: [
+            {
+              'action' => 'read',
+              'resource' => {
+                'type' => 'telegrafs'
+              }
+            },
+            {
+              'action' => 'write',
+              'resource' => {
+                'type' => 'telegrafs'
+              }
+            },
+          ]
+        }
+
+        provider.instance_variable_set(
+          '@self_hash',
+          [
+            {
+              'id' => '123',
+              'token' => 'foo',
+              'status' => 'active',
+              'description' => 'token_1',
+              'orgID' => '123',
+              'org' => 'puppetlabs',
+              'userID' => '123',
+              'user' => 'admin',
+              'permissions' => [
+                {
+                  'action' => 'read',
+                  'resource' => {
+                    'type' => 'telegrafs'
+                  }
+                },
+              ],
+              'links' => {
+                'self' => '/api/v2/authorizations/123',
+              },
+            },
+          ],
+        )
+
+        post_data = JSON.dump(
+          {
+            'orgID': 123,
+            'permissions': [
+              {
+                'action': 'read',
+                'resource': {
+                  'type': 'telegrafs'
+                }
+              },
+              {
+                'action': 'write',
+                'resource': {
+                  'type': 'telegrafs'
+                }
+              },
+            ],
+            'description': 'token_1',
+            'status': 'active',
+            'userID': 123
+          },
+        )
+
+        provider.instance_variable_set('@org_hash', [{ 'name' => 'puppetlabs', 'id' => 123 }])
+        provider.instance_variable_set('@user_map', [{ 'name' => 'admin', 'id' => 123 }])
+
+        post_args = ['/api/v2/authorizations', post_data]
+
+        expect(context).to receive(:debug).with("Creating '#{should_hash[:name]}' with #{should_hash.inspect}")
+        expect(context).to receive(:debug).with("Updating '#{should_hash[:name]}' with #{should_hash.inspect}")
+        expect(context).to receive(:debug).with("Deleting '#{should_hash[:name]}'")
+        expect(provider).to receive(:influx_delete).with('/api/v2/authorizations/123')
+        expect(provider).to receive(:influx_post).with(*post_args)
+
+        provider.update(context, should_hash[:name], should_hash)
+      end
+    end
   end
 
   describe '#delete' do
@@ -308,6 +399,7 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
       should_hash = {
         ensure: 'absent',
         name: 'token_1',
+        token_id: '123',
       }
 
       expect(context).to receive(:debug).with("Deleting '#{should_hash[:name]}'")

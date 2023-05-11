@@ -17,7 +17,7 @@ Puppet::ResourceApi.register_type(
 This type provides the ability to manage InfluxDB dbrps
 
 EOS
-  features: ['canonicalize'],
+  features: ['canonicalize', 'simple_get_filter'],
   attributes: {
     ensure: {
       type: 'Enum[present, absent]',

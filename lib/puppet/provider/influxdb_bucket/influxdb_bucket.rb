@@ -20,7 +20,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     nil
   end
 
-  def get(context)
+  def get(context, names = nil)
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
     get_bucket_info if @bucket_hash.empty?
@@ -32,7 +32,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     ret = []
     response.each do |r|
       next unless r['buckets']
-      r['buckets'].select { |bucket| bucket['type'] == 'user' }.each do |bucket|
+      r['buckets'].select { |s| s['type'] == 'user' && (names.nil? || names.include?(s['name'])) }.each do |bucket|
         dbrp = @dbrp_hash.find { |d| d['bucketID'] == bucket['id'] }
 
         links_hash = @bucket_hash.find { |b| b['name'] == bucket['name'] }

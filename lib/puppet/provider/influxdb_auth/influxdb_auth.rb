@@ -13,7 +13,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     super
   end
 
-  def canonicalize(_context, resources)
+  def canonicalize(context, resources)
     init_attrs(resources)
     resources
   rescue StandardError => e
@@ -22,7 +22,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     nil
   end
 
-  def get(_context)
+  def get(context, names = nil)
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
 
@@ -33,7 +33,12 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     response.each do |r|
       next unless r['authorizations']
 
-      r['authorizations'].each do |auth|
+      r['authorizations'].select { |s| names.nil? || names.include?(s['description']) }.each do |auth|
+        permissions = auth['permissions'].map do |p|
+          p['resource'].delete_if { |k, _| ['id', 'orgID'].include?(k) }
+          p
+        end
+
         val = {
           name: auth['description'],
           ensure: 'present',
@@ -42,7 +47,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
           port: @port,
           token: @token,
           token_file: @token_file,
-          permissions: auth['permissions'],
+          permissions: permissions,
           status: auth['status'],
           user: auth['user'],
           org: auth['org'],
@@ -62,13 +67,31 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
   def create(context, name, should)
     context.debug("Creating '#{name}' with #{should.inspect}")
 
+    permissions = should[:permissions].map do |p|
+      if p['resource'].key?('name') && !p['resource'].key?('id')
+        resname = p['resource']['name']
+        restype = p['resource']['type']
+        response = influx_get("/api/v2/#{restype}", params: { 'name': resname })
+        if response.key?(restype)
+          p['resource']['id'] = response[restype][0]['id']
+        else
+          context.error("failed to find id for #{restype} #{resname}")
+        end
+      end
+      p
+    end
+
     body = {
       orgID: id_from_name(@org_hash, should[:org]),
-      permissions: should[:permissions],
+      permissions: permissions,
       description: name,
       status: should[:status],
-      user: should[:user] ? should[:user] : 'admin'
     }
+
+    if should[:user]
+      get_user_info if @user_map.empty?
+      body['userID'] = id_from_name(@user_map, should[:user])
+    end
 
     influx_post('/api/v2/authorizations', JSON.dump(body))
   rescue StandardError => e
@@ -83,7 +106,12 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
 
     # If the status property is unchanged, then a different, immutable property has been changed.
     if self_token['status'] == should[:status]
-      context.warning("Unable to update properties other than 'status'.  Please delete and recreate resource with the desired properties")
+      if should[:force]
+        create(context, name, should)
+        delete(context, name)
+      else
+        context.warning("Unable to update properties other than 'status'.  Please delete and recreate resource with the desired properties")
+      end
     else
       auth_id = self_token['id']
       body = {

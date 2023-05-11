@@ -22,13 +22,13 @@ class Puppet::Provider::InfluxdbDbrp::InfluxdbDbrp < Puppet::ResourceApi::Simple
     nil
   end
 
-  def get(_context)
+  def get(_context, names = nil)
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
     get_bucket_info if @bucket_hash.empty?
     get_dbrp_info if @dbrp_hash.empty?
 
-    @dbrp_hash.reduce([]) do |memo, value|
+    @dbrp_hash.select { |s| names.nil? || names.include?(s['database']) }.reduce([]) do |memo, value|
       memo + [
         {
           ensure: 'present',

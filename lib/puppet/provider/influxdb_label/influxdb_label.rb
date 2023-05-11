@@ -20,7 +20,7 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
     nil
   end
 
-  def get(_context)
+  def get(_context, names = nil)
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
     get_label_info if @label_hash.empty?
@@ -30,7 +30,7 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
 
     response.each do |r|
       next unless r['labels']
-      r['labels'].each do |label|
+      r['labels'].select { |s| names.nil? || names.include?(s['name']) }.each do |label|
         ret << {
           name: label['name'],
           use_ssl: @use_ssl,
