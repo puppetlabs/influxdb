@@ -17,7 +17,7 @@ Puppet::Functions.create_function(:'influxdb::retrieve_token') do
   def retrieve_token_file(uri, token_name, admin_token_file)
     admin_token = File.read(admin_token_file)
     retrieve_token(uri, token_name, admin_token)
-  rescue Errno::EISDIR, Errno::EACCESS, Errno::ENOENT => e
+  rescue Errno::EISDIR, Errno::EACCES, Errno::ENOENT => e
     Puppet.err("Unable to retrieve #{token_name}": e.message)
     nil
   end
