@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v2.1.0](https://github.com/puppetlabs/influxdb/tree/v2.1.0) (2023-05-26)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.0.0...v2.1.0)
+
+### Added
+
+- Provider updates [\#66](https://github.com/puppetlabs/influxdb/pull/66) ([h0tw1r3](https://github.com/h0tw1r3))
+
+### Fixed
+
+- \(SUP-4274\) Swapped legacy fact fqdn for networking.fqdn [\#84](https://github.com/puppetlabs/influxdb/pull/84) ([MartyEwings](https://github.com/MartyEwings))
+- Fix Errno::EACCES typo [\#82](https://github.com/puppetlabs/influxdb/pull/82) ([m0dular](https://github.com/m0dular))
+- \(SUP-4215\) Add creates param to archive resource [\#81](https://github.com/puppetlabs/influxdb/pull/81) ([m0dular](https://github.com/m0dular))
+
 ## [v2.0.0](https://github.com/puppetlabs/influxdb/tree/v2.0.0) (2023-04-27)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v1.6.0...v2.0.0)
