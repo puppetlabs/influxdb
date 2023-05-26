@@ -154,7 +154,7 @@ With all dependencies in place and up-to-date, run the tests:
 % pdk validate
 ```
 
-This executes all of the syntax and lint checks on the module. Please ensure that there are no issues with the syntax or formatting of your code prior to crearing a PR.
+This executes all of the syntax and lint checks on the module. Please ensure that there are no issues with the syntax or formatting of your code prior to creating a PR.
 
 ### Unit Tests
 
