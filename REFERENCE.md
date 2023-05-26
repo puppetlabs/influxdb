@@ -300,6 +300,12 @@ Whether the token should be present or absent on the target system.
 
 Default value: `present`
 
+##### `force`
+
+Data type: `Boolean`
+
+Recreate resource if immutable property changes
+
 ##### `host`
 
 Data type: `Optional[String]`
@@ -975,6 +981,30 @@ Data type: `String`
 ##### `admin_token_file`
 
 Data type: `String`
+
+
+
+#### `influxdb::retrieve_token(String $uri, String $token_name, Sensitive $admin_token)`
+
+The influxdb::retrieve_token function.
+
+Returns: `Any`
+
+##### `uri`
+
+Data type: `String`
+
+
+
+##### `token_name`
+
+Data type: `String`
+
+
+
+##### `admin_token`
+
+Data type: `Sensitive`
 
 
 
