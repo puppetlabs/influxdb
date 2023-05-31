@@ -11,7 +11,7 @@ module PuppetX
         attr_accessor :host, :port, :token_file, :use_ssl
       end
 
-      self.host = Facter.value('fqdn')
+      self.host = Facter.value(:networking)['fqdn']
       self.port = 8086
       self.use_ssl = true
       self.token_file = if Facter.value('identity')['user'] == 'root'
