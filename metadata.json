@@ -8,7 +8,7 @@
   "dependencies": [
     {
       "name": "puppet/archive",
-      "version_requirement": ">= 6.0.0 <7.0.0"
+      "version_requirement": ">= 6.0.0 < 8.0.0"
     },
     {
       "name": "puppetlabs/apt",
