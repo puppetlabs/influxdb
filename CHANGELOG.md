@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v2.2.0](https://github.com/puppetlabs/influxdb/tree/v2.2.0) (2023-07-25)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.1.0...v2.2.0)
+
+### Added
+
+- puppet/archive: Allow 7.x [\#91](https://github.com/puppetlabs/influxdb/pull/91) ([bastelfreak](https://github.com/bastelfreak))
+- Update Stdlib version to include 9 [\#90](https://github.com/puppetlabs/influxdb/pull/90) ([MartyEwings](https://github.com/MartyEwings))
+
+### Fixed
+
+- Update legacy fqdn fact [\#88](https://github.com/puppetlabs/influxdb/pull/88) ([elainemccloskey](https://github.com/elainemccloskey))
+
 ## [v2.1.0](https://github.com/puppetlabs/influxdb/tree/v2.1.0) (2023-05-26)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.0.0...v2.1.0)
