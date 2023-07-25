@@ -166,6 +166,75 @@ RSpec.describe Puppet::Provider::InfluxdbBucket::InfluxdbBucket do
         expect(provider.get(context)).to eq should_hash
       end
     end
+
+    context 'when using the system store' do
+      it 'configures and uses the ssl context' do
+        resources = [
+          { name: 'puppet_data',
+            ensure: 'present',
+            use_ssl: true,
+            use_system_store: true,
+            host: 'foo.bar.com',
+            port: 8086,
+            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+            token_file: '/root/.influxdb_token',
+            org: 'puppetlabs',
+            retention_rules: [{ 'type' => 'expire', 'everySeconds' => 2_592_000, 'shardGroupDurationSeconds' => 604_800 }],
+            members: [],
+            labels: [],
+            create_dbrp: true },
+        ]
+
+        # canonicalize will set up the ssl_context and add it to the @client_options hash
+        provider.canonicalize(context, resources)
+        expect(provider.instance_variable_get('@client_options').key?(:ssl_context)).to eq true
+      end
+
+      it 'checks for a valid CA bundle' do
+        resources = [
+          { name: 'puppet_data',
+            ensure: 'present',
+            use_ssl: true,
+            use_system_store: true,
+            ca_bundle: '/not/a/file',
+            host: 'foo.bar.com',
+            port: 8086,
+            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+            token_file: '/root/.influxdb_token',
+            org: 'puppetlabs',
+            retention_rules: [{ 'type' => 'expire', 'everySeconds' => 2_592_000, 'shardGroupDurationSeconds' => 604_800 }],
+            members: [],
+            labels: [],
+            create_dbrp: true },
+        ]
+
+        provider.canonicalize(context, resources)
+        expect(instance_variable_get('@logs').any? { |log| log.message == 'No CA bundle found at /not/a/file' }).to eq true
+      end
+    end
+
+    context 'when not using the system store' do
+      it 'does not configure and uses the ssl context' do
+        resources = [
+          { name: 'puppet_data',
+            ensure: 'present',
+            use_ssl: true,
+            use_system_store: false,
+            host: 'foo.bar.com',
+            port: 8086,
+            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+            token_file: '/root/.influxdb_token',
+            org: 'puppetlabs',
+            retention_rules: [{ 'type' => 'expire', 'everySeconds' => 2_592_000, 'shardGroupDurationSeconds' => 604_800 }],
+            members: [],
+            labels: [],
+            create_dbrp: true },
+        ]
+
+        provider.canonicalize(context, resources)
+        expect(provider.instance_variable_get('@client_options').key?(:ssl_context)).to eq false
+      end
+    end
   end
 
   describe '#create' do
@@ -221,7 +290,7 @@ RSpec.describe Puppet::Provider::InfluxdbBucket::InfluxdbBucket do
                   'links' => {
                     'self' => '/api/v2/buckets/12345/members'
                   },
-                'users' => []
+                  'users' => []
                 }]
               }]
             },

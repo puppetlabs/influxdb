@@ -11,6 +11,7 @@
   - [Usage](#usage)
     - [Installation](#installation)
     - [Resource management](#resource-management)
+    - [SSL](#ssl)
   - [Limitations](#limitations)
 - [Supporting Content](#supporting-content)
     - [Articles](#articles)
@@ -191,6 +192,26 @@ class my_profile::my_class{
     }
   )
 ```
+
+### SSL
+
+#### Defaults
+
+The InfluxDB application and Puppet resources can be configured to use SSL.  The [use_ssl](https://forge.puppet.com/modules/puppetlabs/influxdb/reference#use_ssl) parameter of the main class and all resources defaults to `true`, meaning SSL will be used in all communications.  If you wish to disable it, setting `influxdb::use_ssl` to `false` will do so for the application.  Passing `use_ssl` to resources will cause them to query the application without using SSL.
+
+The certificates used in SSL communication default to those issued by the Puppet CA.  The application will use the [ssl certificate](https://forge.puppet.com/modules/puppetlabs/influxdb/reference#ssl_cert_file) and [private key](https://forge.puppet.com/modules/puppetlabs/influxdb/reference#ssl_key_file) used by the Puppet agent on the local machine running InfluxDB.  Applications that query InfluxDB, such as Telegraf and the resources in this module, need to provide a CA certificate issued by the same CA to be trusted.  See the [puppet_operational_dashboards](https://forge.puppet.com/modules/puppetlabs/puppet_operational_dashboards/reference#puppet_operational_dashboardstelegrafagent) module for an example.
+
+#### Configuration
+
+If you wish to manage the certificate files yourself, you can set [manage_ssl](https://forge.puppet.com/modules/puppetlabs/influxdb/reference#manage_ssl).  SSL will still be enabled and used by the resources, but the module will not manage the contents of the certificate files.
+
+If you need to use certificates issued by a CA other than the Puppet CA, you can do so by using either the default OpenSSL CA bundle or by providing your own.  In either case, set the [use_system_store](https://forge.puppet.com/modules/puppetlabs/influxdb/reference#use_system_store) parameter to `true` in the main class and all resources.
+
+Next, either add your CA cert to the default system store or specify a path to the cert using [](https://forge.puppet.com/modules/puppetlabs/influxdb/reference#ca_bundle).
+
+The default location varies by platform, but for example on RedHat, the bundle is located at `/etc/pki/tls/certs/ca-bundle.crt` and your cert can be added to it using the `update-ca-trust` command.  When using this method, the module will use the default location and it isn't necessary to specify `ca_bundle`.
+
+If you wish to save your CA cert to a different location other than the default store, `ca_bundle` to a path containing the cert.
 
 ## Limitations
 

@@ -52,28 +52,28 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
       'links' => {
         'self' => '/api/v2/authorizations'
       },
-    'authorizations' => [
-      {
-        'id' => '123',
-        'user' => 'admin',
-        'token' => '321',
-        'status' => 'active',
-        'description' => 'token_1',
-        'orgID' => '123',
-        'org' => 'puppetlabs',
-        'permissions' => [
-          {
-            'action' => 'read',
-            'resource' => {
-              'type' => 'telegrafs'
-            }
-          },
-        ],
-        'links' => {
-          'self' => '/api/v2/authorizations/123',
-        }
-      },
-    ]
+      'authorizations' => [
+        {
+          'id' => '123',
+          'user' => 'admin',
+          'token' => '321',
+          'status' => 'active',
+          'description' => 'token_1',
+          'orgID' => '123',
+          'org' => 'puppetlabs',
+          'permissions' => [
+            {
+              'action' => 'read',
+              'resource' => {
+                'type' => 'telegrafs'
+              }
+            },
+          ],
+          'links' => {
+            'self' => '/api/v2/authorizations/123',
+          }
+        },
+      ]
     }]
   end
 
@@ -112,6 +112,99 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
 
       allow(provider).to receive(:influx_get).with('/api/v2/authorizations').and_return(auth_response)
       expect(provider.get(context)).to eq should_hash
+    end
+
+    context 'when using the system store' do
+      it 'configures and uses the ssl context' do
+        resources = [
+          {
+            ensure: 'present',
+            use_ssl: true,
+            use_system_store: true,
+            host: 'foo.bar.com',
+            port: 8086,
+            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+            token_file: '/root/.influxdb_token',
+            user: 'admin',
+            name: 'token_1',
+            status: 'active',
+            org: 'puppetlabs',
+            permissions: [
+              {
+                'action' => 'read',
+                'resource' => {
+                  'type' => 'telegrafs'
+                }
+              },
+            ]
+          },
+        ]
+
+        # canonicalize will set up the ssl_context and add it to the @client_options hash
+        provider.canonicalize(context, resources)
+        expect(provider.instance_variable_get('@client_options').key?(:ssl_context)).to eq true
+      end
+
+      it 'checks for a valid CA bundle' do
+        resources = [
+          {
+            ensure: 'present',
+            use_ssl: true,
+            use_system_store: true,
+            ca_bundle: '/not/a/file',
+            host: 'foo.bar.com',
+            port: 8086,
+            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+            token_file: '/root/.influxdb_token',
+            user: 'admin',
+            name: 'token_1',
+            status: 'active',
+            org: 'puppetlabs',
+            permissions: [
+              {
+                'action' => 'read',
+                'resource' => {
+                  'type' => 'telegrafs'
+                }
+              },
+            ]
+          },
+        ]
+
+        provider.canonicalize(context, resources)
+        expect(instance_variable_get('@logs').any? { |log| log.message == 'No CA bundle found at /not/a/file' }).to eq true
+      end
+    end
+
+    context 'when not using the system store' do
+      it 'does not configure and uses the ssl context' do
+        resources = [
+          {
+            ensure: 'present',
+            use_ssl: true,
+            use_system_store: false,
+            host: 'foo.bar.com',
+            port: 8086,
+            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+            token_file: '/root/.influxdb_token',
+            user: 'admin',
+            name: 'token_1',
+            status: 'active',
+            org: 'puppetlabs',
+            permissions: [
+              {
+                'action' => 'read',
+                'resource' => {
+                  'type' => 'telegrafs'
+                }
+              },
+            ]
+          },
+        ]
+
+        provider.canonicalize(context, resources)
+        expect(provider.instance_variable_get('@client_options').key?(:ssl_context)).to eq false
+      end
     end
   end
 

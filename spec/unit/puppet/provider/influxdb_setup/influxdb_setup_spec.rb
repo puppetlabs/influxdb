@@ -34,12 +34,75 @@ RSpec.describe Puppet::Provider::InfluxdbSetup::InfluxdbSetup do
         allow(provider).to receive(:influx_get).with('/api/v2/setup').and_return([{ 'allowed' => true }])
         expect(provider.get(context)[0][:ensure]).to eq 'absent'
       end
+    end
 
-      context 'when setup' do
-        it 'processes resources' do
-          allow(provider).to receive(:influx_get).with('/api/v2/setup').and_return([{ 'allowed' => false }])
-          expect(provider.get(context)[0][:ensure]).to eq 'present'
-        end
+    context 'when setup' do
+      it 'processes resources' do
+        allow(provider).to receive(:influx_get).with('/api/v2/setup').and_return([{ 'allowed' => false }])
+        expect(provider.get(context)[0][:ensure]).to eq 'present'
+      end
+    end
+
+    context 'when using the system store' do
+      it 'configures and uses the ssl context' do
+        resources = [{
+          use_ssl: true,
+          use_system_store: true,
+          host: 'foo.bar.com',
+          port: 8086,
+          token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+          bucket: 'puppet',
+          org: 'puppetlabs',
+          username: 'admin',
+          password: RSpec::Puppet::Sensitive.new('puppetlabs'),
+          token_file: '/tmp/foo',
+          ensure: 'present'
+        }]
+
+        # canonicalize will set up the ssl_context and add it to the @client_options hash
+        provider.canonicalize(context, resources)
+        expect(provider.instance_variable_get('@client_options').key?(:ssl_context)).to eq true
+      end
+
+      it 'checks for a valid CA bundle' do
+        resources = [{
+          use_ssl: true,
+          use_system_store: true,
+          ca_bundle: '/not/a/file',
+          host: 'foo.bar.com',
+          port: 8086,
+          token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+          bucket: 'puppet',
+          org: 'puppetlabs',
+          username: 'admin',
+          password: RSpec::Puppet::Sensitive.new('puppetlabs'),
+          token_file: '/tmp/foo',
+          ensure: 'present'
+        }]
+
+        provider.canonicalize(context, resources)
+        expect(instance_variable_get('@logs').any? { |log| log.message == 'No CA bundle found at /not/a/file' }).to eq true
+      end
+    end
+
+    context 'when not using the system store' do
+      it 'does not configure and uses the ssl context' do
+        resources = [{
+          use_ssl: true,
+          use_system_store: false,
+          host: 'foo.bar.com',
+          port: 8086,
+          token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+          bucket: 'puppet',
+          org: 'puppetlabs',
+          username: 'admin',
+          password: RSpec::Puppet::Sensitive.new('puppetlabs'),
+          token_file: '/tmp/foo',
+          ensure: 'present'
+        }]
+
+        provider.canonicalize(context, resources)
+        expect(provider.instance_variable_get('@client_options').key?(:ssl_context)).to eq false
       end
     end
   end

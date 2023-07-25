@@ -90,6 +90,73 @@ RSpec.describe Puppet::Provider::InfluxdbOrg::InfluxdbOrg do
 
       expect(provider.get(context)).to eq should_hash
     end
+
+    context 'when using the system store' do
+      it 'configures and uses the ssl context' do
+        resources = [
+          {
+            name: 'puppetlabs',
+            ensure: 'present',
+            use_ssl: true,
+            use_system_store: true,
+            host: 'foo.bar.com',
+            port: 8086,
+            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+            token_file: '/root/.influxdb_token',
+            description: nil,
+            members: [],
+          },
+        ]
+
+        # canonicalize will set up the ssl_context and add it to the @client_options hash
+        provider.canonicalize(context, resources)
+        expect(provider.instance_variable_get('@client_options').key?(:ssl_context)).to eq true
+      end
+
+      it 'checks for a valid CA bundle' do
+        resources = [
+          {
+            name: 'puppetlabs',
+            ensure: 'present',
+            use_ssl: true,
+            use_system_store: true,
+            ca_bundle: '/not/a/file',
+            host: 'foo.bar.com',
+            port: 8086,
+            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+            token_file: '/root/.influxdb_token',
+            description: nil,
+            members: [],
+          },
+        ]
+
+        provider.canonicalize(context, resources)
+        expect(instance_variable_get('@logs').any? { |log| log.message == 'No CA bundle found at /not/a/file' }).to eq true
+      end
+    end
+
+    context 'when not using the system store' do
+      it 'does not configure and uses the ssl context' do
+        resources = [
+          {
+            name: 'puppetlabs',
+            ensure: 'present',
+            use_ssl: true,
+            use_system_store: false,
+            ca_bundle: '/not/a/file',
+            host: 'foo.bar.com',
+            port: 8086,
+            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
+            token_file: '/root/.influxdb_token',
+            description: nil,
+            members: [],
+          },
+        ]
+
+        provider.canonicalize(context, resources)
+        expect(provider.instance_variable_get('@client_options').key?(:ssl_context)).to eq false
+      end
+    end
   end
 
   describe '#create' do
@@ -198,21 +265,21 @@ RSpec.describe Puppet::Provider::InfluxdbOrg::InfluxdbOrg do
         provider.update(context, should_hash[:name], should_hash)
       end
     end
+  end
 
-    describe '#delete' do
-      it 'deletes resources' do
-        provider.instance_variable_set('@org_hash', [{ 'name' => 'puppetlabs', 'id' => 123 }])
+  describe '#delete' do
+    it 'deletes resources' do
+      provider.instance_variable_set('@org_hash', [{ 'name' => 'puppetlabs', 'id' => 123 }])
 
-        should_hash = {
-          ensure: 'absent',
-          name: 'puppetlabs',
-        }
+      should_hash = {
+        ensure: 'absent',
+        name: 'puppetlabs',
+      }
 
-        expect(context).to receive(:debug).with("Deleting '#{should_hash[:name]}'")
-        expect(provider).to receive(:influx_delete).with('/api/v2/orgs/123')
+      expect(context).to receive(:debug).with("Deleting '#{should_hash[:name]}'")
+      expect(provider).to receive(:influx_delete).with('/api/v2/orgs/123')
 
-        provider.delete(context, should_hash[:name])
-      end
+      provider.delete(context, should_hash[:name])
     end
   end
 end
