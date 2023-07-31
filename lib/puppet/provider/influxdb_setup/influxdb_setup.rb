@@ -11,7 +11,7 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::Simp
     super
   end
 
-  def canonicalize(_context, resources)
+  def canonicalize(context, resources)
     init_attrs(resources)
     resources
   rescue StandardError => e
@@ -20,7 +20,7 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::Simp
     nil
   end
 
-  def get(_context)
+  def get(context)
     response = influx_get('/api/v2/setup')[0]
     [
       {
@@ -29,7 +29,7 @@ class Puppet::Provider::InfluxdbSetup::InfluxdbSetup < Puppet::ResourceApi::Simp
         port: @port,
         token: @token,
         token_file: @token_file,
-        ensure: (response['allowed'] == true) ? 'absent' : 'present',
+        ensure: (response && response['allowed'] == true) ? 'absent' : 'present',
       },
     ]
   rescue StandardError => e

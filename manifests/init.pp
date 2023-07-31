@@ -23,9 +23,6 @@
 #   Whether to manage the SSL bundle for https connections.  Defaults to true.
 # @param use_system_store
 #   Whether to use the system store for SSL connections.  Defaults to false.
-# @param ca_bundle
-#   Path to a bundle of CA certificates to use when using the system store.
-#   Defaults to an empty string, which means to use the default system path
 # @param ssl_cert_file
 #   SSL certificate to be used by the influxdb service.  Defaults to the agent certificate issued by the Puppet CA for the local machine.
 # @param ssl_key_file
@@ -74,7 +71,6 @@ class influxdb (
   Boolean $use_ssl = true,
   Boolean $manage_ssl = true,
   Boolean $use_system_store = false,
-  Optional[String] $ca_bundle = undef,
   String  $ssl_cert_file = "/etc/puppetlabs/puppet/ssl/certs/${trusted['certname']}.pem",
   String  $ssl_key_file ="/etc/puppetlabs/puppet/ssl/private_keys/${trusted['certname']}.pem",
   String  $ssl_ca_file ='/etc/puppetlabs/puppet/ssl/certs/ca.pem',
@@ -267,7 +263,6 @@ class influxdb (
       port             => $port,
       use_ssl          => $use_ssl,
       use_system_store => $use_system_store,
-      ca_bundle        => $ca_bundle,
       token_file       => $token_file,
       bucket           => $initial_bucket,
       org              => $initial_org,

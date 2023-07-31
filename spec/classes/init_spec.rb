@@ -130,7 +130,7 @@ describe 'influxdb' do
   end
 
   context 'when using the system store' do
-    let(:params) { { host: 'localhost', use_system_store: true, ca_bundle: '' } }
+    let(:params) { { host: 'localhost', use_system_store: true } }
 
     it {
       is_expected.to contain_influxdb_setup('localhost').with(
@@ -141,7 +141,6 @@ describe 'influxdb' do
         username: 'admin',
         password: RSpec::Puppet::Sensitive.new('puppetlabs'),
         use_system_store: true,
-        ca_bundle: '',
       )
     }
   end

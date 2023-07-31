@@ -8,14 +8,13 @@ module PuppetX
     # Mixin module to provide constants and instance methods for the providers
     module PuppetlabsInfluxdb
       class << self
-        attr_accessor :host, :port, :token_file, :use_ssl, :use_system_store, :ca_bundle, :cert_store, :ssl_context, :client_options
+        attr_accessor :host, :port, :token_file, :use_ssl, :use_system_store, :cert_store, :ssl_context, :client_options
       end
 
       self.host = Facter.value(:networking)['fqdn']
       self.port = 8086
       self.use_ssl = true
       self.use_system_store = false
-      self.ca_bundle = ''
       self.token_file = if Facter.value('identity')['user'] == 'root'
                           '/root/.influxdb_token'
                         else
@@ -46,7 +45,6 @@ module PuppetX
           @port ||= resource[:port] ? resource[:port] : PuppetlabsInfluxdb.port
           @use_ssl ||= (!resource[:use_ssl].nil?) ? resource[:use_ssl] : PuppetlabsInfluxdb.use_ssl
           @use_system_store ||= resource[:use_system_store] ? resource[:use_system_store] : PuppetlabsInfluxdb.use_system_store
-          @ca_bundle ||= resource[:ca_bundle] ? resource[:ca_bundle] : PuppetlabsInfluxdb.ca_bundle
           @token ||= resource[:token]
           @token_file ||= resource[:token_file] ? resource[:token_file] : PuppetlabsInfluxdb.token_file
         end
@@ -54,28 +52,11 @@ module PuppetX
         protocol = @use_ssl ? 'https' : 'http'
         @influxdb_uri = "#{protocol}://#{@host}:#{@port}"
 
-        if @use_system_store
-          if !@ca_bundle.empty?
-            # Add the CA bundle to the store object if provided
-            if File.file?(@ca_bundle)
-              @cert_store.add_file(@ca_bundle)
-            else
-              # Throw an error if a non-existent CA bundle was provided when using the system store
-              Puppet.err("No CA bundle found at #{@ca_bundle}")
-            end
-          # Otherwise use the default system path
-          else
-            @cert_store.set_default_paths
-          end
-
-          @ssl_context ||= Puppet::SSL::SSLContext.new(
-            verify_peer: false,
-            store: @cert_store,
-          )
-          @client_options = { ssl_context: @ssl_context }
-        else
-          @client_options = {}
-        end
+        @client_options = if @use_system_store
+                            { include_system_store: true }
+                          else
+                            {}
+                          end
       end
 
       def init_auth

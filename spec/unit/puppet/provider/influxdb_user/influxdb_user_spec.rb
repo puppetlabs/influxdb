@@ -88,29 +88,9 @@ RSpec.describe Puppet::Provider::InfluxdbUser::InfluxdbUser do
           },
         ]
 
-        # canonicalize will set up the ssl_context and add it to the @client_options hash
+        # canonicalize will set up the include_system_store and add it to the @client_options hash
         provider.canonicalize(context, resources)
-        expect(provider.instance_variable_get('@client_options').key?(:ssl_context)).to eq true
-      end
-
-      it 'checks for a valid CA bundle' do
-        resources = [
-          {
-            use_ssl: true,
-            use_system_store: true,
-            ca_bundle: '/not/a/file',
-            host: 'foo.bar.com',
-            port: 8086,
-            token: RSpec::Puppet::Sensitive.new('puppetlabs'),
-            token_file: '/root/.influxdb_token',
-            name: 'Bob',
-            ensure: 'present',
-            status: 'active',
-          },
-        ]
-
-        provider.canonicalize(context, resources)
-        expect(instance_variable_get('@logs').any? { |log| log.message == 'No CA bundle found at /not/a/file' }).to eq true
+        expect(provider.instance_variable_get('@client_options').key?(:include_system_store)).to eq true
       end
     end
 
@@ -131,7 +111,7 @@ RSpec.describe Puppet::Provider::InfluxdbUser::InfluxdbUser do
         ]
 
         provider.canonicalize(context, resources)
-        expect(provider.instance_variable_get('@client_options').key?(:ssl_context)).to eq false
+        expect(provider.instance_variable_get('@client_options').key?(:include_system_store)).to eq false
       end
     end
   end

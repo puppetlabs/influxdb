@@ -82,12 +82,6 @@ EOS
       default: false,
       behavior: :parameter,
     },
-    ca_bundle: {
-      type: 'String',
-      desc: 'Path to the CA bundle to use if using the system store',
-      default: '',
-      behavior: :parameter,
-    },
     force: {
       type: 'Boolean',
       desc: 'Recreate resource if immutable property changes',
