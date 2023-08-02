@@ -11,7 +11,7 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
     super
   end
 
-  def canonicalize(_context, resources)
+  def canonicalize(context, resources)
     init_attrs(resources)
     resources
   rescue StandardError => e
@@ -20,7 +20,7 @@ class Puppet::Provider::InfluxdbLabel::InfluxdbLabel < Puppet::ResourceApi::Simp
     nil
   end
 
-  def get(_context, names = nil)
+  def get(context, names = nil)
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
     get_label_info if @label_hash.empty?

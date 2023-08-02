@@ -128,4 +128,20 @@ describe 'influxdb' do
       is_expected.not_to contain_archive('/tmp/influxdb.tar.gz')
     }
   end
+
+  context 'when using the system store' do
+    let(:params) { { host: 'localhost', use_system_store: true } }
+
+    it {
+      is_expected.to contain_influxdb_setup('localhost').with(
+        ensure: 'present',
+        token_file: '/root/.influxdb_token',
+        bucket: 'puppet_data',
+        org: 'puppetlabs',
+        username: 'admin',
+        password: RSpec::Puppet::Sensitive.new('puppetlabs'),
+        use_system_store: true,
+      )
+    }
+  end
 end

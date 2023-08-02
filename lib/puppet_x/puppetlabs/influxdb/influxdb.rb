@@ -8,12 +8,13 @@ module PuppetX
     # Mixin module to provide constants and instance methods for the providers
     module PuppetlabsInfluxdb
       class << self
-        attr_accessor :host, :port, :token_file, :use_ssl
+        attr_accessor :host, :port, :token_file, :use_ssl, :use_system_store, :cert_store, :ssl_context, :client_options
       end
 
       self.host = Facter.value(:networking)['fqdn']
       self.port = 8086
       self.use_ssl = true
+      self.use_system_store = false
       self.token_file = if Facter.value('identity')['user'] == 'root'
                           '/root/.influxdb_token'
                         else
@@ -24,6 +25,7 @@ module PuppetX
 
       def initialize
         @client ||= Puppet.runtime[:http]
+        @cert_store ||= OpenSSL::X509::Store.new
         @org_hash = []
         @telegraf_hash = []
         @label_hash = []
@@ -37,17 +39,24 @@ module PuppetX
       # Make class instance variables available as instance variables to whichever object calls this method
       # For subclasses which call super, the instance variables will be part of their scope
       def init_attrs(resources)
-        # TODO: Only one uri per resource type
+        # TODO: this can probably be refactored into a proper cache of resources
         resources.each do |resource|
           @host ||= resource[:host] ? resource[:host] : PuppetlabsInfluxdb.host
           @port ||= resource[:port] ? resource[:port] : PuppetlabsInfluxdb.port
           @use_ssl ||= (!resource[:use_ssl].nil?) ? resource[:use_ssl] : PuppetlabsInfluxdb.use_ssl
+          @use_system_store ||= resource[:use_system_store] ? resource[:use_system_store] : PuppetlabsInfluxdb.use_system_store
           @token ||= resource[:token]
           @token_file ||= resource[:token_file] ? resource[:token_file] : PuppetlabsInfluxdb.token_file
         end
 
         protocol = @use_ssl ? 'https' : 'http'
         @influxdb_uri = "#{protocol}://#{@host}:#{@port}"
+
+        @client_options = if @use_system_store
+                            { include_system_store: true }
+                          else
+                            {}
+                          end
       end
 
       def init_auth
@@ -75,7 +84,7 @@ module PuppetX
         # Return the current data if there is no 'next' object
         return results if name.nil?
 
-        response = @client.get(URI(@influxdb_uri + name), headers: @auth)
+        response = @client.get(URI(@influxdb_uri + name), headers: @auth, options: @client_options)
         if response.success?
           # Recursively append the results of calling the URL in the 'next' object to our array
           body = JSON.parse(response.body)
@@ -99,14 +108,14 @@ module PuppetX
       # end
 
       def influx_post(name, body)
-        response = @client.post(URI(@influxdb_uri + name), body, headers: @auth.merge({ 'Content-Type' => 'application/json' }))
+        response = @client.post(URI(@influxdb_uri + name), body, headers: @auth.merge({ 'Content-Type' => 'application/json' }), options: @client_options)
         raise Puppet::DevError, "Received HTTP code '#{response.code}' for post #{name} with message '#{response.reason}' '#{body}" unless response.success?
 
         JSON.parse(response.body ? response.body : '{}')
       end
 
       def influx_put(name, body)
-        response = @client.put(URI(@influxdb_uri + name), body, headers: @auth.merge({ 'Content-Type' => 'application/json' }))
+        response = @client.put(URI(@influxdb_uri + name), body, headers: @auth.merge({ 'Content-Type' => 'application/json' }), options: @client_options)
         raise Puppet::DevError, "Received HTTP code #{response.code} for put #{name} with message #{response.reason}" unless response.success?
 
         JSON.parse(response.body ? response.body : '{}')
@@ -114,13 +123,12 @@ module PuppetX
 
       # Our HTTP class doesn't have a patch method, so we create the connection and use Net::HTTP manually
       def influx_patch(name, body)
-        @client.connect(URI(@influxdb_uri)) do |conn|
+        @client.connect(URI(@influxdb_uri), options: @client_options) do |conn|
           request = Net::HTTP::Patch.new(@influxdb_uri + name)
           request['Content-Type'] = 'application/json'
-
           request['Authorization'] = @auth[:Authorization]
-
           request.body = body
+
           response = conn.request(request)
           raise Puppet::DevError, "Received HTTP code #{response.code} for patch #{name} with message #{response.reason}" unless response.is_a?(Net::HTTPSuccess)
 
@@ -129,7 +137,7 @@ module PuppetX
       end
 
       def influx_delete(name)
-        response = @client.delete(URI(@influxdb_uri + name), headers: @auth)
+        response = @client.delete(URI(@influxdb_uri + name), headers: @auth, options: @client_options)
         raise Puppet::DevError, "Received HTTP code #{response.code} for delete #{name} with message #{response.reason}" unless response.success?
 
         JSON.parse(response.body ? response.body : '{}')

@@ -11,7 +11,7 @@ class Puppet::Provider::InfluxdbBucket::InfluxdbBucket < Puppet::ResourceApi::Si
     super
   end
 
-  def canonicalize(_context, resources)
+  def canonicalize(context, resources)
     init_attrs(resources)
     resources
   rescue StandardError => e

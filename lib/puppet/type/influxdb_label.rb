@@ -58,6 +58,12 @@ EOS
       desc: 'Whether to enable SSL for the InfluxDB service',
       default: true,
       behavior: :parameter,
-    }
+    },
+    use_system_store: {
+      type: 'Boolean',
+      desc: 'Whether to use the system store for SSL connections',
+      default: false,
+      behavior: :parameter,
+    },
   },
 )
