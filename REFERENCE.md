@@ -56,6 +56,7 @@ The following parameters are available in the `influxdb` class:
 * [`archive_source`](#archive_source)
 * [`use_ssl`](#use_ssl)
 * [`manage_ssl`](#manage_ssl)
+* [`use_system_store`](#use_system_store)
 * [`ssl_cert_file`](#ssl_cert_file)
 * [`ssl_key_file`](#ssl_key_file)
 * [`ssl_ca_file`](#ssl_ca_file)
@@ -124,6 +125,14 @@ Data type: `Boolean`
 Whether to manage the SSL bundle for https connections.  Defaults to true.
 
 Default value: ``true``
+
+##### <a name="use_system_store"></a>`use_system_store`
+
+Data type: `Boolean`
+
+Whether to use the system store for SSL connections.  Defaults to false.
+
+Default value: ``false``
 
 ##### <a name="ssl_cert_file"></a>`ssl_cert_file`
 
@@ -366,6 +375,12 @@ Whether to enable SSL for the InfluxDB service
 
 Default value: `true`
 
+##### `use_system_store`
+
+Data type: `Boolean`
+
+Whether to use the system store for SSL connections
+
 ##### `user`
 
 Data type: `Optional[String]`
@@ -475,6 +490,12 @@ Whether to enable SSL for the InfluxDB service
 
 Default value: `true`
 
+##### `use_system_store`
+
+Data type: `Boolean`
+
+Whether to use the system store for SSL connections
+
 ### <a name="influxdb_dbrp"></a>`influxdb_dbrp`
 
 This type provides the ability to manage InfluxDB dbrps
@@ -570,6 +591,12 @@ Whether to enable SSL for the InfluxDB service
 
 Default value: `true`
 
+##### `use_system_store`
+
+Data type: `Boolean`
+
+Whether to use the system store for SSL connections
+
 ### <a name="influxdb_label"></a>`influxdb_label`
 
 Manages labels in InfluxDB
@@ -649,6 +676,12 @@ Whether to enable SSL for the InfluxDB service
 
 Default value: `true`
 
+##### `use_system_store`
+
+Data type: `Boolean`
+
+Whether to use the system store for SSL connections
+
 ### <a name="influxdb_org"></a>`influxdb_org`
 
 Manages organizations in InfluxDB
@@ -726,6 +759,12 @@ Data type: `Boolean`
 Whether to enable SSL for the InfluxDB service
 
 Default value: `true`
+
+##### `use_system_store`
+
+Data type: `Boolean`
+
+Whether to use the system store for SSL connections
 
 ### <a name="influxdb_setup"></a>`influxdb_setup`
 
@@ -809,6 +848,12 @@ Data type: `Boolean`
 Whether to enable SSL for the InfluxDB service
 
 Default value: `true`
+
+##### `use_system_store`
+
+Data type: `Boolean`
+
+Whether to use the system store for SSL connections
 
 ##### `username`
 
@@ -916,6 +961,12 @@ Whether to enable SSL for the InfluxDB service
 
 Default value: `true`
 
+##### `use_system_store`
+
+Data type: `Boolean`
+
+Whether to use the system store for SSL connections
+
 ## Functions
 
 ### <a name="influxdbfrom_toml"></a>`influxdb::from_toml`
@@ -960,7 +1011,7 @@ Type: Ruby 4.x API
 
 The influxdb::retrieve_token function.
 
-#### `influxdb::retrieve_token(String $uri, String $token_name, String $admin_token_file)`
+#### `influxdb::retrieve_token(String $uri, String $token_name, String $admin_token_file, Boolean $use_system_store)`
 
 The influxdb::retrieve_token function.
 
@@ -984,7 +1035,13 @@ Data type: `String`
 
 
 
-#### `influxdb::retrieve_token(String $uri, String $token_name, Sensitive $admin_token)`
+##### `use_system_store`
+
+Data type: `Boolean`
+
+
+
+#### `influxdb::retrieve_token(String $uri, String $token_name, Sensitive $admin_token, Boolean $use_system_store)`
 
 The influxdb::retrieve_token function.
 
@@ -1005,6 +1062,12 @@ Data type: `String`
 ##### `admin_token`
 
 Data type: `Sensitive`
+
+
+
+##### `use_system_store`
+
+Data type: `Boolean`
 
 
 
