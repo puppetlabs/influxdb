@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v2.3.0](https://github.com/puppetlabs/influxdb/tree/v2.3.0) (2023-08-03)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.3.0...v2.3.0)
+
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
+
+- Make use\_system\_store optional in token function [\#95](https://github.com/puppetlabs/influxdb/pull/95) ([m0dular](https://github.com/m0dular))
+
 ## [v2.3.0](https://github.com/puppetlabs/influxdb/tree/v2.3.0) (2023-08-02)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.2.0...v2.3.0)
