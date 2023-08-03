@@ -1011,7 +1011,7 @@ Type: Ruby 4.x API
 
 The influxdb::retrieve_token function.
 
-#### `influxdb::retrieve_token(String $uri, String $token_name, String $admin_token_file, Boolean $use_system_store)`
+#### `influxdb::retrieve_token(String $uri, String $token_name, String $admin_token_file, Optional[Boolean] $use_system_store)`
 
 The influxdb::retrieve_token function.
 
@@ -1037,11 +1037,11 @@ Data type: `String`
 
 ##### `use_system_store`
 
-Data type: `Boolean`
+Data type: `Optional[Boolean]`
 
 
 
-#### `influxdb::retrieve_token(String $uri, String $token_name, Sensitive $admin_token, Boolean $use_system_store)`
+#### `influxdb::retrieve_token(String $uri, String $token_name, Sensitive $admin_token, Optional[Boolean] $use_system_store)`
 
 The influxdb::retrieve_token function.
 
@@ -1067,7 +1067,7 @@ Data type: `Sensitive`
 
 ##### `use_system_store`
 
-Data type: `Boolean`
+Data type: `Optional[Boolean]`
 
 
 
