@@ -16,7 +16,7 @@ Puppet::Functions.create_function(:'influxdb::retrieve_token') do
     optional_param 'Boolean', :use_system_store
   end
 
-  def retrieve_token_file(uri, token_name, admin_token_file, use_system_store=false)
+  def retrieve_token_file(uri, token_name, admin_token_file, use_system_store = false)
     admin_token = File.read(admin_token_file)
     retrieve_token(uri, token_name, admin_token, use_system_store)
   rescue Errno::EISDIR, Errno::EACCES, Errno::ENOENT => e
@@ -24,7 +24,7 @@ Puppet::Functions.create_function(:'influxdb::retrieve_token') do
     nil
   end
 
-  def retrieve_token(uri, token_name, admin_token, use_system_store=false)
+  def retrieve_token(uri, token_name, admin_token, use_system_store = false)
     if admin_token.is_a?(Puppet::Pops::Types::PSensitiveType::Sensitive)
       admin_token = admin_token.unwrap
     end
