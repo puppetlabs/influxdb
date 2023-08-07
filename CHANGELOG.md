@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v2.3.2](https://github.com/puppetlabs/influxdb/tree/v2.3.2) (2023-08-07)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.3.1...v2.3.2)
+
+### Fixed
+
+- \(\#98\) Fix broken HTTP calls [\#99](https://github.com/puppetlabs/influxdb/pull/99) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [v2.3.1](https://github.com/puppetlabs/influxdb/tree/v2.3.1) (2023-08-03)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.3.0...v2.3.1)
