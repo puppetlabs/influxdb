@@ -37,7 +37,7 @@ Puppet::Functions.create_function(:'influxdb::retrieve_token') do
                      end
 
     response = client.get(URI(uri + '/api/v2/authorizations'),
-                          headers: { 'Authorization' => "Token #{admin_token}", options: client_options })
+                          headers: { 'Authorization' => "Token #{admin_token}" }, options: client_options)
 
     if response.success?
       body = JSON.parse(response.body)
