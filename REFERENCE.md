@@ -39,8 +39,8 @@ Installs, configures, and performs initial setup of InfluxDB 2.x
 ```puppet
 include influxdb
 
-class {'influxdb':
-  initial_org => 'my_org',
+class { 'influxdb':
+  initial_org    => 'my_org',
   initial_bucket => 'my_bucket',
 }
 ```
@@ -75,13 +75,15 @@ The following parameters are available in the `influxdb` class:
 
 Data type: `Boolean`
 
-Whether to manage a repository to provide InfluxDB packages.  Defaults to true
+Whether to manage a repository to provide InfluxDB packages.
+
+Default value: ``false``
 
 ##### <a name="manage_setup"></a>`manage_setup`
 
 Data type: `Boolean`
 
-Whether to perform initial setup of InfluxDB.  This will create an initial organization, bucket, and admin token.  Defaults to true.
+Whether to perform initial setup of InfluxDB.  This will create an initial organization, bucket, and admin token.
 
 Default value: ``true``
 
@@ -89,7 +91,7 @@ Default value: ``true``
 
 Data type: `String`
 
-Name of the InfluxDB repository if using $manage_repo.  Defaults to influxdb2
+Name of the InfluxDB repository if using $manage_repo.
 
 Default value: `'influxdb2'`
 
@@ -106,7 +108,6 @@ Default value: `'2.6.1'`
 Data type: `Variant[String,Boolean[false]]`
 
 URL containing an InfluxDB archive if not installing from a repository or false to disable installing from source.
-Defaults to version 2.6.1 on amd64 architechture.
 
 Default value: `'https://dl.influxdata.com/influxdb/releases/influxdb2-2.6.1-linux-amd64.tar.gz'`
 
@@ -114,7 +115,7 @@ Default value: `'https://dl.influxdata.com/influxdb/releases/influxdb2-2.6.1-lin
 
 Data type: `Boolean`
 
-Whether to use http or https connections.  Defaults to true (https).
+Whether to use http or https connections.
 
 Default value: ``true``
 
@@ -122,7 +123,7 @@ Default value: ``true``
 
 Data type: `Boolean`
 
-Whether to manage the SSL bundle for https connections.  Defaults to true.
+Whether to manage the SSL bundle for https connections.
 
 Default value: ``true``
 
@@ -130,7 +131,7 @@ Default value: ``true``
 
 Data type: `Boolean`
 
-Whether to use the system store for SSL connections.  Defaults to false.
+Whether to use the system store for SSL connections.
 
 Default value: ``false``
 
@@ -138,7 +139,7 @@ Default value: ``false``
 
 Data type: `String`
 
-SSL certificate to be used by the influxdb service.  Defaults to the agent certificate issued by the Puppet CA for the local machine.
+SSL certificate to be used by the influxdb service.
 
 Default value: `"/etc/puppetlabs/puppet/ssl/certs/${trusted['certname']}.pem"`
 
@@ -147,7 +148,6 @@ Default value: `"/etc/puppetlabs/puppet/ssl/certs/${trusted['certname']}.pem"`
 Data type: `String`
 
 Private key used in the CSR for the certificate specified by $ssl_cert_file.
-Defaults to the private key of the local machine for generating a CSR for the Puppet CA
 
 Default value: `"/etc/puppetlabs/puppet/ssl/private_keys/${trusted['certname']}.pem"`
 
@@ -155,39 +155,47 @@ Default value: `"/etc/puppetlabs/puppet/ssl/private_keys/${trusted['certname']}.
 
 Data type: `String`
 
-CA certificate issued by the CA which signed the certificate specified by $ssl_cert_file.  Defaults to the Puppet CA.
+CA certificate issued by the CA which signed the certificate specified by $ssl_cert_file.
 
 Default value: `'/etc/puppetlabs/puppet/ssl/certs/ca.pem'`
 
 ##### <a name="host"></a>`host`
 
-Data type: `String`
+Data type: `Stdlib::Host`
 
-fqdn of the host running InfluxDB.  Defaults to the fqdn of the local machine
+fqdn of the host running InfluxDB.
+
+Default value: `$facts['networking']['fqdn']`
 
 ##### <a name="port"></a>`port`
 
 Data type: `Stdlib::Port::Unprivileged`
 
-port of the InfluxDB Service. Defaults to 8086
+port of the InfluxDB service.
+
+Default value: `8086`
 
 ##### <a name="initial_org"></a>`initial_org`
 
-Data type: `String`
+Data type: `String[1]`
 
-Name of the initial organization to use during initial setup.  Defaults to puppetlabs
+Name of the initial organization to use during initial setup.
+
+Default value: `'puppetlabs'`
 
 ##### <a name="initial_bucket"></a>`initial_bucket`
 
-Data type: `String`
+Data type: `String[1]`
 
-Name of the initial bucket to use during initial setup.  Defaults to puppet_data
+Name of the initial bucket to use during initial setup.
+
+Default value: `'puppet_data'`
 
 ##### <a name="admin_user"></a>`admin_user`
 
 Data type: `String`
 
-Name of the administrative user to use during initial setup.  Defaults to admin
+Name of the administrative user to use during initial setup.
 
 Default value: `'admin'`
 
@@ -195,7 +203,7 @@ Default value: `'admin'`
 
 Data type: `Sensitive[String[1]]`
 
-Password for the administrative user in Sensitive format used during initial setup.  Defaults to puppetlabs
+Password for the administrative user in Sensitive format used during initial setup.
 
 Default value: `Sensitive('puppetlabs')`
 
@@ -210,9 +218,11 @@ Default value: `$facts['identity']['user']`
 
 ##### <a name="repo_gpg_key_id"></a>`repo_gpg_key_id`
 
-Data type: `String`
+Data type: `String[1]`
 
 ID of the GPG signing key
+
+Default value: `'9D539D90D3328DC7D6C8D3B9D8FF8E1F7DF8B07E'`
 
 ##### <a name="repo_url"></a>`repo_url`
 
@@ -224,9 +234,11 @@ Default value: ``undef``
 
 ##### <a name="repo_gpg_key_url"></a>`repo_gpg_key_url`
 
-Data type: `String`
+Data type: `Stdlib::HTTPSUrl`
 
 URL of the GPG signing key
+
+Default value: `'https://repos.influxdata.com/influxdata-archive_compat.key'`
 
 ### <a name="influxdbprofiletoml"></a>`influxdb::profile::toml`
 
