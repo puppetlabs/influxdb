@@ -7,59 +7,57 @@
 #     initial_bucket => 'my_bucket',
 #   }
 # @param manage_repo
-#   Whether to manage a repository to provide InfluxDB packages.  Defaults to true
+#   Whether to manage a repository to provide InfluxDB packages.
 # @param manage_setup
-#   Whether to perform initial setup of InfluxDB.  This will create an initial organization, bucket, and admin token.  Defaults to true.
+#   Whether to perform initial setup of InfluxDB.  This will create an initial organization, bucket, and admin token.
 # @param repo_name
-#   Name of the InfluxDB repository if using $manage_repo.  Defaults to influxdb2
+#   Name of the InfluxDB repository if using $manage_repo.
 # @param version
 #   Version of InfluxDB to install.  Changing this is not recommended.
 # @param archive_source
 #   URL containing an InfluxDB archive if not installing from a repository or false to disable installing from source.
-#   Defaults to version 2.6.1 on amd64 architechture.
 # @param use_ssl
-#   Whether to use http or https connections.  Defaults to true (https).
+#   Whether to use http or https connections.
 # @param manage_ssl
-#   Whether to manage the SSL bundle for https connections.  Defaults to true.
+#   Whether to manage the SSL bundle for https connections.
 # @param use_system_store
-#   Whether to use the system store for SSL connections.  Defaults to false.
+#   Whether to use the system store for SSL connections.
 # @param ssl_cert_file
-#   SSL certificate to be used by the influxdb service.  Defaults to the agent certificate issued by the Puppet CA for the local machine.
+#   SSL certificate to be used by the influxdb service.
 # @param ssl_key_file
 #   Private key used in the CSR for the certificate specified by $ssl_cert_file.
-#   Defaults to the private key of the local machine for generating a CSR for the Puppet CA
 # @param ssl_ca_file
-#   CA certificate issued by the CA which signed the certificate specified by $ssl_cert_file.  Defaults to the Puppet CA.
+#   CA certificate issued by the CA which signed the certificate specified by $ssl_cert_file.
 # @param host
-#   fqdn of the host running InfluxDB.  Defaults to the fqdn of the local machine
+#   fqdn of the host running InfluxDB.
 # @param port
-#   port of the InfluxDB Service. Defaults to 8086
+#   port of the InfluxDB service.
 # @param initial_org
-#   Name of the initial organization to use during initial setup.  Defaults to puppetlabs
+#   Name of the initial organization to use during initial setup.
 # @param initial_bucket
-#   Name of the initial bucket to use during initial setup.  Defaults to puppet_data
+#   Name of the initial bucket to use during initial setup.
 # @param admin_user
-#   Name of the administrative user to use during initial setup.  Defaults to admin
+#   Name of the administrative user to use during initial setup.
 # @param admin_pass
-#   Password for the administrative user in Sensitive format used during initial setup.  Defaults to puppetlabs
+#   Password for the administrative user in Sensitive format used during initial setup.
 # @param token_file
 #   File on disk containing an administrative token.  This class will write the token generated as part of initial setup to this file.
 #   Note that functions or code run in Puppet server will not be able to use this file, so setting $token after setup is recommended.
 # @param repo_gpg_key_id
 #   ID of the GPG signing key
-# @param repo_url 
+# @param repo_url
 #   URL of the Package repository
 # @param repo_gpg_key_url
 #   URL of the GPG signing key
 class influxdb (
   # Provided by module data
-  String  $host,
-  Stdlib::Port::Unprivileged $port,
-  String  $initial_org,
-  String  $initial_bucket,
-  String  $repo_gpg_key_id,
-  String  $repo_gpg_key_url,
-  Boolean $manage_repo,
+  Stdlib::Host $host = $facts['networking']['fqdn'],
+  Stdlib::Port::Unprivileged $port = 8086,
+  String[1] $initial_org = 'puppetlabs',
+  String[1] $initial_bucket = 'puppet_data',
+  String[1] $repo_gpg_key_id = '9D539D90D3328DC7D6C8D3B9D8FF8E1F7DF8B07E',
+  Stdlib::HTTPSUrl $repo_gpg_key_url = 'https://repos.influxdata.com/influxdata-archive_compat.key',
+  Boolean $manage_repo = false,
 
   Boolean $manage_setup = true,
 
