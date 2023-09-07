@@ -2,8 +2,8 @@
 # @example Basic usage
 #   include influxdb
 #
-#   class {'influxdb':
-#     initial_org => 'my_org',
+#   class { 'influxdb':
+#     initial_org    => 'my_org',
 #     initial_bucket => 'my_bucket',
 #   }
 # @param manage_repo
