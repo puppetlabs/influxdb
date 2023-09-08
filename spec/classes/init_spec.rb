@@ -21,16 +21,22 @@ describe 'influxdb' do
           )
 
           is_expected.to contain_service('influxdb').with_ensure('running')
-          is_expected.to contain_package('influxdb2').that_comes_before([
-                                                                          'File[/etc/influxdb/cert.pem]',
-                                                                          'File[/etc/influxdb/key.pem]',
-                                                                          'File[/etc/influxdb/ca.pem]',
-                                                                          'File[/etc/systemd/system/influxdb.service.d]',
-                                                                          'Service[influxdb]',
-                                                                        ])
+          is_expected.to contain_package('influxdb2').that_comes_before(
+            [
+              'File[/etc/influxdb/cert.pem]',
+              'File[/etc/influxdb/key.pem]',
+              'File[/etc/influxdb/ca.pem]',
+              'File[/etc/systemd/system/influxdb.service.d]',
+              'Service[influxdb]',
+            ],
+          )
           is_expected.to contain_package('influxdb2').with_ensure('2.6.1')
 
-          ['/etc/influxdb/cert.pem', '/etc/influxdb/ca.pem', '/etc/influxdb/key.pem'].each do |file|
+          [
+            '/etc/influxdb/cert.pem',
+            '/etc/influxdb/ca.pem',
+            '/etc/influxdb/key.pem',
+          ].each do |file|
             is_expected.to contain_file(file)
           end
 
@@ -43,7 +49,10 @@ describe 'influxdb' do
             password: RSpec::Puppet::Sensitive.new('puppetlabs'),
           )
 
-          ['/etc/systemd/system/influxdb.service.d', '/etc/systemd/system/influxdb.service.d/override.conf'].each do |file|
+          [
+            '/etc/systemd/system/influxdb.service.d',
+            '/etc/systemd/system/influxdb.service.d/override.conf',
+          ].each do |file|
             is_expected.to contain_file(file)
           end
         }
@@ -86,7 +95,11 @@ describe 'influxdb' do
         it {
           is_expected.not_to contain_yumrepo('influxdb2')
 
-          ['/etc/influxdb', '/opt/influxdb', '/etc/influxdb/scripts'].each do |file|
+          [
+            '/etc/influxdb',
+            '/opt/influxdb',
+            '/etc/influxdb/scripts',
+          ].each do |file|
             is_expected.to contain_file(file).with(
               ensure: 'directory',
               owner: 'root',
@@ -97,10 +110,17 @@ describe 'influxdb' do
             ensure: 'directory',
             owner: 'influxdb',
             group: 'influxdb',
+          ).that_requires(
+            [
+              'User[influxdb]',
+              'Group[influxdb]',
+            ],
           )
-          is_expected.to contain_file('/var/lib/influxdb').that_requires(['User[influxdb]', 'Group[influxdb]'])
 
-          ['/etc/influxdb/scripts/influxd-systemd-start.sh', '/etc/systemd/system/influxdb.service'].each do |file|
+          [
+            '/etc/influxdb/scripts/influxd-systemd-start.sh',
+            '/etc/systemd/system/influxdb.service',
+          ].each do |file|
             is_expected.to contain_file(file)
           end
 
@@ -109,9 +129,11 @@ describe 'influxdb' do
 
           is_expected.to contain_archive('/tmp/influxdb.tar.gz').with(
             source: 'https://dl.influxdata.com/influxdb/releases/influxdb2-2.6.1-linux-amd64.tar.gz',
-          )
-          is_expected.to contain_archive('/tmp/influxdb.tar.gz').that_requires(
-            ['File[/etc/influxdb]', 'File[/opt/influxdb]'],
+          ).that_requires(
+            [
+              'File[/etc/influxdb]',
+              'File[/opt/influxdb]',
+            ],
           )
         }
       end
