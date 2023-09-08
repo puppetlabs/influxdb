@@ -5,6 +5,30 @@ describe 'influxdb' do
     context "on #{os}" do
       let(:facts) { os_facts }
 
+      let(:baseurl_dir) do
+        case os_facts[:os]['name']
+        when 'RedHat'
+          'rhel'
+        when 'CentOS'
+          'centos'
+        when 'Ubuntu'
+          'ubuntu'
+        else
+          case os_facts[:os]['family']
+          when 'RedHat'
+            'rhel'
+          when 'Debian'
+            'debian'
+          end
+        end
+      end
+
+      let(:package_version) do
+        v = '2.6.1'
+        return "#{v}-1" if os_facts[:os]['family'] == 'Debian'
+        v
+      end
+
       it { is_expected.to compile.with_all_deps }
 
       context 'when using default parameters' do
@@ -21,16 +45,34 @@ describe 'influxdb' do
           )
 
           is_expected.to contain_service('influxdb').with_ensure('running')
-          is_expected.to contain_package('influxdb2').that_comes_before(
-            [
-              'File[/etc/influxdb/cert.pem]',
-              'File[/etc/influxdb/key.pem]',
-              'File[/etc/influxdb/ca.pem]',
-              'File[/etc/systemd/system/influxdb.service.d]',
-              'Service[influxdb]',
-            ],
-          )
-          is_expected.to contain_package('influxdb2').with_ensure('2.6.1')
+
+          case os_facts[:os]['family']
+          when 'Suse'
+            is_expected.to contain_archive('/tmp/influxdb.tar.gz').with(
+              ensure: 'present',
+              extract: true,
+              extract_command: 'tar xfz %s --strip-components=1',
+              extract_path: '/opt/influxdb',
+              creates: '/opt/influxdb/influxd',
+              source: "https://dl.influxdata.com/influxdb/releases/influxdb2-#{package_version}-linux-amd64.tar.gz",
+              cleanup: true,
+            ).that_requires(
+              [
+                'File[/etc/influxdb]',
+                'File[/opt/influxdb]',
+              ],
+            ).that_comes_before('Service[influxdb]')
+          else
+            is_expected.to contain_package('influxdb2').that_comes_before(
+              [
+                'File[/etc/influxdb/cert.pem]',
+                'File[/etc/influxdb/key.pem]',
+                'File[/etc/influxdb/ca.pem]',
+                'File[/etc/systemd/system/influxdb.service.d]',
+                'Service[influxdb]',
+              ],
+            ).with_ensure(package_version)
+          end
 
           [
             '/etc/influxdb/cert.pem',
@@ -73,20 +115,32 @@ describe 'influxdb' do
       context 'when using a repository' do
         let(:params) { { host: 'localhost' } }
 
-        it {
-          is_expected.to contain_yumrepo('influxdb2').with(
+        case os_facts[:os]['family']
+        when 'RedHat'
+          it {
+            is_expected.to contain_yumrepo('influxdb2').with(
               ensure: 'present',
               descr: 'influxdb2',
               name: 'influxdb2',
-              baseurl: 'https://repos.influxdata.com/rhel/$releasever/$basearch/stable',
+              baseurl: "https://repos.influxdata.com/#{baseurl_dir}/$releasever/$basearch/stable",
               gpgkey: 'https://repos.influxdata.com/influxdata-archive_compat.key',
               enabled: '1',
               gpgcheck: '1',
               target: '/etc/yum.repos.d/influxdb2.repo',
             )
 
-          is_expected.not_to contain_archive('/tmp/influxdb.tar.gz')
-        }
+            is_expected.not_to contain_archive('/tmp/influxdb.tar.gz')
+          }
+        when 'Debian'
+          it do
+            is_expected.to contain_apt__source('influxdb2').with(
+              ensure: 'present',
+              location: "https://repos.influxdata.com/#{baseurl_dir}",
+              release: 'stable',
+              repos: 'main',
+            )
+          end
+        end
       end
 
       context 'when using an archive source' do
