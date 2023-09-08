@@ -1,1 +1,1 @@
-influxdb::repo_url: 'https://repos.influxdata.com/debian'
+influxdb::repo_url: 'https://repos.influxdata.com/ubuntu'
