@@ -79,7 +79,7 @@ The type and provider code is able to use the token saved in this file, provided
 
 ### Installation
 
-As detailed in [Beginning with influxdb](#Beginning with influxdb), the `influxdb` class manages installation and initial setup of InfluxDB. The following aspects are managed by default:
+As detailed in [Beginning with Influxdb](#beginning-with-influxdb), the `influxdb` class manages installation and initial setup of InfluxDB. The following aspects are managed by default:
 
 * InfluxDB repository
 * SSL
