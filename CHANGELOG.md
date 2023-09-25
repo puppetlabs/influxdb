@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v2.4.0](https://github.com/puppetlabs/influxdb/tree/v2.4.0) (2023-09-25)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.3.2...v2.4.0)
+
+### Added
+
+- Move parameter defaults from hiera `common.yaml` to `init.pp` [\#104](https://github.com/puppetlabs/influxdb/pull/104) ([kenyon](https://github.com/kenyon))
+- Add Debian 11 support [\#103](https://github.com/puppetlabs/influxdb/pull/103) ([kenyon](https://github.com/kenyon))
+
 ## [v2.3.2](https://github.com/puppetlabs/influxdb/tree/v2.3.2) (2023-08-07)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.3.1...v2.3.2)
