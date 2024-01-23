@@ -39,6 +39,8 @@ Rakefile:
 spec/default_facts.yml:
   extra_facts:
     pe_build: '2021.4.0'
+    networking:
+      fqdn: 'foo.bar.com'
     
 Gemfile:
   optional:
@@ -48,5 +50,4 @@ Gemfile:
     - gem: concurrent-ruby
       version: '= 1.1.10'
     - gem: 'toml-rb'
-    - gem: 'puppet-strings'
-      version: '= 2.9.0'
+    - gem: 'net-ftp'
