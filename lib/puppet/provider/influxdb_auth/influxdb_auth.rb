@@ -71,9 +71,9 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
       if p['resource'].key?('name') && !p['resource'].key?('id')
         resname = p['resource']['name']
         restype = p['resource']['type']
-        response = influx_get("/api/v2/#{restype}", params: { 'name': resname })
-        if response.key?(restype)
-          p['resource']['id'] = response[restype][0]['id']
+        response = influx_get("/api/v2/#{restype}?name=#{resname}&orgID=#{id_from_name(@org_hash, should[:org])}")
+        if !response.empty? && response[0].key?(restype)
+          p['resource']['id'] = response[0][restype][0]['id']
         else
           context.error("failed to find id for #{restype} #{resname}")
         end
