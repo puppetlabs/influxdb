@@ -77,10 +77,39 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
     }]
   end
 
+  let(:bucket_response) do
+    [{
+      'links' => {
+        'self' => '/api/v2/buckets?descending=false&limit=20&offset=0'
+      },
+      'buckets' => [
+        {
+          'id' => '12345',
+          'orgID' => '123',
+          'type' => 'user',
+          'name' => 'puppet_data',
+          'links' => {
+            'self' => '/api/v2/buckets/12345',
+          },
+          'retentionRules' => [
+            {
+              'type' => 'expire',
+              'everySeconds' => 2_592_000,
+              'shardGroupDurationSeconds' => 604_800
+            },
+          ],
+          'labels' => { 'links' => { 'self' => '/api/v2/labels' }, 'labels' => [] }
+        },
+      ]
+    }]
+  end
+
   describe '#get' do
     # rubocop:disable RSpec/SubjectStub
     it 'processes resources' do
       allow(provider).to receive(:influx_get).with('/api/v2/orgs').and_return(org_response)
+      allow(provider).to receive(:influx_get).with('/api/v2/buckets').and_return(bucket_response)
+
       provider.instance_variable_set('@use_ssl', true)
       provider.instance_variable_set('@host', 'foo.bar.com')
       provider.instance_variable_set('@port', 8086)
@@ -215,6 +244,67 @@ RSpec.describe Puppet::Provider::InfluxdbAuth::InfluxdbAuth do
 
       provider.instance_variable_set('@org_hash', [{ 'name' => 'puppetlabs', 'id' => 123 }])
       provider.instance_variable_set('@user_map', [{ 'name' => 'admin', 'id' => 123 }])
+
+      expect(provider).to receive(:influx_post).with('/api/v2/authorizations', JSON.dump(post_args))
+      expect(context).to receive(:debug).with("Creating '#{should_hash[:name]}' with #{should_hash.inspect}")
+
+      provider.create(context, should_hash[:name], should_hash)
+    end
+
+    it 'creates fine-grained permissions' do
+      should_hash = {
+        ensure: 'present',
+        user: 'admin',
+        name: 'token_1',
+        status: 'active',
+        org: 'puppetlabs',
+        permissions: [
+          {
+            'action'   => 'read',
+            'resource' => {
+              'type'   => 'buckets',
+              'name'   => 'puppet_data',
+            }
+          },
+          {
+            'action'   => 'write',
+            'resource' => {
+              'type'   => 'buckets',
+              'name'   => 'puppet_data',
+            }
+          },
+        ],
+      }
+
+      post_args = {
+        orgID: 123,
+        permissions: [
+          {
+            'action'   => 'read',
+            'resource' => {
+              'type'   => 'buckets',
+              'name'   => 'puppet_data',
+              'id'     => '12345',
+            }
+          },
+          {
+            'action'   => 'write',
+            'resource' => {
+              'type'   => 'buckets',
+              'name'   => 'puppet_data',
+              'id'     => '12345',
+            }
+          },
+        ],
+
+        description: 'token_1',
+        status: 'active',
+        userID: 123,
+      }
+
+      provider.instance_variable_set('@org_hash', [{ 'name' => 'puppetlabs', 'id' => 123 }])
+      provider.instance_variable_set('@user_map', [{ 'name' => 'admin', 'id' => 123 }])
+      provider.instance_variable_set('@bucket_hash', [{ 'name' => 'puppet_data', 'id' => '12345' }])
 
       expect(provider).to receive(:influx_post).with('/api/v2/authorizations', JSON.dump(post_args))
       expect(context).to receive(:debug).with("Creating '#{should_hash[:name]}' with #{should_hash.inspect}")

@@ -25,6 +25,7 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
   def get(context, names = nil)
     init_auth if @auth.empty?
     get_org_info if @org_hash.empty?
+    get_bucket_info if @bucket_hash.empty?
 
     response = influx_get('/api/v2/authorizations')
     ret = []
@@ -68,14 +69,19 @@ class Puppet::Provider::InfluxdbAuth::InfluxdbAuth < Puppet::ResourceApi::Simple
     context.debug("Creating '#{name}' with #{should.inspect}")
 
     permissions = should[:permissions].map do |p|
+      # Permissions can specify a 'name' to restrict them to a specific instance, e.g. individual buckets instead of all buckets
+      # If so, find the id from the hash and add it as an 'id' element to the permission
       if p['resource'].key?('name') && !p['resource'].key?('id')
         resname = p['resource']['name']
         restype = p['resource']['type']
-        response = influx_get("/api/v2/#{restype}", params: { 'name': resname })
-        if response.key?(restype)
-          p['resource']['id'] = response[restype][0]['id']
+
+        if restype == 'buckets'
+          id = id_from_name(@bucket_hash, resname)
+          context.err("Unable to find bucket named #{resname}") unless id
+
+          p['resource']['id'] = id
         else
-          context.error("failed to find id for #{restype} #{resname}")
+          context.warning('Unable to manage fine-grained permissions for types other than buckets.')
         end
       end
       p
