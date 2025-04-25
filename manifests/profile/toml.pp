@@ -8,7 +8,7 @@
 # @param install_options_agent
 #   Pass additional parameters to the puppetserver gem installation
 class influxdb::profile::toml (
-  String $version = '2.1.1',
+  String $version = '4.0.0',
   Array[String[1]] $install_options_server = [],
   Array[String[1]] $install_options_agent = [],
 ) {

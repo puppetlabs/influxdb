@@ -7,7 +7,7 @@
 ### Classes
 
 * [`influxdb`](#influxdb): Installs, configures, and performs initial setup of InfluxDB 2.x
-* [`influxdb::profile::toml`](#influxdbprofiletoml): Installs the toml-rb gem inside Puppet server and agent
+* [`influxdb::profile::toml`](#influxdb--profile--toml): Installs the toml-rb gem inside Puppet server and agent
 
 ### Resource types
 
@@ -21,10 +21,10 @@
 
 ### Functions
 
-* [`influxdb::from_toml`](#influxdbfrom_toml)
-* [`influxdb::hosts_with_pe_profile`](#influxdbhosts_with_pe_profile)
-* [`influxdb::retrieve_token`](#influxdbretrieve_token)
-* [`influxdb::to_toml`](#influxdbto_toml)
+* [`influxdb::from_toml`](#influxdb--from_toml)
+* [`influxdb::hosts_with_pe_profile`](#influxdb--hosts_with_pe_profile)
+* [`influxdb::retrieve_token`](#influxdb--retrieve_token)
+* [`influxdb::to_toml`](#influxdb--to_toml)
 
 ## Classes
 
@@ -49,45 +49,45 @@ class { 'influxdb':
 
 The following parameters are available in the `influxdb` class:
 
-* [`manage_repo`](#manage_repo)
-* [`manage_setup`](#manage_setup)
-* [`repo_name`](#repo_name)
-* [`version`](#version)
-* [`archive_source`](#archive_source)
-* [`use_ssl`](#use_ssl)
-* [`manage_ssl`](#manage_ssl)
-* [`use_system_store`](#use_system_store)
-* [`ssl_cert_file`](#ssl_cert_file)
-* [`ssl_key_file`](#ssl_key_file)
-* [`ssl_ca_file`](#ssl_ca_file)
-* [`host`](#host)
-* [`port`](#port)
-* [`initial_org`](#initial_org)
-* [`initial_bucket`](#initial_bucket)
-* [`admin_user`](#admin_user)
-* [`admin_pass`](#admin_pass)
-* [`token_file`](#token_file)
-* [`repo_gpg_key_id`](#repo_gpg_key_id)
-* [`repo_url`](#repo_url)
-* [`repo_gpg_key_url`](#repo_gpg_key_url)
+* [`manage_repo`](#-influxdb--manage_repo)
+* [`manage_setup`](#-influxdb--manage_setup)
+* [`repo_name`](#-influxdb--repo_name)
+* [`version`](#-influxdb--version)
+* [`archive_source`](#-influxdb--archive_source)
+* [`use_ssl`](#-influxdb--use_ssl)
+* [`manage_ssl`](#-influxdb--manage_ssl)
+* [`use_system_store`](#-influxdb--use_system_store)
+* [`ssl_cert_file`](#-influxdb--ssl_cert_file)
+* [`ssl_key_file`](#-influxdb--ssl_key_file)
+* [`ssl_ca_file`](#-influxdb--ssl_ca_file)
+* [`host`](#-influxdb--host)
+* [`port`](#-influxdb--port)
+* [`initial_org`](#-influxdb--initial_org)
+* [`initial_bucket`](#-influxdb--initial_bucket)
+* [`admin_user`](#-influxdb--admin_user)
+* [`admin_pass`](#-influxdb--admin_pass)
+* [`token_file`](#-influxdb--token_file)
+* [`repo_gpg_key_id`](#-influxdb--repo_gpg_key_id)
+* [`repo_url`](#-influxdb--repo_url)
+* [`repo_gpg_key_url`](#-influxdb--repo_gpg_key_url)
 
-##### <a name="manage_repo"></a>`manage_repo`
+##### <a name="-influxdb--manage_repo"></a>`manage_repo`
 
 Data type: `Boolean`
 
 Whether to manage a repository to provide InfluxDB packages.
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="manage_setup"></a>`manage_setup`
+##### <a name="-influxdb--manage_setup"></a>`manage_setup`
 
 Data type: `Boolean`
 
 Whether to perform initial setup of InfluxDB.  This will create an initial organization, bucket, and admin token.
 
-Default value: ``true``
+Default value: `true`
 
-##### <a name="repo_name"></a>`repo_name`
+##### <a name="-influxdb--repo_name"></a>`repo_name`
 
 Data type: `String`
 
@@ -95,7 +95,7 @@ Name of the InfluxDB repository if using $manage_repo.
 
 Default value: `'influxdb2'`
 
-##### <a name="version"></a>`version`
+##### <a name="-influxdb--version"></a>`version`
 
 Data type: `String`
 
@@ -103,7 +103,7 @@ Version of InfluxDB to install.  Changing this is not recommended.
 
 Default value: `'2.6.1'`
 
-##### <a name="archive_source"></a>`archive_source`
+##### <a name="-influxdb--archive_source"></a>`archive_source`
 
 Data type: `Variant[String,Boolean[false]]`
 
@@ -111,31 +111,31 @@ URL containing an InfluxDB archive if not installing from a repository or false 
 
 Default value: `'https://dl.influxdata.com/influxdb/releases/influxdb2-2.6.1-linux-amd64.tar.gz'`
 
-##### <a name="use_ssl"></a>`use_ssl`
+##### <a name="-influxdb--use_ssl"></a>`use_ssl`
 
 Data type: `Boolean`
 
 Whether to use http or https connections.
 
-Default value: ``true``
+Default value: `true`
 
-##### <a name="manage_ssl"></a>`manage_ssl`
+##### <a name="-influxdb--manage_ssl"></a>`manage_ssl`
 
 Data type: `Boolean`
 
 Whether to manage the SSL bundle for https connections.
 
-Default value: ``true``
+Default value: `true`
 
-##### <a name="use_system_store"></a>`use_system_store`
+##### <a name="-influxdb--use_system_store"></a>`use_system_store`
 
 Data type: `Boolean`
 
 Whether to use the system store for SSL connections.
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="ssl_cert_file"></a>`ssl_cert_file`
+##### <a name="-influxdb--ssl_cert_file"></a>`ssl_cert_file`
 
 Data type: `String`
 
@@ -143,7 +143,7 @@ SSL certificate to be used by the influxdb service.
 
 Default value: `"/etc/puppetlabs/puppet/ssl/certs/${trusted['certname']}.pem"`
 
-##### <a name="ssl_key_file"></a>`ssl_key_file`
+##### <a name="-influxdb--ssl_key_file"></a>`ssl_key_file`
 
 Data type: `String`
 
@@ -151,7 +151,7 @@ Private key used in the CSR for the certificate specified by $ssl_cert_file.
 
 Default value: `"/etc/puppetlabs/puppet/ssl/private_keys/${trusted['certname']}.pem"`
 
-##### <a name="ssl_ca_file"></a>`ssl_ca_file`
+##### <a name="-influxdb--ssl_ca_file"></a>`ssl_ca_file`
 
 Data type: `String`
 
@@ -159,7 +159,7 @@ CA certificate issued by the CA which signed the certificate specified by $ssl_c
 
 Default value: `'/etc/puppetlabs/puppet/ssl/certs/ca.pem'`
 
-##### <a name="host"></a>`host`
+##### <a name="-influxdb--host"></a>`host`
 
 Data type: `Stdlib::Host`
 
@@ -167,7 +167,7 @@ fqdn of the host running InfluxDB.
 
 Default value: `$facts['networking']['fqdn']`
 
-##### <a name="port"></a>`port`
+##### <a name="-influxdb--port"></a>`port`
 
 Data type: `Stdlib::Port::Unprivileged`
 
@@ -175,7 +175,7 @@ port of the InfluxDB service.
 
 Default value: `8086`
 
-##### <a name="initial_org"></a>`initial_org`
+##### <a name="-influxdb--initial_org"></a>`initial_org`
 
 Data type: `String[1]`
 
@@ -183,7 +183,7 @@ Name of the initial organization to use during initial setup.
 
 Default value: `'puppetlabs'`
 
-##### <a name="initial_bucket"></a>`initial_bucket`
+##### <a name="-influxdb--initial_bucket"></a>`initial_bucket`
 
 Data type: `String[1]`
 
@@ -191,7 +191,7 @@ Name of the initial bucket to use during initial setup.
 
 Default value: `'puppet_data'`
 
-##### <a name="admin_user"></a>`admin_user`
+##### <a name="-influxdb--admin_user"></a>`admin_user`
 
 Data type: `String`
 
@@ -199,7 +199,7 @@ Name of the administrative user to use during initial setup.
 
 Default value: `'admin'`
 
-##### <a name="admin_pass"></a>`admin_pass`
+##### <a name="-influxdb--admin_pass"></a>`admin_pass`
 
 Data type: `Sensitive[String[1]]`
 
@@ -207,16 +207,22 @@ Password for the administrative user in Sensitive format used during initial set
 
 Default value: `Sensitive('puppetlabs')`
 
-##### <a name="token_file"></a>`token_file`
+##### <a name="-influxdb--token_file"></a>`token_file`
 
 Data type: `String`
 
 File on disk containing an administrative token.  This class will write the token generated as part of initial setup to this file.
 Note that functions or code run in Puppet server will not be able to use this file, so setting $token after setup is recommended.
 
-Default value: `$facts['identity']['user']`
+Default value:
 
-##### <a name="repo_gpg_key_id"></a>`repo_gpg_key_id`
+```puppet
+$facts['identity']['user'] ? {
+    'root'  => '/root/.influxdb_token',
+    default => "/home/${facts['identity']['user']}/.influxdb_token"
+```
+
+##### <a name="-influxdb--repo_gpg_key_id"></a>`repo_gpg_key_id`
 
 Data type: `String[1]`
 
@@ -224,15 +230,15 @@ ID of the GPG signing key
 
 Default value: `'9D539D90D3328DC7D6C8D3B9D8FF8E1F7DF8B07E'`
 
-##### <a name="repo_url"></a>`repo_url`
+##### <a name="-influxdb--repo_url"></a>`repo_url`
 
 Data type: `Optional[String]`
 
 URL of the Package repository
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="repo_gpg_key_url"></a>`repo_gpg_key_url`
+##### <a name="-influxdb--repo_gpg_key_url"></a>`repo_gpg_key_url`
 
 Data type: `Stdlib::HTTPSUrl`
 
@@ -240,7 +246,7 @@ URL of the GPG signing key
 
 Default value: `'https://repos.influxdata.com/influxdata-archive_compat.key'`
 
-### <a name="influxdbprofiletoml"></a>`influxdb::profile::toml`
+### <a name="influxdb--profile--toml"></a>`influxdb::profile::toml`
 
 Installs the toml-rb gem inside Puppet server and agent
 
@@ -256,19 +262,19 @@ include influxdb::profile::toml
 
 The following parameters are available in the `influxdb::profile::toml` class:
 
-* [`version`](#version)
-* [`install_options_server`](#install_options_server)
-* [`install_options_agent`](#install_options_agent)
+* [`version`](#-influxdb--profile--toml--version)
+* [`install_options_server`](#-influxdb--profile--toml--install_options_server)
+* [`install_options_agent`](#-influxdb--profile--toml--install_options_agent)
 
-##### <a name="version"></a>`version`
+##### <a name="-influxdb--profile--toml--version"></a>`version`
 
 Data type: `String`
 
 Version of the toml-rb gem to install
 
-Default value: `'2.1.1'`
+Default value: `'4.0.0'`
 
-##### <a name="install_options_server"></a>`install_options_server`
+##### <a name="-influxdb--profile--toml--install_options_server"></a>`install_options_server`
 
 Data type: `Array[String[1]]`
 
@@ -276,7 +282,7 @@ Pass additional parameters to the puppetserver gem installation
 
 Default value: `[]`
 
-##### <a name="install_options_agent"></a>`install_options_agent`
+##### <a name="-influxdb--profile--toml--install_options_agent"></a>`install_options_agent`
 
 Data type: `Array[String[1]]`
 
@@ -877,9 +883,9 @@ Name of the initial admin user
 
 The following parameters are available in the `influxdb_setup` type.
 
-* [`name`](#name)
+* [`name`](#-influxdb_setup--name)
 
-##### <a name="name"></a>`name`
+##### <a name="-influxdb_setup--name"></a>`name`
 
 namevar
 
@@ -981,7 +987,7 @@ Whether to use the system store for SSL connections
 
 ## Functions
 
-### <a name="influxdbfrom_toml"></a>`influxdb::from_toml`
+### <a name="influxdb--from_toml"></a>`influxdb::from_toml`
 
 Type: Ruby 4.x API
 
@@ -999,7 +1005,7 @@ Data type: `String`
 
 
 
-### <a name="influxdbhosts_with_pe_profile"></a>`influxdb::hosts_with_pe_profile`
+### <a name="influxdb--hosts_with_pe_profile"></a>`influxdb::hosts_with_pe_profile`
 
 Type: Puppet Language
 
@@ -1017,7 +1023,7 @@ Data type: `String`
 
 
 
-### <a name="influxdbretrieve_token"></a>`influxdb::retrieve_token`
+### <a name="influxdb--retrieve_token"></a>`influxdb::retrieve_token`
 
 Type: Ruby 4.x API
 
@@ -1083,7 +1089,7 @@ Data type: `Optional[Boolean]`
 
 
 
-### <a name="influxdbto_toml"></a>`influxdb::to_toml`
+### <a name="influxdb--to_toml"></a>`influxdb::to_toml`
 
 Type: Ruby 4.x API
 
