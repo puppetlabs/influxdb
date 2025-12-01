@@ -23,8 +23,9 @@
     {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
-        "7",
-        "8"
+        "8",
+        "9",
+        "10"
       ]
     },
     {
@@ -36,7 +37,7 @@
     {
       "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
-        "7"
+        "8"
       ]
     },
     {
@@ -49,7 +50,9 @@
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
         "18.04",
-        "20.04"
+        "20.04",
+        "22.04",
+        "24.04"
       ]
     },
     {
@@ -68,7 +71,8 @@
     {
       "operatingsystem": "RockyLinux",
       "operatingsystemrelease": [
-        "8"
+        "8",
+        "9"
       ]
     },
     {
@@ -81,7 +85,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 7.0.0 < 9.0.0"
+      "version_requirement": ">= 8.0.0 < 9.0.0"
     }
   ],
   "pdk-version": "3.0.1",
