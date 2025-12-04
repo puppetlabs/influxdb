@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v3.0.0](https://github.com/puppetlabs/influxdb/tree/v3.0.0) (2025-12-04)
+
+[Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.4.0...3.0.0)
+
+### Breaking Changes
+
+- (SUP-6701): Removed Puppet 7 Support by @MartyEwings in https://github.com/puppetlabs/influxdb/pull/116
+
+### Added
+
+- Update to pdk 3 by @m0dular in https://github.com/puppetlabs/influxdb/pull/107
+- toml-rb: Update 2.1.1->4.0.0 by @bastelfreak in https://github.com/puppetlabs/influxdb/pull/112
+
+### Fixed
+
+- Fix tokens with named buckets by @m0dular in https://github.com/puppetlabs/influxdb/pull/110
+- Fix: metadata dependency on puppet-archive by @marcusdots in https://github.com/puppetlabs/influxdb/pull/115
+- (SUP-6701) PDK update and APT module dependancy update by @MartyEwings in https://github.com/puppetlabs/influxdb/pull/118
+
 ## [v2.4.0](https://github.com/puppetlabs/influxdb/tree/v2.4.0) (2023-09-25)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.3.2...v2.4.0)
