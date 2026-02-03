@@ -244,7 +244,7 @@ Data type: `Stdlib::HTTPSUrl`
 
 URL of the GPG signing key
 
-Default value: `'https://repos.influxdata.com/influxdata-archive_compat.key'`
+Default value: `'https://repos.influxdata.com/influxdata-archive.key'`
 
 ### <a name="influxdb--profile--toml"></a>`influxdb::profile::toml`
 
