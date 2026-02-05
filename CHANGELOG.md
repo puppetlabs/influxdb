@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v3.0.1](https://github.com/puppetlabs/influxdb/compare/v3.0.0...v3.0.1) (2026-02-05)
+
+### Fixed
+
+- (SUP-6938) update gpg key by @MartyEwings in https://github.com/puppetlabs/influxdb/pull/121
+
+
 ## [v3.0.0](https://github.com/puppetlabs/influxdb/tree/v3.0.0) (2025-12-04)
 
 [Full Changelog](https://github.com/puppetlabs/influxdb/compare/v2.4.0...3.0.0)
