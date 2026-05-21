@@ -45,8 +45,7 @@
 #   Note that functions or code run in Puppet server will not be able to use this file, so setting $token after setup is recommended.
 # @param repo_gpg_key_id
 #   ID of the GPG signing key. Retained for backward compatibility; not used.
-#   Previously validated the downloaded key against this fingerprint via apt::key;
-#   the modern apt::keyring path trusts the HTTPS-served file directly.
+#   The Debian apt path downloads the key by URL with no fingerprint verification.
 # @param repo_url
 #   URL of the Package repository
 # @param repo_gpg_key_url
@@ -122,18 +121,33 @@ class influxdb (
       }
       'Debian': {
         include apt
-        # `name` (not `id`) routes through apt::keyring for deb822 apt compatibility.
+        # apt::keyring with `source => <https url>` is not idempotent — Puppet's HTTPS
+        # file source re-fetches every run and rewrites the file. Use archive (which
+        # only downloads when the file is missing) and reference the result via
+        # apt::source's keyring param to set signed-by= on the source list.
+        $_influxdb_keyring = '/etc/apt/keyrings/influxdb-archive.asc'
+        ensure_resource('file', '/etc/apt/keyrings', {
+            ensure => directory,
+            owner  => 'root',
+            group  => 'root',
+            mode   => '0755',
+        })
+        archive { $_influxdb_keyring:
+          ensure  => 'present',
+          source  => $repo_gpg_key_url,
+          cleanup => false,
+          extract => false,
+          require => File['/etc/apt/keyrings'],
+        }
         apt::source { $repo_name:
           ensure   => 'present',
           comment  => 'The InfluxDB2 repository',
           location => $repo_url,
           release  => 'stable',
           repos    => 'main',
-          key      => {
-            'name'   => "${repo_name}.asc",
-            'source' => $repo_gpg_key_url,
-          },
+          keyring  => $_influxdb_keyring,
         }
+        Archive[$_influxdb_keyring] -> Apt::Source[$repo_name]
         $package_require = [
           Apt::Source[$repo_name],
           Class['Apt::Update']

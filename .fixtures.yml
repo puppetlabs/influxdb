@@ -7,7 +7,7 @@ fixtures:
     yumrepo: "puppetlabs/yumrepo_core"
     apt:
       repo: "puppetlabs/apt"
-      ref: "9.2.0"
+      ref: "9.0.0"
     service: "puppetlabs/service"
     package: "puppetlabs/package"
     reboot: "puppetlabs/reboot"
