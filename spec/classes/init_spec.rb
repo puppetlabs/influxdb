@@ -133,11 +133,9 @@ describe 'influxdb' do
           }
         when 'Debian'
           it do
-            is_expected.to contain_file('/etc/apt/keyrings').with(
+            is_expected.to contain_file('keyrings').with(
               ensure: 'directory',
-              owner: 'root',
-              group: 'root',
-              mode: '0755',
+              path: '/etc/apt/keyrings',
             )
             is_expected.to contain_archive('/etc/apt/keyrings/influxdb-archive.asc').with(
               ensure: 'present',

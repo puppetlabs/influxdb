@@ -126,8 +126,12 @@ class influxdb (
         # only downloads when the file is missing) and reference the result via
         # apt::source's keyring param to set signed-by= on the source list.
         $_influxdb_keyring = '/etc/apt/keyrings/influxdb-archive.asc'
-        ensure_resource('file', '/etc/apt/keyrings', {
+        # Older puppetlabs-apt (< 11.3) does not create /etc/apt/keyrings/; declare it
+        # via ensure_resource with the same title apt itself uses so we're a no-op on
+        # newer apt (which already declares File['keyrings']).
+        ensure_resource('file', 'keyrings', {
             ensure => directory,
+            path   => '/etc/apt/keyrings',
             owner  => 'root',
             group  => 'root',
             mode   => '0755',
@@ -137,7 +141,7 @@ class influxdb (
           source  => $repo_gpg_key_url,
           cleanup => false,
           extract => false,
-          require => File['/etc/apt/keyrings'],
+          require => File['keyrings'],
         }
         apt::source { $repo_name:
           ensure   => 'present',
