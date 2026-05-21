@@ -44,7 +44,9 @@
 #   File on disk containing an administrative token.  This class will write the token generated as part of initial setup to this file.
 #   Note that functions or code run in Puppet server will not be able to use this file, so setting $token after setup is recommended.
 # @param repo_gpg_key_id
-#   ID of the GPG signing key
+#   ID of the GPG signing key. Retained for backward compatibility; not used.
+#   Previously validated the downloaded key against this fingerprint via apt::key;
+#   the modern apt::keyring path trusts the HTTPS-served file directly.
 # @param repo_url
 #   URL of the Package repository
 # @param repo_gpg_key_url
@@ -120,6 +122,7 @@ class influxdb (
       }
       'Debian': {
         include apt
+        # `name` (not `id`) routes through apt::keyring for deb822 apt compatibility.
         apt::source { $repo_name:
           ensure   => 'present',
           comment  => 'The InfluxDB2 repository',
@@ -127,7 +130,7 @@ class influxdb (
           release  => 'stable',
           repos    => 'main',
           key      => {
-            'id'     => $repo_gpg_key_id,
+            'name'   => "${repo_name}.asc",
             'source' => $repo_gpg_key_url,
           },
         }

@@ -133,11 +133,19 @@ describe 'influxdb' do
           }
         when 'Debian'
           it do
+            is_expected.to contain_apt__keyring('influxdb2.asc').with(
+              ensure: 'present',
+              source: 'https://repos.influxdata.com/influxdata-archive.key',
+            )
             is_expected.to contain_apt__source('influxdb2').with(
               ensure: 'present',
               location: "https://repos.influxdata.com/#{baseurl_dir}",
               release: 'stable',
               repos: 'main',
+              key: {
+                'name'   => 'influxdb2.asc',
+                'source' => 'https://repos.influxdata.com/influxdata-archive.key',
+              },
             )
           end
         end
@@ -148,6 +156,8 @@ describe 'influxdb' do
 
         it {
           is_expected.not_to contain_yumrepo('influxdb2')
+          is_expected.not_to contain_apt__source('influxdb2')
+          is_expected.not_to contain_apt__keyring('influxdb2.asc')
 
           [
             '/etc/influxdb',
@@ -197,6 +207,8 @@ describe 'influxdb' do
 
         it {
           is_expected.not_to contain_yumrepo('influxdb2')
+          is_expected.not_to contain_apt__source('influxdb2')
+          is_expected.not_to contain_apt__keyring('influxdb2.asc')
           is_expected.not_to contain_archive('/tmp/influxdb.tar.gz')
         }
       end

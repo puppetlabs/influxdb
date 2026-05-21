@@ -5,7 +5,9 @@ fixtures:
   forge_modules:
     archive: "puppet/archive"
     yumrepo: "puppetlabs/yumrepo_core"
-    apt: "puppetlabs/apt"
+    apt:
+      repo: "puppetlabs/apt"
+      ref: "9.2.0"
     service: "puppetlabs/service"
     package: "puppetlabs/package"
     reboot: "puppetlabs/reboot"
