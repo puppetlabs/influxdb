@@ -18,7 +18,10 @@ module PuppetX
         end
 
         def token_file
-          @token_file ||= (Facter.value('identity')['user'] == 'root' ? '/root/.influxdb_token' : "/home/#{Facter.value('identity')['user']}/.influxdb_token")
+          return @token_file if @token_file
+
+          user = Facter.value('identity')['user']
+          @token_file = (user == 'root') ? '/root/.influxdb_token' : "/home/#{user}/.influxdb_token"
         end
       end
 
