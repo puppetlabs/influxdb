@@ -150,8 +150,8 @@ class influxdb (
           release  => 'stable',
           repos    => 'main',
           keyring  => $_influxdb_keyring,
+          require  => Archive[$_influxdb_keyring],
         }
-        Archive[$_influxdb_keyring] -> Apt::Source[$repo_name]
         $package_require = [
           Apt::Source[$repo_name],
           Class['Apt::Update']
