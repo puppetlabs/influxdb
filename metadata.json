@@ -29,28 +29,14 @@
       ]
     },
     {
-      "operatingsystem": "CentOS",
-      "operatingsystemrelease": [
-        "7"
-      ]
-    },
-    {
       "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
         "8"
       ]
     },
     {
-      "operatingsystem": "Scientific",
-      "operatingsystemrelease": [
-        "7"
-      ]
-    },
-    {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
-        "18.04",
-        "20.04",
         "22.04",
         "24.04"
       ]
@@ -58,14 +44,14 @@
     {
       "operatingsystem": "SLES",
       "operatingsystemrelease": [
-        "12",
         "15"
       ]
     },
     {
       "operatingsystem": "AlmaLinux",
       "operatingsystemrelease": [
-        "8"
+        "8",
+        "9"
       ]
     },
     {
@@ -78,7 +64,8 @@
     {
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
-        "11"
+        "11",
+        "12"
       ]
     }
   ],
