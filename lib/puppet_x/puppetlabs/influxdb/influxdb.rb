@@ -8,18 +8,26 @@ module PuppetX
     # Mixin module to provide constants and instance methods for the providers
     module PuppetlabsInfluxdb
       class << self
-        attr_accessor :host, :port, :token_file, :use_ssl, :use_system_store, :cert_store, :ssl_context, :client_options
+        attr_accessor :port, :use_ssl, :use_system_store, :cert_store, :ssl_context, :client_options
+        attr_writer :host, :token_file
+
+        # Lazy so Facter doesn't run at module-load time (breaks test harnesses
+        # where facts aren't yet populated).
+        def host
+          @host ||= Facter.value(:networking)['fqdn']
+        end
+
+        def token_file
+          return @token_file if @token_file
+
+          user = Facter.value('identity')['user']
+          @token_file = (user == 'root') ? '/root/.influxdb_token' : "/home/#{user}/.influxdb_token"
+        end
       end
 
-      self.host = Facter.value(:networking)['fqdn']
       self.port = 8086
       self.use_ssl = true
       self.use_system_store = false
-      self.token_file = if Facter.value('identity')['user'] == 'root'
-                          '/root/.influxdb_token'
-                        else
-                          "/home/#{Facter.value('identity')['user']}/.influxdb_token"
-                        end
 
       attr_accessor :telegraf_hash, :user_map, :label_hash, :auth, :bucket_hash, :dbrp_hash
 
